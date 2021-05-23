@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Projects</title>
+<link rel="stylesheet"	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+<script	th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script	th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+</head>
+<body>
+	<div th:replace="fragments/header :: header"></div>
+	<div class="container-fluid">	
+		<div class="row">
+			<h2 class="lh-lg"><label th:text="${project.projectName}"></label></h2>
+		</div>
+		<div class="row">
+			<div class="col-md-2">
+				<div th:replace="fragments/leftSidebar :: viewProjectLeftSidebar"></div>
+			</div>
+			<div class="col-md-8">
+				<h4 class="lh-sm">
+					<label>Import Documents</label>
+				</h4>
+				<form action="#" th:action="@{/project/{id}/import(id=${project.projectId})}" th:object="${project}" method="post" enctype="multipart/form-data">
+					<div class="input-group">
+					  <input type="file" class="form-control" id="inputGroupFile04"  name="files" aria-describedby="inputGroupFileAddon04" aria-label="Upload" multiple>
+					  <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">Import</button>
+					</div>
+				</form>
+				<table class="table table-striped table-responsive-md">
+					<tbody>	
+						<tr>
+							<td>Project Directory: </td>
+							<td><label th:text="${datasetBaseDir}+${project.projectDirectoryName}"></label></td>
+						</tr>
+					</tbody>
+				</table>
+				<table class="table table-striped table-responsive-md">
+					<tbody>
+						<tr>
+							<th>Document ID</th>
+							<th>PDF File Path (Relative to Project Directory)</th>
+							<th>Original Text File Path (Relative to Project Directory)</th>
+						</tr>
+						<tr th:each="legalDocument: ${project.legalDocuments}">
+							<td th:text="${legalDocument.documentId}" />
+							<td>
+								<label th:text="${legalDocument.pdfFilePath}"></label>								
+							</td>
+							<td>
+								<label th:text="${legalDocument.origTextFilePath}"></label>								
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="col-md-2">
+			
+			</div>
+		</div>
+	</div>
+</body>
+</html>

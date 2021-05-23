@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div th:fragment="viewProjectLeftSidebar">
+		<ul class="nav flex-column">
+		  <li class="nav-item">
+		    <a class="nav-link" aria-controls="prop" aria-selected="true" th:href="@{/project/view/{id}(id=${project.projectId})}">General Properties</a>
+		  </li>
+		  <li class="nav-item">
+		    <a class="nav-link" aria-controls="import" aria-selected="true" th:href="@{/project/{id}/import(id=${project.projectId})}">Import Documents</a>
+		  </li>
+		  <li class="nav-item">
+		    <a class="nav-link" aria-controls="preprocess" aria-selected="true" href="#">Preprocess Documents</a>
+		  </li>
+		</ul>
+	</div>
+</body>
+</html>

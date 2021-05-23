@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Add All Court Order</title>
+<link rel="stylesheet"	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+<script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+</head>
+<body>
+	<div th:replace="fragments/header :: header"></div>
+	<div class="container-fluid">
+		<div class="row">
+			<h2 class="lh-lg">Add All Court Order</h2>
+		</div>
+		<div class="row">
+			<div class="col-md-8">
+				<form action="#" th:action="@{/addAllCourtOrders}" method="post">
+					<label class="col-form-label">Place the PDF files in
+						following folder path :</label>
+					<!-- <input type="text" name="folderPath" id="folderPath" placeholder="folderPath"> -->
+					<br /> <label class="col-form-label"
+						th:text="${pdfFilesFolderPath}"></label> <br /> <input
+						type="submit" class="btn btn-primary" value="Add All">
+				</form>
+				<label for="name" class="text-success"
+					th:text="${message.successMessage}"></label> <label for="name"
+					class="text-danger" th:text="${message.errorMessage}"></label>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
