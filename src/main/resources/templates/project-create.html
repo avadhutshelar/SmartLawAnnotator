@@ -34,8 +34,10 @@
 							</tr>
 							<tr>									
 								<td colspan="2">
-									<label for="name" class="text-success"	th:text="${message.successMessage}"></label>	
-									<label for="name" class="text-danger" th:text="${message.errorMessage}"></label>								
+									<div th:if="${message != null}">
+										<label for="name" class="text-success"	th:text="${message.successMessage}"></label>	
+										<label for="name" class="text-danger" th:text="${message.errorMessage}"></label>
+									</div>								
 								</td>
 							</tr>
 						</tbody>

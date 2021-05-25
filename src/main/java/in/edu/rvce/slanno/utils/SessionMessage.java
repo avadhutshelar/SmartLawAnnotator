@@ -13,4 +13,7 @@ public class SessionMessage {
 	@Setter
 	String errorMessage;
 	
+	@Getter
+	@Setter
+	String textOrder;
 }

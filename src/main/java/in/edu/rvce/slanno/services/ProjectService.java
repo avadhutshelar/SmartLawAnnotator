@@ -6,15 +6,16 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.thymeleaf.util.StringUtils;
 
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
@@ -38,7 +39,7 @@ public class ProjectService {
 
 	public String getDatasetBaseDirectory() {
 		return env.getProperty("slanno.dataset.basedir");
-	}	
+	}
 
 	public Boolean createDirectories(Project project) throws Exception {
 
@@ -79,53 +80,126 @@ public class ProjectService {
 
 		Arrays.asList(files).stream().forEach(file -> {
 			String filename = file.getOriginalFilename();
-			
+
 			if (filename.endsWith("." + env.getProperty("slanno.dataset.import.format1"))) {
-				
+
 				String pdfFilePath = env.getProperty("slanno.dataset.import.format1") + "\\" + filename;
 				LegalDocument legalDocument = new LegalDocument(project, pdfFilePath);
 				LegalDocument legalDocument2 = legalDocumentRepository.save(legalDocument);
 				legalDocument2.setPdfFilePath(env.getProperty("slanno.dataset.import.format1") + "\\"
 						+ legalDocument.getDocumentId() + "." + env.getProperty("slanno.dataset.import.format1"));
-				
+
 				String targetPDFFileNameWithPath = env.getProperty("slanno.dataset.basedir") + "\\"
 						+ project.getProjectDirectoryName() + "\\" + legalDocument2.getPdfFilePath();
-				
+
 				copyFile(file, targetPDFFileNameWithPath);
-				
-				legalDocument2.setOrigTextFilePath(env.getProperty("slanno.dataset.dir.txt.orig") + "\\"
-						+ legalDocument.getDocumentId() + ".txt");
-				
-				String targetTextFileNameWithPath = env.getProperty("slanno.dataset.basedir") + "\\"
+
+				legalDocument2.setOrigTextFilePath(
+						env.getProperty("slanno.dataset.dir.txt.orig") + "\\" + legalDocument.getDocumentId() + ".txt");
+
+				String origTextFileNameWithPath = env.getProperty("slanno.dataset.basedir") + "\\"
 						+ project.getProjectDirectoryName() + "\\" + legalDocument2.getOrigTextFilePath();
-				convertPDFtoTextAndSave(targetPDFFileNameWithPath,targetTextFileNameWithPath);
 				
-				//Mark Stage0 Complete
+				String textOrder=convertPDFtoText(targetPDFFileNameWithPath);
+
+				legalDocument.setProcessedTextFilePath(env.getProperty("slanno.dataset.dir.txt.processed") + "\\"
+						+ legalDocument.getDocumentId() + ".txt");
+		
+				String processedTextFileNameWithPath = env.getProperty("slanno.dataset.basedir") + "\\"
+						+ project.getProjectDirectoryName() + "\\" + legalDocument.getProcessedTextFilePath();
+			
+				try {
+					Files.write(Paths.get(origTextFileNameWithPath), textOrder.getBytes());
+					Files.write(Paths.get(processedTextFileNameWithPath), textOrder.getBytes());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+				// Mark Stage0 Complete
 				legalDocument2.setAnnotationProcessingStage(AnnotationProcessingStage.STAGE0);
 				legalDocumentRepository.save(legalDocument2);
 			}
 		});
 	}
-	
+
 	private void copyFile(MultipartFile file, String targetFileNameWithPath) {
 		try {
-			Files.copy(file.getInputStream(), Paths.get(targetFileNameWithPath),
-					StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(file.getInputStream(), Paths.get(targetFileNameWithPath), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	private void convertPDFtoTextAndSave(String sourcePDFFileNameWithPath,String targetTextFileNameWithPath) {
+
+	private String convertPDFtoText(String sourcePDFFileNameWithPath) {
+		
+		String textCourtOrder="";
 		try {
 			byte[] fileBytes = Files.readAllBytes(Paths.get(sourcePDFFileNameWithPath));
 			PDFtoText pdftotext = new PDFtoText();
-			String textCourtOrder = pdftotext.generateTxtFromByteArray(fileBytes);
+			String temp = pdftotext.generateTxtFromByteArray(fileBytes);
+
+			textCourtOrder=CommonUtils.removeUnnecessaryCharacters(temp);
 			
-			PrintWriter pw = new PrintWriter(new File(targetTextFileNameWithPath));
-			pw.print(CommonUtils.removeUnnecessaryCharacters(textCourtOrder));
-			pw.close();
-		}catch(Exception e) {
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return textCourtOrder;
+	}
+
+	public String getLegalDocumentOriginalText(Project project, LegalDocument legalDocument) {
+		String originalText = "";
+
+		String origTextFileNameWithPath = env.getProperty("slanno.dataset.basedir") + "\\"
+				+ project.getProjectDirectoryName() + "\\" + legalDocument.getOrigTextFilePath();
+
+		try {
+			originalText = new String(Files.readAllBytes(Paths.get(origTextFileNameWithPath)));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return originalText;
+	}
+	
+	public String getLegalDocumentProcessedText(Project project, LegalDocument legalDocument) {
+		String originalText = "";
+
+		String processedTextFileNameWithPath = env.getProperty("slanno.dataset.basedir") + "\\"
+				+ project.getProjectDirectoryName() + "\\" + legalDocument.getProcessedTextFilePath();
+
+		try {
+			originalText = new String(Files.readAllBytes(Paths.get(processedTextFileNameWithPath)));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return originalText;
+	}
+
+	public List<LegalDocument> getAllLegalDocumentByProjectId(Integer projectId) throws Exception {
+		List<LegalDocument> tempLegalDocumentList = Lists.newArrayList(legalDocumentRepository.findAll());
+		List<LegalDocument> legalDocumentList = tempLegalDocumentList.stream()
+				.filter(legDoc -> legDoc.getProject_doc().getProjectId() == projectId).collect(Collectors.toList());
+		return legalDocumentList;
+	}
+
+	public LegalDocument getLegalDocumentByDocumentId(Long documentId) throws Exception {
+		LegalDocument legalDocument = legalDocumentRepository.findById(documentId).get();
+		return legalDocument;
+	}
+	
+	public void saveUpdatedTextOrder(Project project, LegalDocument legalDocument, String textOrderHidden) {
+		try {			
+			legalDocument.setProcessedTextFilePath(env.getProperty("slanno.dataset.dir.txt.processed") + "\\"
+					+ legalDocument.getDocumentId() + ".txt");
+	
+			String processedTextFileNameWithPath = env.getProperty("slanno.dataset.basedir") + "\\"
+					+ project.getProjectDirectoryName() + "\\" + legalDocument.getProcessedTextFilePath();
+		
+			Files.write(Paths.get(processedTextFileNameWithPath), textOrderHidden.getBytes());
+			
+			legalDocumentRepository.save(legalDocument);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
