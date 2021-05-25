@@ -10,7 +10,7 @@
 		    <a class="nav-link" aria-controls="import" aria-selected="true" th:href="@{/project/{id}/import(id=${project.projectId})}">Import Documents</a>
 		  </li>
 		  <li class="nav-item">
-		    <a class="nav-link" aria-controls="preprocess" aria-selected="true" href="#">Preprocess Documents</a>
+		    <a class="nav-link" aria-controls="preprocess" aria-selected="true" th:href="@{/project/{projectId}/preprocess(projectId=${project.projectId})}">Preprocess Documents</a>
 		  </li>
 		</ul>
 	</div>
