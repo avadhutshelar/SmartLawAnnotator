@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Annotate Documents</title>
+<link rel="stylesheet"
+	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+<script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+<script type="text/javascript">
+
+	function setAnnotation(annotation) {		
+		var textSelected = document.getSelection();
+		var y = document.getElementById('selectedText');
+		y.value = textSelected;
+		var z = document.getElementById('selectedAnnotation');
+		z.value = annotation;
+	}
+	function completeAnnotationProcess() {
+		var txtArea = document.getElementById("textOrderTextArea");
+		var y = document.getElementById('textOrderHidden1');
+		y.value = txtArea.value;
+	}
+	
+</script>
+</head>
+<body>
+	<div th:replace="fragments/header :: header"></div>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-4">
+				<h3 class="lh-lg">
+					Annotate Documents					
+				</h3>
+			</div>
+			<div class="col-md-6">
+				<nav aria-label="Page navigation example">
+				  <ul class="pagination justify-content-start pagination-lg">
+				    <li class="page-item">
+				    	<a class="page-link" 
+				    		th:href="@{/project/{projectId}/annotate/{docId}/prev(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}">
+				    		Previous
+				    	</a>
+				    </li>
+				    <li class="page-item active" aria-current="page">
+				    	<a class="page-link" 
+				    		th:href="@{/project/{projectId}/annotate/{docId}(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}">
+				    		<label th:text="' Current Document : '+${legalDocument.documentId}"></label>
+				    	</a>
+				    </li>    
+				    <li class="page-item">
+				    	<a class="page-link" 
+				    		th:href="@{/project/{projectId}/annotate/{docId}/next(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}">
+				    		Next
+				    	</a>
+				   	</li>
+				  </ul>
+				</nav>
+			</div>						
+		</div>
+		<div class="row">
+			<div class="col-md-10">
+				<div th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE0}">	
+					<textarea rows="20" cols="170" id="textOrderTextArea"
+						th:text="${message.textOrder}" th:field="${message.textOrder}"></textarea>
+				</div>
+				<div th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE1}">	
+					<p id="styledtextOrderPara" th:utext="${message.styledtextOrder}"></p>
+				</div>
+			</div>
+			
+			
+			<div class="col-md-2">		
+			<h6>Tools</h6>
+			<br>
+			<form action="#"
+				th:action="@{/project/{projectId}/addAnnotation/{docId}(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}"
+				th:object="${legalDocument}" method="post">
+				<input type="hidden" th:name="selectedText" class="form-control" id="selectedText" placeholder="selectedText">
+				<input type="hidden" th:name="selectedAnnotation" class="form-control" id="selectedAnnotation" placeholder="selectedAnnotation">		
+				<input type="submit" value="Set Header" onclick="setAnnotation('header')"/>
+			</form>
+			<br>
+			<form action="#"
+				th:action="@{/project/{projectId}/annotate/{docId}/complete(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}"
+				th:object="${legalDocument}" method="post">
+				<input type="hidden" th:name="textOrderHidden1" class="form-control"
+					id="textOrderHidden1" placeholder="textOrderHidden1"/>			
+				<div th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE0}">	
+					<input type="submit" value="Mark Complete" onclick="completeAnnotationProcess()"/>
+				</div>
+			</form>
+			<div th:if="${message != null}">
+				<label for="name" class="text-success"	th:text="${message.successMessage}"></label>	
+				<label for="name" class="text-danger" th:text="${message.errorMessage}"></label>
+			</div>	
+			</div>
+		</div>
+	</div>
+</body>
+</html>
