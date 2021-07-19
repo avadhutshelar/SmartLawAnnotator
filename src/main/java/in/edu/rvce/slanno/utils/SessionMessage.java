@@ -16,4 +16,8 @@ public class SessionMessage {
 	@Getter
 	@Setter
 	String textOrder;
+	
+	@Getter
+	@Setter
+	String styledtextOrder;
 }
