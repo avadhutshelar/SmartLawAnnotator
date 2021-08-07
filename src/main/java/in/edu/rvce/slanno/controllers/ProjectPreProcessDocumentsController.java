@@ -102,6 +102,7 @@ public class ProjectPreProcessDocumentsController {
 			LegalDocument legalDocument= projectService.getLegalDocumentByDocumentId(docId);
 			legalDocument.setAnnotationProcessingStage(AnnotationProcessingStage.STAGE1);
 			projectService.saveUpdatedTextOrder(project, legalDocument, textOrderHidden1);
+			projectService.saveJsonOrder(project, legalDocument);
 			message.setTextOrder(textOrderHidden1);
 			model.addAttribute("project", project);
 			model.addAttribute("legalDocument", legalDocument);

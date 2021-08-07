@@ -1,27 +1,42 @@
 package in.edu.rvce.slanno.services;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import edu.stanford.nlp.pipeline.CoreDocument;
+import edu.stanford.nlp.pipeline.CoreSentence;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import in.edu.rvce.courtorder.Argument;
+import in.edu.rvce.courtorder.ArgumentSentence;
+import in.edu.rvce.courtorder.Background;
+import in.edu.rvce.courtorder.JsonCourtOrder;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
 import in.edu.rvce.slanno.repositories.LegalDocumentRepository;
 import in.edu.rvce.slanno.repositories.ProjectRepository;
+import in.edu.rvce.slanno.utils.ApplicationConstants;
 import in.edu.rvce.slanno.utils.CommonUtils;
 import in.edu.rvce.slanno.utils.PDFtoText;
 
@@ -52,11 +67,15 @@ public class ProjectService {
 			File projectImportFormat1Dir = new File(projectDatasetBaseDir,
 					env.getProperty("slanno.dataset.import.format1"));
 			projectImportFormat1Dir.mkdir();
-			File projectOrigTextDir = new File(projectDatasetBaseDir, env.getProperty("slanno.dataset.dir.txt.orig"));
+			File projectOrigTextDir = new File(projectDatasetBaseDir, 
+					env.getProperty("slanno.dataset.dir.txt.orig"));
 			projectOrigTextDir.mkdir();
 			File projectProcessedTextDir = new File(projectDatasetBaseDir,
 					env.getProperty("slanno.dataset.dir.txt.processed"));
 			projectProcessedTextDir.mkdir();
+			File projectJsonDir = new File(projectDatasetBaseDir,
+					env.getProperty("slanno.dataset.dir.json"));
+			projectJsonDir.mkdir();			
 			return Boolean.TRUE;
 		}
 	}
@@ -203,4 +222,109 @@ public class ProjectService {
 			e.printStackTrace();
 		}
 	}
+	
+	public void saveJsonOrder(Project project, LegalDocument legalDocument) {
+		try {			
+			
+			String processedText = "";
+			String processedTextFileNameWithPath = env.getProperty("slanno.dataset.basedir") + "\\"
+					+ project.getProjectDirectoryName() + "\\" + legalDocument.getProcessedTextFilePath();			
+			
+			try {
+				processedText = new String(Files.readAllBytes(Paths.get(processedTextFileNameWithPath)));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			JsonCourtOrder co = getJsonCourtOrder(processedText);
+					
+			legalDocument.setJsonFilePath(env.getProperty("slanno.dataset.dir.json") + "\\"
+					+ legalDocument.getDocumentId() + ".json");
+	
+			String jsonFileNameWithPath = env.getProperty("slanno.dataset.basedir") + "\\"
+					+ project.getProjectDirectoryName() + "\\" + legalDocument.getJsonFilePath();
+			 
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			
+			// Java objects to File
+	        try (FileWriter writer = new FileWriter(jsonFileNameWithPath)) {
+	            gson.toJson(co, writer);
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+
+	        legalDocumentRepository.save(legalDocument);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private JsonCourtOrder getJsonCourtOrder(String processedText) {
+		JsonCourtOrder co = new JsonCourtOrder();
+		co.setProcessedText(processedText);
+
+		String headerEnds=ApplicationConstants.HEADER_ENDS;		
+		String header=StringUtils.substring(processedText, 0, StringUtils.indexOfIgnoreCase(processedText, headerEnds));
+		co.setHeader(header.trim());
+
+		String backgroundEnds = ApplicationConstants.BACKGROUND_ENDS;
+		String background = StringUtils.substring(processedText,
+				StringUtils.indexOfIgnoreCase(processedText, headerEnds) + headerEnds.length(),
+				StringUtils.indexOfIgnoreCase(processedText, backgroundEnds));
+		Background back = new Background(background.trim());
+		co.setBackground(back);
+		
+		String argumentEnds = ApplicationConstants.ARGUMENT_ENDS;
+		String argument = StringUtils.substring(processedText,
+				StringUtils.indexOfIgnoreCase(processedText, backgroundEnds) + backgroundEnds.length(),
+				StringUtils.lastIndexOfIgnoreCase(processedText, argumentEnds));
+		String[] argumentTextArray=argument.split(argumentEnds, -1);
+		List<String> argumentTextList=Arrays.asList(argumentTextArray);
+		List<Argument> argumentList=new ArrayList<Argument>(0);
+		for(String argumentText:argumentTextList) {
+			Argument arg = new Argument(argumentText.trim());
+			List<ArgumentSentence> argumentSentences= SplitArgumentSentences(argumentText);
+			arg.setArgumentSentences(argumentSentences);
+			argumentList.add(arg);
+		}		
+		co.setArguments(argumentList);
+		
+		String orderEnds = ApplicationConstants.ORDER_ENDS;
+		String order = StringUtils.substring(processedText,
+				StringUtils.lastIndexOfIgnoreCase(processedText, argumentEnds) + argumentEnds.length(),
+				StringUtils.indexOfIgnoreCase(processedText, orderEnds));
+		co.setOrder(order.trim());
+		
+		String footer = StringUtils.substring(processedText,
+				StringUtils.lastIndexOfIgnoreCase(processedText, orderEnds) + orderEnds.length(),
+				processedText.length());
+		co.setFooter(footer.trim());
+		
+		return co;
+	}
+	
+	private List<ArgumentSentence> SplitArgumentSentences(String text) {
+    	List<ArgumentSentence> argumentSentences = new ArrayList<ArgumentSentence>(0);
+    	
+    	// set up pipeline properties
+        Properties props = new Properties();
+        // set the list of annotators to run
+        props.setProperty("annotators", "tokenize,ssplit");
+        props.setProperty("rulesFiles", "D:/git/SmartLawAnnotator/src/main/resources/basic_ner.rules");
+        // build pipeline
+        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+        // create a document object
+        CoreDocument doc = new CoreDocument(text);
+        // annotate
+        pipeline.annotate(doc);
+        // display sentences
+        for (CoreSentence sent : doc.sentences()) {
+            //System.out.println(sent.text());
+            ArgumentSentence argumentSentence=new ArgumentSentence();
+            argumentSentence.setText(sent.text());
+            argumentSentences.add(argumentSentence);
+        }
+    	
+    	return argumentSentences;
+    }
 }
