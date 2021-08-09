@@ -28,8 +28,7 @@ public class ProjectPreProcessDocumentsController {
 		String successMessage = "";
 		String errorMessage = "";
 		Long docId=null;
-		try {
-			Project project = projectService.getProjectById(projectId);
+		try {			
 			List<LegalDocument> legalDocumentList= projectService.getAllLegalDocumentByProjectId(projectId);
 			
 			//TODO get 1st incomplete document
@@ -121,8 +120,7 @@ public class ProjectPreProcessDocumentsController {
 	public RedirectView preProcessPreviousDocuments(SessionMessage message, Model model, @PathVariable Integer projectId, @PathVariable Long docId) {
 		String successMessage = "";
 		String errorMessage = "";
-		try {
-			Project project = projectService.getProjectById(projectId);
+		try {			
 			List<LegalDocument> legalDocumentList= projectService.getAllLegalDocumentByProjectId(projectId);
 			
 			LegalDocument currentlegalDocument= projectService.getLegalDocumentByDocumentId(docId);

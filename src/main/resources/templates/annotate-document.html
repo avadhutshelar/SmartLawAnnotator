@@ -30,7 +30,7 @@
 			</div>
 			<div class="col-md-6">
 				<nav aria-label="Page navigation example">
-					<ul class="pagination justify-content-start pagination-lg">
+					<ul class="pagination justify-content-start pagination-sm">
 						<li class="page-item"><a class="page-link"
 							th:href="@{/project/{projectId}/annotate/{docId}/prev(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}">
 								Previous </a></li>
@@ -48,34 +48,69 @@
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-10">
+			<div class="col-md-12">
 				<div
 					th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE1}">
 					
 					<table class="table table-striped table-responsive-md">
 						<tbody>
 							<tr>
-								<td><label th:text="${jsonCourtOrder.header}"></label></td>
+								<td class="h5 text-center" th:text="${jsonCourtOrder.header}"/>
 							</tr>
 							<tr>
-								<td><label th:text="${jsonCourtOrder.background}"></label></td>
+								<td th:text="${jsonCourtOrder.background.text}"/>
 							</tr>
-							<tr th:each="argument : ${jsonCourtOrder.arguments}">
-								<td th:text="${argument.text}" />
+						</tbody>
+					</table>
+							
+					<div class="accordion" id="accordionExample" th:each="argument : ${jsonCourtOrder.arguments}">
+						<div class="accordion-item">
+							<h2 class="accordion-header" th:id="'heading'+${argument.argumentNumber}">
+						      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" th:data-bs-target="@{#collapse{id}(id=${argument.argumentNumber})}" 
+						      			aria-expanded="false" th:aria-controls="'collapse'+${argument.argumentNumber}" th:text="'Argument No '+${argument.argumentNumber}">
+						        
+						      </button>
+						    </h2>
+						    <div th:id="'collapse'+${argument.argumentNumber}" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+						      <div class="accordion-body">
+						        <table class="table mb-0">
+									<thead>
+										<tr>
+											<td class="h5 text-center" th:text="'Argument and Sentences'"/>
+											<td class="h5 text-center" th:text="'Action'"/>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td th:text="${argument.text}" />
+											<td th:text="'Argument By'"></td>
+										</tr>
+										<tr th:each="sentence : ${argument.argumentSentences}">
+											<td th:text="${sentence.text}" />
+											<td th:text="'Sentence Type'"></td>											
+										</tr>
+									</tbody>
+								</table>
+						      </div>
+						    </div>
+						</div>
+					</div>
+							
+					<table class="table table-striped table-responsive-md">
+						<tbody>
+							<tr>
+								<td th:text="${jsonCourtOrder.order}"/>
 							</tr>
 							<tr>
-								<td><label th:text="${jsonCourtOrder.order}"></label></td>
-							</tr>
-							<tr>
-								<td><label th:text="${jsonCourtOrder.footer}"></label></td>
+								<td th:text="${jsonCourtOrder.footer}"/>
 							</tr>
 						</tbody>
 					</table>
 				</div>
 			</div>
-
-
-			<div class="col-md-2">
+		</div>
+		<div class="row">
+			<div class="col-md-12">
 				<h6>Tools</h6>
 				<br>
 

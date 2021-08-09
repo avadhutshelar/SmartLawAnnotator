@@ -82,8 +82,7 @@ public class AnnotationController {
 			@PathVariable Integer projectId, @PathVariable Long docId) {
 		String successMessage = "";
 		String errorMessage = "";
-		try {
-			Project project = projectService.getProjectById(projectId);
+		try {			
 			List<LegalDocument> legalDocumentList = projectService.getAllLegalDocumentByProjectId(projectId);
 
 			List<LegalDocument> annotationDocumentList = legalDocumentList.stream()

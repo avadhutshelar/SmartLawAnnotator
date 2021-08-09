@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class Argument {
+	Integer argumentNumber;
 	String text;
 	String argumentBy;
 	List<ArgumentSentence> argumentSentences;
