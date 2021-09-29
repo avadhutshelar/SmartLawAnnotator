@@ -25,10 +25,11 @@
 	<div th:replace="fragments/header :: header"></div>
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-md-4">
+			<div class="col-md-6">
 				<h3 class="lh-lg">Annotate Documents</h3>
 			</div>
 			<div class="col-md-6">
+				<br/>
 				<nav aria-label="Page navigation example">
 					<ul class="pagination justify-content-start pagination-sm">
 						<li class="page-item"><a class="page-link"
@@ -77,7 +78,9 @@
 									<thead>
 										<tr>
 											<td class="h5 text-center" th:text="'Argument and Sentences'"/>
-											<td class="h5 text-center" th:text="'Action'"/>
+											<td>
+												
+											</td>
 										</tr>
 									</thead>
 									<tbody>
@@ -87,7 +90,18 @@
 										</tr>
 										<tr th:each="sentence : ${argument.argumentSentences}">
 											<td th:text="${sentence.text}" />
-											<td th:text="'Sentence Type'"></td>											
+											<!-- <td th:text="'Sentence Type'"></td>	 -->	
+											<td>									
+											<div class="form-group">
+									            <label>Action</label>
+									            <div th:each="sentenceType : ${T(in.edu.rvce.slanno.enums.ArgumentSentenceType).values()}">
+									                <div class="custom-control custom-radio custom-control-inline">
+									                    <input type="radio" th:field="*{sentence.argumentSentenceType}" th:value="${sentenceType}" class="custom-control-input">
+									                    <label class="custom-control-label" th:for="${#ids.prev('sentence.argumentSentenceType')}" th:text="${sentence.sentenceType}">sentenceType</label>
+									                </div>
+									            </div>
+									        </div>
+									        </td>
 										</tr>
 									</tbody>
 								</table>
