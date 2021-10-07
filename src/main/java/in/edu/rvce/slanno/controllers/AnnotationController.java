@@ -1,5 +1,6 @@
 package in.edu.rvce.slanno.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,9 +9,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.view.RedirectView;
 
+import in.edu.rvce.courtorder.Argument;
+import in.edu.rvce.courtorder.ArgumentSentence;
 import in.edu.rvce.courtorder.JsonCourtOrder;
+import in.edu.rvce.slanno.dto.ArgumentDto;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
@@ -52,17 +57,18 @@ public class AnnotationController {
 		}
 		return new RedirectView("/project/" + projectId + "/annotate/" + docId);
 	}
-	
+
 	@GetMapping("/project/{projectId}/annotate/{docId}")
-	public String annotateDocuments(SessionMessage message, Model model, @PathVariable Integer projectId, @PathVariable Long docId) {
+	public String annotateDocuments(SessionMessage message, Model model, @PathVariable Integer projectId,
+			@PathVariable Long docId) {
 		String successMessage = "";
 		String errorMessage = "";
 		try {
 			Project project = projectService.getProjectById(projectId);
-			LegalDocument legalDocument= projectService.getLegalDocumentByDocumentId(docId);
-			
-			JsonCourtOrder jsonCourtOrder= annotationService.getJsonCourtOrder(project, legalDocument);
-			String textOrder=jsonCourtOrder.getProcessedText();
+			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
+
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument);
+			String textOrder = jsonCourtOrder.getProcessedText();
 			message.setTextOrder(textOrder);
 			model.addAttribute("project", project);
 			model.addAttribute("legalDocument", legalDocument);
@@ -72,23 +78,23 @@ public class AnnotationController {
 		} finally {
 			message.setSuccessMessage(successMessage);
 			message.setErrorMessage(errorMessage);
-			model.addAttribute("message", message);			
+			model.addAttribute("message", message);
 		}
 		return "annotate-document";
 	}
 
 	@GetMapping("/project/{projectId}/annotate/{docId}/prev")
-	public RedirectView annotatePreviousDocuments(SessionMessage message, Model model,
-			@PathVariable Integer projectId, @PathVariable Long docId) {
+	public RedirectView annotatePreviousDocuments(SessionMessage message, Model model, @PathVariable Integer projectId,
+			@PathVariable Long docId) {
 		String successMessage = "";
 		String errorMessage = "";
-		try {			
+		try {
 			List<LegalDocument> legalDocumentList = projectService.getAllLegalDocumentByProjectId(projectId);
 
 			List<LegalDocument> annotationDocumentList = legalDocumentList.stream()
 					.filter(doc -> doc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE1))
 					.collect(Collectors.toList());
-			
+
 			LegalDocument currentlegalDocument = projectService.getLegalDocumentByDocumentId(docId);
 			Integer index = 0;
 			for (LegalDocument ld : annotationDocumentList) {
@@ -112,39 +118,95 @@ public class AnnotationController {
 		}
 		return new RedirectView("/project/" + projectId + "/annotate/" + docId);
 	}
-	
+
 	@GetMapping("/project/{projectId}/annotate/{docId}/next")
-	public RedirectView preProcessNextDocuments(SessionMessage message, Model model, @PathVariable Integer projectId, @PathVariable Long docId) {
+	public RedirectView preProcessNextDocuments(SessionMessage message, Model model, @PathVariable Integer projectId,
+			@PathVariable Long docId) {
 		String successMessage = "";
 		String errorMessage = "";
 		try {
-			List<LegalDocument> legalDocumentList= projectService.getAllLegalDocumentByProjectId(projectId);
-			
+			List<LegalDocument> legalDocumentList = projectService.getAllLegalDocumentByProjectId(projectId);
+
 			List<LegalDocument> annotationDocumentList = legalDocumentList.stream()
 					.filter(doc -> doc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE1))
 					.collect(Collectors.toList());
-			
-			LegalDocument currentlegalDocument= projectService.getLegalDocumentByDocumentId(docId);
-			Integer index=0;
-			for(LegalDocument ld:annotationDocumentList) {
-				if(ld.getDocumentId()==currentlegalDocument.getDocumentId()) {
+
+			LegalDocument currentlegalDocument = projectService.getLegalDocumentByDocumentId(docId);
+			Integer index = 0;
+			for (LegalDocument ld : annotationDocumentList) {
+				if (ld.getDocumentId() == currentlegalDocument.getDocumentId()) {
 					index = annotationDocumentList.indexOf(ld);
 				}
 			}
-			if(index<annotationDocumentList.size()) {
-				LegalDocument prevlegalDocument=annotationDocumentList.get(index+1);
-				docId=prevlegalDocument.getDocumentId();
-			}else {
-				docId=currentlegalDocument.getDocumentId();
+			if (index < annotationDocumentList.size()) {
+				LegalDocument prevlegalDocument = annotationDocumentList.get(index + 1);
+				docId = prevlegalDocument.getDocumentId();
+			} else {
+				docId = currentlegalDocument.getDocumentId();
 			}
-			
+
 		} catch (Exception e) {
 			errorMessage = "Error in retriving the legal document: \n" + e.getMessage();
 		} finally {
 			message.setSuccessMessage(successMessage);
 			message.setErrorMessage(errorMessage);
 			model.addAttribute("message", message);
-		}		
-		return new RedirectView("/project/"+projectId+"/annotate/"+docId);
+		}
+		return new RedirectView("/project/" + projectId + "/annotate/" + docId);
+	}
+	
+	@GetMapping("/project/{projectId}/annotate/{docId}/argument/{argNum}")
+	public String getArgument(SessionMessage message, Model model, @PathVariable Integer projectId,
+			@PathVariable Long docId,  @PathVariable Integer argNum) {
+		String successMessage = "";
+		String errorMessage = "";
+		try {
+			Project project = projectService.getProjectById(projectId);
+			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument);			
+			List<Argument> argumentList = jsonCourtOrder.getArguments().stream().filter(arg->arg.getArgumentNumber().equals(argNum)).collect(Collectors.toList());
+			
+			model.addAttribute("project", project);
+			model.addAttribute("legalDocument", legalDocument);
+			model.addAttribute("jsonCourtOrder", jsonCourtOrder);
+			model.addAttribute("argument", argumentList.get(0));
+		} catch (Exception e) {
+			errorMessage = "Error in retriving the legal document: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);
+		}
+		return "annotate-argument";
+	}
+
+	@PostMapping("/project/{projectId}/annotate/{docId}/argument/{argNum}")
+	public RedirectView updateArgBy(SessionMessage message, Model model, @PathVariable Integer projectId,
+			@PathVariable Long docId, @PathVariable Integer argNum, Argument argument) {
+		String successMessage = "";
+		String errorMessage = "";
+		try {
+			Project project = projectService.getProjectById(projectId);
+			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument);
+			//Update argumentBy
+			jsonCourtOrder.getArguments().forEach(a -> {
+				if (a.getArgumentNumber().equals(argNum)) {
+					a.setArgumentBy(argument.getArgumentBy());
+					a.setArgumentSentences(argument.getArgumentSentences());
+				}
+			});
+			
+			
+			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder);
+
+		} catch (Exception e) {
+			errorMessage = "Error in retriving the legal document: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);
+		}
+		return new RedirectView("/project/" + projectId + "/annotate/" + docId+ "/argument/" + argNum);
 	}
 }

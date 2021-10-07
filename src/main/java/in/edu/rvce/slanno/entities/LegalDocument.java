@@ -22,8 +22,8 @@ public class LegalDocument {
 	Long documentId;
 
 	@ManyToOne
-	@JoinColumn(name="project_id")
-	private Project project_doc;
+	@JoinColumn(name="project_Id", referencedColumnName="projectId")
+	private Project project;
 	
 	String pdfFilePath;
 	String origTextFilePath;
@@ -34,7 +34,7 @@ public class LegalDocument {
 	
 	public LegalDocument(Project project, String pdfFilePath) {
 		super();
-		this.project_doc = project;
+		this.project = project;
 		this.pdfFilePath = pdfFilePath;
 	}	
 	

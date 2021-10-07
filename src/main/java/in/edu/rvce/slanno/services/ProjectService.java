@@ -196,7 +196,7 @@ public class ProjectService {
 	public List<LegalDocument> getAllLegalDocumentByProjectId(Integer projectId) throws Exception {
 		List<LegalDocument> tempLegalDocumentList = Lists.newArrayList(legalDocumentRepository.findAll());
 		List<LegalDocument> legalDocumentList = tempLegalDocumentList.stream()
-				.filter(legDoc -> legDoc.getProject_doc().getProjectId() == projectId).collect(Collectors.toList());
+				.filter(legDoc -> legDoc.getProject().getProjectId() == projectId).collect(Collectors.toList());
 		return legalDocumentList;
 	}
 
@@ -281,7 +281,7 @@ public class ProjectService {
 		List<Argument> argumentList=new ArrayList<Argument>(0);
 		for(String argumentText:argumentTextList) {
 			Argument arg = new Argument(argumentText.trim());
-			List<ArgumentSentence> argumentSentences= SplitArgumentSentences(argumentText);
+			List<ArgumentSentence> argumentSentences= splitArgumentSentences(argumentText);
 			arg.setArgumentSentences(argumentSentences);
 			argumentList.add(arg);
 		}		
@@ -301,7 +301,7 @@ public class ProjectService {
 		return co;
 	}
 	
-	private List<ArgumentSentence> SplitArgumentSentences(String text) {
+	private List<ArgumentSentence> splitArgumentSentences(String text) {
     	List<ArgumentSentence> argumentSentences = new ArrayList<ArgumentSentence>(0);
     	
     	// set up pipeline properties

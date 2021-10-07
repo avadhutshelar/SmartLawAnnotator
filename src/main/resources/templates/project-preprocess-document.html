@@ -83,19 +83,19 @@
 				  <ul class="pagination justify-content-start pagination-lg">
 				    <li class="page-item">
 				    	<a class="page-link" 
-				    		th:href="@{/project/{projectId}/preprocess/{docId}/prev(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}">
+				    		th:href="@{/project/{projectId}/preprocess/{docId}/prev(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
 				    		Previous
 				    	</a>
 				    </li>
 				    <li class="page-item active" aria-current="page">
 				    	<a class="page-link" 
-				    		th:href="@{/project/{projectId}/preprocess/{docId}(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}">
+				    		th:href="@{/project/{projectId}/preprocess/{docId}(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
 				    		<label th:text="' Current Document : '+${legalDocument.documentId}"></label>
 				    	</a>
 				    </li>    
 				    <li class="page-item">
 				    	<a class="page-link" 
-				    		th:href="@{/project/{projectId}/preprocess/{docId}/next(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}">
+				    		th:href="@{/project/{projectId}/preprocess/{docId}/next(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
 				    		Next
 				    	</a>
 				   	</li>
@@ -103,8 +103,8 @@
 				</nav>
 			</div>	
 			<div class="col-md-2">
-				<a th:href="@{/project/view/{id}(id=${legalDocument.project_doc.projectId})}">
-					<h6><label th:text="'Back to : '+${legalDocument.project_doc.projectName}"></label></h6>
+				<a th:href="@{/project/view/{id}(id=${legalDocument.project.projectId})}">
+					<h6><label th:text="'Back to : '+${legalDocument.project.projectName}"></label></h6>
 				</a>
 			</div>		
 		</div>
@@ -122,42 +122,42 @@
 			<div class="col-md-2">
 				<div th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE0}">
 					<form action="#"
-						th:action="@{/project/{projectId}/preprocess/{docId}(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}"
+						th:action="@{/project/{projectId}/preprocess/{docId}(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}"
 						th:object="${legalDocument}" method="post">
 						<input type="hidden" th:name="textOrderHidden" class="form-control"	id="textOrderHidden" placeholder="textOrderHidden"/> 
 						<input type="submit" value="Update Document" onclick="updateTextOrder()"/>		
 					</form>
 					<br>
 					<form action="#"
-						th:action="@{/project/{projectId}/preprocess/{docId}/insertHeaderEnd(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}"
+						th:action="@{/project/{projectId}/preprocess/{docId}/insertHeaderEnd(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}"
 						th:object="${legalDocument}" method="post">
 						<input type="hidden" th:name="textOrderHidden2" class="form-control" id="textOrderHidden2" placeholder="textOrderHidden2"/> 
 						<input type="submit" value="Insert Header End" onclick="insertHeaderEnd()"/>		
 					</form>
 					<br>
 					<form action="#"
-						th:action="@{/project/{projectId}/preprocess/{docId}/insertBackgroundEnd(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}"
+						th:action="@{/project/{projectId}/preprocess/{docId}/insertBackgroundEnd(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}"
 						th:object="${legalDocument}" method="post">
 						<input type="hidden" th:name="textOrderHidden3" class="form-control" id="textOrderHidden3" placeholder="textOrderHidden3"/> 
 						<input type="submit" value="Insert Background End" onclick="insertBackgroundEnd()"/>		
 					</form>
 					<br>
 					<form action="#"
-						th:action="@{/project/{projectId}/preprocess/{docId}/insertArgumentEnd(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}"
+						th:action="@{/project/{projectId}/preprocess/{docId}/insertArgumentEnd(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}"
 						th:object="${legalDocument}" method="post">
 						<input type="hidden" th:name="textOrderHidden4" class="form-control" id="textOrderHidden4" placeholder="textOrderHidden4"/> 
 						<input type="submit" value="Insert Argument End" onclick="insertArgumentEnd()"/>		
 					</form>
 					<br>
 					<form action="#"
-						th:action="@{/project/{projectId}/preprocess/{docId}/insertOrderEnd(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}"
+						th:action="@{/project/{projectId}/preprocess/{docId}/insertOrderEnd(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}"
 						th:object="${legalDocument}" method="post">
 						<input type="hidden" th:name="textOrderHidden5" class="form-control" id="textOrderHidden5" placeholder="textOrderHidden5"/> 
 						<input type="submit" value="Insert Order End" onclick="insertOrderEnd()"/>		
 					</form>
 					<br>
 					<form action="#"
-						th:action="@{/project/{projectId}/preprocess/{docId}/complete(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}"
+						th:action="@{/project/{projectId}/preprocess/{docId}/complete(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}"
 						th:object="${legalDocument}" method="post">
 						<input type="hidden" th:name="textOrderHidden1" class="form-control" id="textOrderHidden1" placeholder="textOrderHidden1"/>									
 							<input type="submit" value="Mark Complete" onclick="completePreProcess()"/>					
