@@ -97,8 +97,18 @@ public class AnnotationController {
 					if (a.getArgumentNumber().equals(ain.getArgumentNumber())) {
 						
 						a.setArgumentBy(ain.getArgumentBy());
-						a.setArgumentSentences(ain.getArgumentSentences());
-						
+						//a.setArgumentSentences(ain.getArgumentSentences());
+						a.getArgumentSentences().forEach(s->{
+							
+							ain.getArgumentSentences().forEach(sin->{
+							
+								if(s.getSentenceNumber().equals(sin.getSentenceNumber())) {
+									s.setArgumentSentenceType(sin.getArgumentSentenceType());
+								}
+								
+							});
+							
+						});
 					}
 				
 				});

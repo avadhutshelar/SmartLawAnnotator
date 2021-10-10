@@ -278,9 +278,12 @@ public class ProjectService {
 				StringUtils.lastIndexOfIgnoreCase(processedText, argumentEnds));
 		String[] argumentTextArray=argument.split(argumentEnds, -1);
 		List<String> argumentTextList=Arrays.asList(argumentTextArray);
-		List<Argument> argumentList=new ArrayList<Argument>(0);
+		List<Argument> argumentList=new ArrayList<>();
+		int count=0;
 		for(String argumentText:argumentTextList) {
-			Argument arg = new Argument(argumentText.trim());
+			Argument arg = new Argument();
+			arg.setArgumentNumber(++count);
+			arg.setText(argumentText.trim());
 			List<ArgumentSentence> argumentSentences= splitArgumentSentences(argumentText);
 			arg.setArgumentSentences(argumentSentences);
 			argumentList.add(arg);
@@ -316,9 +319,11 @@ public class ProjectService {
         // annotate
         pipeline.annotate(doc);
         // display sentences
+        int count=0;
         for (CoreSentence sent : doc.sentences()) {
             //System.out.println(sent.text());
             ArgumentSentence argumentSentence=new ArgumentSentence();
+            argumentSentence.setSentenceNumber(++count);
             argumentSentence.setText(sent.text());
             argumentSentences.add(argumentSentence);
         }
