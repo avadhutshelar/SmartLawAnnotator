@@ -1,6 +1,5 @@
 package in.edu.rvce.slanno.controllers;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,9 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.view.RedirectView;
 
 import in.edu.rvce.courtorder.Argument;
-import in.edu.rvce.courtorder.ArgumentSentence;
 import in.edu.rvce.courtorder.JsonCourtOrder;
-import in.edu.rvce.slanno.dto.ArgumentDto;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
@@ -83,6 +80,43 @@ public class AnnotationController {
 		return "annotate-document";
 	}
 
+	@PostMapping("/project/{projectId}/annotate/{docId}")
+	public RedirectView updateJsonCourtOrder(SessionMessage message, Model model, @PathVariable Integer projectId,
+			@PathVariable Long docId, JsonCourtOrder jsonCourtOrderIn) {
+		String successMessage = "";
+		String errorMessage = "";
+		try {
+			Project project = projectService.getProjectById(projectId);
+			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument);
+			//Update argumentBy
+			jsonCourtOrder.getArguments().forEach(a -> {
+				
+				jsonCourtOrderIn.getArguments().forEach(ain -> {
+					
+					if (a.getArgumentNumber().equals(ain.getArgumentNumber())) {
+						
+						a.setArgumentBy(ain.getArgumentBy());
+						a.setArgumentSentences(ain.getArgumentSentences());
+						
+					}
+				
+				});
+				
+			});
+			
+			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder);
+
+		} catch (Exception e) {
+			errorMessage = "Error in retriving the legal document: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);
+		}
+		return new RedirectView("/project/" + projectId + "/annotate/" + docId);
+	}
+	
 	@GetMapping("/project/{projectId}/annotate/{docId}/prev")
 	public RedirectView annotatePreviousDocuments(SessionMessage message, Model model, @PathVariable Integer projectId,
 			@PathVariable Long docId) {
@@ -196,7 +230,6 @@ public class AnnotationController {
 					a.setArgumentSentences(argument.getArgumentSentences());
 				}
 			});
-			
 			
 			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder);
 
