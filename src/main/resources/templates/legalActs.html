@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Legal Acts</title>
+<link rel="stylesheet"	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+<script	th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script	th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+</head>
+<body>
+	<div th:replace="fragments/header :: header"></div>
+	<div class="container-fluid">	
+		<div class="row">
+			<h2 class="lh-lg"><label>Settings</label></h2>
+		</div>
+		<div class="row">
+			<div class="col-md-2">
+				<div th:replace="fragments/leftSidebar :: viewSettingsLeftSidebar"></div>
+			</div>
+			<div class="col-md-8">
+				<h4 class="lh-sm">
+					<label>Legal Acts</label>
+				</h4>
+				<form action="#" th:action="@{/legalActs/add}" th:object="${settingsDto}" method="post" >
+					
+				</form>
+				
+				<table class="table table-striped table-responsive-md">
+					<tbody>
+						<tr>
+							<th>Act ID</th>
+							<th>Section Number</th>
+							<th>Act Name</th>
+							<th>Act Year</th>
+						</tr>
+						<tr th:each="legalAct: ${settingsDto.legalActs}">
+							<td th:text="${legalAct.actId}" />
+							<td>
+								<label th:text="${legalAct.sectionNumber}"></label>								
+							</td>
+							<td>
+								<label th:text="${legalAct.actName}"></label>								
+							</td>
+							<td>
+								<label th:text="${legalAct.actYear}"></label>								
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="col-md-2">
+			
+			</div>
+		</div>
+	</div>
+</body>
+</html>
