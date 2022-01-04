@@ -5,6 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -19,8 +20,13 @@ public class LegalAct {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	Long actId;
 	
+	@NotBlank(message = "Section Number is mandatory")	
 	String sectionNumber;
+	
+	@NotBlank(message = "Act Name is mandatory")	
 	String actName;
+	
+	@NotBlank(message = "Act Year is mandatory")	
 	String actYear;
 
 	@Override
@@ -28,11 +34,8 @@ public class LegalAct {
 		return "section " + sectionNumber + " of " + actName + ", " + actYear;
 	}
 
-	public LegalAct(String sectionNumber, String actName, String actYear) {
-		super();
-		this.sectionNumber = sectionNumber;
-		this.actName = actName;
-		this.actYear = actYear;
+	public LegalAct() {
+		
 	}
 
 }
