@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>System Settings</title>
+<link rel="stylesheet"	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+<script	th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script	th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+</head>
+<body>
+	<div th:replace="fragments/header :: header"></div>
+	<div class="container-fluid">	
+		<div class="row">
+			<h2 class="lh-lg"><label>Settings</label></h2>
+		</div>
+		<div class="row">
+			<div class="col-md-2">
+				<div th:replace="fragments/leftSidebar :: viewSettingsLeftSidebar"></div>
+			</div>
+			<div class="col-md-8">
+				<h4 class="lh-sm">
+					<label>System Settings</label>
+				</h4>
+				<form action="#" th:action="@{/systemSettings/add}" th:object="${systemSetting}" method="post" >
+					<table class="table table-striped table-responsive-md">
+						<tbody>							
+							<tr>
+								<td><label for="key" class="col-form-label">Key: </label></td>
+								<td><input type="text" th:field="*{key}" class="form-control" id="key" placeholder="Type Key here">
+									<span th:if="${#fields.hasErrors('key')}" th:errors="*{key}" class="text-danger"></span>
+								</td>
+							</tr>
+							
+							<tr>
+								<td><label for="value" class="col-form-label">Value: </label></td>
+								<td><input type="text" th:field="*{value}" class="form-control" id="value" placeholder="Type value here">
+									<span th:if="${#fields.hasErrors('value')}" th:errors="*{value}" class="text-danger"></span>
+								</td>
+							</tr>
+							
+							<tr>
+								<td><label for="description" class="col-form-label">Description: </label></td>
+								<td><input type="text" th:field="*{description}" class="form-control" id="description" placeholder="Type description here">
+									<span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="text-danger"></span>
+								</td>
+							</tr>
+							
+							<tr>									
+								<td colspan="2"><input type="submit" class="btn btn-primary" value="Add Setting"></td>									
+							</tr>
+							<tr>									
+								<td colspan="2">
+									<div th:if="${message != null}">
+										<label for="name" class="text-success"	th:text="${message.successMessage}"></label>	
+										<label for="name" class="text-danger" th:text="${message.errorMessage}"></label>
+									</div>								
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</form>
+				
+				<table class="table table-striped table-responsive-md">
+					<tbody>
+						<tr>
+							<th>Key</th>
+							<th>Value</th>
+							<th>Description</th>														
+						</tr>
+						<tr th:each="ss: ${systemSettingList}">
+							<td th:text="${ss.key}" />
+							<td th:text="${ss.value}"/>
+							<td th:text="${ss.description}"/>														
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="col-md-2">
+			
+			</div>
+		</div>
+	</div>
+</body>
+</html>

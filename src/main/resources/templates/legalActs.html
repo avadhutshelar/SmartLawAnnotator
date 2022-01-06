@@ -24,23 +24,40 @@
 					<table class="table table-striped table-responsive-md">
 						<tbody>							
 							<tr>
-								<td><label for="sectionNumber" class="col-form-label">Section Number: </label></td>
-								<td><input type="text" th:field="*{sectionNumber}" class="form-control" id="sectionNumber" placeholder="Type Section Number here">
-									<span th:if="${#fields.hasErrors('sectionNumber')}" th:errors="*{sectionNumber}" class="text-danger"></span>
-								</td>
-							</tr>
-							<tr>
 								<td><label for="actName" class="col-form-label">Act Name: </label></td>
 								<td><input type="text" th:field="*{actName}" class="form-control" id="actName" placeholder="Type Act Name here">
 									<span th:if="${#fields.hasErrors('actName')}" th:errors="*{actName}" class="text-danger"></span>
 								</td>
 							</tr>
+							
+							<tr>
+								<td><label for="actShortNameList" class="col-form-label">Act Short Name List: </label></td>
+								<td><input type="text" th:field="*{actShortNameList}" class="form-control" id="actShortNameList" placeholder="Type act short name list here. separated by comma">
+									<span th:if="${#fields.hasErrors('actShortNameList')}" th:errors="*{actShortNameList}" class="text-danger"></span>
+								</td>
+							</tr>
+							
 							<tr>
 								<td><label for="actYear" class="col-form-label">Act Year: </label></td>
 								<td><input type="text" th:field="*{actYear}" class="form-control" id="actYear" placeholder="Type Act Year here">
 									<span th:if="${#fields.hasErrors('actYear')}" th:errors="*{actYear}" class="text-danger"></span>
 								</td>
 							</tr>
+							
+							<tr>
+								<td><label for="minSectionNumber" class="col-form-label">Min Section Number: </label></td>
+								<td><input type="text" th:field="*{minSectionNumber}" class="form-control" id="minSectionNumber" placeholder="Type smallest section number here">
+									<span th:if="${#fields.hasErrors('minSectionNumber')}" th:errors="*{minSectionNumber}" class="text-danger"></span>
+								</td>
+							</tr>
+							
+							<tr>
+								<td><label for="maxSectionNumber" class="col-form-label">Max Section Number: </label></td>
+								<td><input type="text" th:field="*{maxSectionNumber}" class="form-control" id="maxSectionNumber" placeholder="Type largest section number here">
+									<span th:if="${#fields.hasErrors('maxSectionNumber')}" th:errors="*{maxSectionNumber}" class="text-danger"></span>
+								</td>
+							</tr>
+							
 							<tr>									
 								<td colspan="2"><input type="submit" class="btn btn-primary" value="Add Act"></td>									
 							</tr>
@@ -60,21 +77,19 @@
 					<tbody>
 						<tr>
 							<th>Act ID</th>
-							<th>Section Number</th>
 							<th>Act Name</th>
+							<th>Act Short Name</th>
 							<th>Act Year</th>
+							<th>Min Section Number</th>
+							<th>Max Section Number</th>							
 						</tr>
 						<tr th:each="la: ${legalActList}">
 							<td th:text="${la.actId}" />
-							<td>
-								<label th:text="${la.sectionNumber}"></label>								
-							</td>
-							<td>
-								<label th:text="${la.actName}"></label>								
-							</td>
-							<td>
-								<label th:text="${la.actYear}"></label>								
-							</td>
+							<td th:text="${la.actName}"/>
+							<td th:text="${la.actShortNameList}"/>
+							<td th:text="${la.actYear}" />							
+							<td th:text="${la.minSectionNumber}"/>
+							<td th:text="${la.maxSectionNumber}"/>							
 						</tr>
 					</tbody>
 				</table>

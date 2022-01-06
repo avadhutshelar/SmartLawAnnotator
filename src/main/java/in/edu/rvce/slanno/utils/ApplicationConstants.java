@@ -10,4 +10,5 @@ public class ApplicationConstants {
 	
 	public static final String ORDER_ENDS="---order-ends---";
 	
+	public static final String SECTION_ABBR_LIST="slanno.legalref.section.abbr.list";
 }

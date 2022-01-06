@@ -20,20 +20,20 @@ public class LegalAct {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	Long actId;
 	
-	@NotBlank(message = "Section Number is mandatory")	
-	String sectionNumber;
-	
 	@NotBlank(message = "Act Name is mandatory")	
 	String actName;
+			
+	String actShortNameList;
 	
 	@NotBlank(message = "Act Year is mandatory")	
 	String actYear;
 
-	@Override
-	public String toString() {
-		return "section " + sectionNumber + " of " + actName + ", " + actYear;
-	}
-
+	@NotBlank(message = "Min Section Number is mandatory")	
+	String minSectionNumber;
+	
+	@NotBlank(message = "Max Section Number is mandatory")	
+	String maxSectionNumber;
+	
 	public LegalAct() {
 		
 	}
