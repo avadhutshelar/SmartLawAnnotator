@@ -4,7 +4,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -12,10 +16,14 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import in.edu.rvce.courtorder.Background;
 import in.edu.rvce.courtorder.JsonCourtOrder;
+import in.edu.rvce.slanno.entities.LegalAct;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
+import in.edu.rvce.slanno.entities.SystemSetting;
 import in.edu.rvce.slanno.repositories.LegalDocumentRepository;
+import in.edu.rvce.slanno.utils.ApplicationConstants;
 
 @Service
 public class AnnotationService {
@@ -25,6 +33,9 @@ public class AnnotationService {
 
 	@Autowired
 	private LegalDocumentRepository legalDocumentRepository;
+	
+	@Autowired
+	private SettingsService settingsService;
 
 	public JsonCourtOrder getJsonCourtOrder(Project project, LegalDocument legalDocument) {
 		JsonCourtOrder jsonCourtOrder = new JsonCourtOrder();
@@ -45,6 +56,7 @@ public class AnnotationService {
 		// File to Java objects
 		try {
 			jsonCourtOrder = gson.fromJson(jsonText, JsonCourtOrder.class);
+			updateSectionReference(jsonCourtOrder);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -74,5 +86,83 @@ public class AnnotationService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public JsonCourtOrder updateSectionReference(JsonCourtOrder jsonCourtOrder) {
+		try {
+			if (jsonCourtOrder.getBackground() != null) {
+				Background background = jsonCourtOrder.getBackground();
+				String backgroundText = background.getText();
+				List<SystemSetting> systemSettingList = settingsService.getSystemSettings();
+				SystemSetting sectionSetting = systemSettingList.stream()
+						.filter(s -> s.getKey().equalsIgnoreCase(ApplicationConstants.SECTION_ABBR_LIST)).findFirst()
+						.get();
+				String[] sectionAbbrArray = sectionSetting.getValue().split(",");
+				List<String> sectionAbbrList = Arrays.asList(sectionAbbrArray);
+				
+				List<String> sectionAbbrFound = new ArrayList<>();
+
+				for (String sectionAbbr : sectionAbbrList) {
+					if (StringUtils.containsIgnoreCase(backgroundText, sectionAbbr)) {
+						sectionAbbrFound.add(sectionAbbr);
+					}
+				}
+
+				List<LegalAct> legalActList = settingsService.getLegalActs();
+				List<LegalAct> legalActFound = new ArrayList<>(); 
+				
+				for (LegalAct legalAct : legalActList) {
+					if (StringUtils.containsIgnoreCase(backgroundText, legalAct.getActName())) {
+						legalActFound.add(legalAct);
+					}
+					String[] legalActShortNameArray = legalAct.getActShortNameList().split(",");
+					List<String> legalActShortNameList = Arrays.asList(legalActShortNameArray);
+					for(String legalActShortName:legalActShortNameList) {
+						if (StringUtils.containsIgnoreCase(backgroundText, legalActShortName)) {
+							legalActFound.add(legalAct);
+						}
+					}
+				}
+				
+				List<String> legalRefFound = new ArrayList<>();
+				
+				for (String sectionAbbr : sectionAbbrFound) {
+					for(LegalAct legalAct: legalActFound) {
+						String legalRef=StringUtils.substringBetween(backgroundText.toLowerCase(), sectionAbbr.toLowerCase(), legalAct.getActName().toLowerCase());
+						if(StringUtils.isNotBlank(legalRef)) {
+							legalRef=sectionAbbr.toLowerCase().concat(legalRef).concat(legalAct.getActName()).toLowerCase();
+							legalRefFound.add(legalRef);
+						}
+						String[] legalActShortNameArray = legalAct.getActShortNameList().split(",");
+						List<String> legalActShortNameList = Arrays.asList(legalActShortNameArray);						
+						for(String legalActShortName:legalActShortNameList) {
+							String legalRef1=StringUtils.substringBetween(backgroundText.toLowerCase(), sectionAbbr.toLowerCase(), legalActShortName.toLowerCase());							
+							if(StringUtils.isNotBlank(legalRef1)) {
+								legalRef1=sectionAbbr.toLowerCase().concat(legalRef1).concat(legalActShortName).toLowerCase();
+								legalRefFound.add(legalRef1);
+							}
+						}
+					}
+				}
+				
+				List<String> legalRefFoundCopy = new ArrayList<>();
+				legalRefFoundCopy.addAll(legalRefFound);
+				List<String> legalRefDuplicate = new ArrayList<>();
+				
+				for(String ref:legalRefFound) {
+					for(String refCopy:legalRefFoundCopy) {
+						if(StringUtils.containsIgnoreCase(ref, refCopy) && !StringUtils.equalsIgnoreCase(ref, refCopy)) {
+							legalRefDuplicate.add(ref);
+						}
+					}
+				}
+				legalRefFound.removeAll(legalRefDuplicate);
+				
+				jsonCourtOrder.setBackground(background);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return jsonCourtOrder;
 	}
 }

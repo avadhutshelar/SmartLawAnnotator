@@ -32,4 +32,8 @@ public class SystemSetting {
 	public SystemSetting(){
 		
 	}
+	public SystemSetting(String key, String value){
+		this.key=key;
+		this.value=value;
+	}
 }

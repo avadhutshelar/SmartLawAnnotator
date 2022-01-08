@@ -38,4 +38,19 @@ public class LegalAct {
 		
 	}
 
+	public LegalAct(Long actId, @NotBlank(message = "Act Name is mandatory") String actName, String actShortNameList,
+			@NotBlank(message = "Act Year is mandatory") String actYear,
+			@NotBlank(message = "Min Section Number is mandatory") String minSectionNumber,
+			@NotBlank(message = "Max Section Number is mandatory") String maxSectionNumber) {
+		super();
+		this.actId = actId;
+		this.actName = actName;
+		this.actShortNameList = actShortNameList;
+		this.actYear = actYear;
+		this.minSectionNumber = minSectionNumber;
+		this.maxSectionNumber = maxSectionNumber;
+	}
+	
+	
+
 }
