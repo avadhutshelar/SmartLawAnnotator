@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -18,10 +19,12 @@ import com.google.gson.GsonBuilder;
 
 import in.edu.rvce.courtorder.Background;
 import in.edu.rvce.courtorder.JsonCourtOrder;
+import in.edu.rvce.courtorder.LegalReference;
 import in.edu.rvce.slanno.entities.LegalAct;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.entities.SystemSetting;
+import in.edu.rvce.slanno.enums.LegalRefAcceptRejectDecision;
 import in.edu.rvce.slanno.repositories.LegalDocumentRepository;
 import in.edu.rvce.slanno.utils.ApplicationConstants;
 
@@ -56,7 +59,9 @@ public class AnnotationService {
 		// File to Java objects
 		try {
 			jsonCourtOrder = gson.fromJson(jsonText, JsonCourtOrder.class);
-			updateSectionReference(jsonCourtOrder);
+			if(CollectionUtils.isEmpty(jsonCourtOrder.getBackground().getLegalReferences())) {
+				updateSectionReference(jsonCourtOrder);
+			}			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -149,15 +154,58 @@ public class AnnotationService {
 				legalRefFoundCopy.addAll(legalRefFound);
 				List<String> legalRefDuplicate = new ArrayList<>();
 				
+				List<String> tempList = new ArrayList<>();
 				for(String ref:legalRefFound) {
 					for(String refCopy:legalRefFoundCopy) {
 						if(StringUtils.containsIgnoreCase(ref, refCopy) && !StringUtils.equalsIgnoreCase(ref, refCopy)) {
+							for(String  sectionAbbr : sectionAbbrFound) {
+								if(StringUtils.containsIgnoreCase(ref, sectionAbbr)) {
+									String temp=StringUtils.substringAfter(ref, refCopy);
+									String temp1=StringUtils.substringAfter(temp, sectionAbbr);
+									tempList.add(sectionAbbr.toLowerCase().concat(temp1));
+								}
+							}
 							legalRefDuplicate.add(ref);
 						}
 					}
 				}
+				legalRefFound.addAll(tempList);
 				legalRefFound.removeAll(legalRefDuplicate);
 				
+				List<LegalReference> legalRefSectionSeparated= new ArrayList<>();
+				int count=0;
+				for(String ref:legalRefFound) {
+					String refTemp = ref.replaceAll("[^0-9]+", " ");
+					List<String> sectionList = Arrays.asList(refTemp.trim().split(" "));
+					
+					String startsWithSectionAbbr="";
+					for(String  sectionAbbr : sectionAbbrFound) {
+						if(StringUtils.startsWith(ref, sectionAbbr)) {
+							startsWithSectionAbbr=sectionAbbr;
+						}
+					}
+					
+					String endsWithLegalAct="";
+					for(LegalAct legalAct: legalActFound) {
+						if(ref.endsWith(legalAct.getActName().toLowerCase())) {
+							endsWithLegalAct=legalAct.getActName();
+						}
+						String[] legalActShortNameArray = legalAct.getActShortNameList().split(",");
+						List<String> legalActShortNameList = Arrays.asList(legalActShortNameArray);						
+						for(String legalActShortName:legalActShortNameList) {
+							if(StringUtils.endsWith(ref, legalActShortName.toLowerCase())) {
+								endsWithLegalAct=legalActShortName;
+							}
+						}
+					}					
+					
+					for(String section:sectionList) {
+						String temp=startsWithSectionAbbr.concat(" ").concat(section).concat(" ").concat(endsWithLegalAct);
+						legalRefSectionSeparated.add(new LegalReference(++count,temp,LegalRefAcceptRejectDecision.TBD));
+					}
+				}
+				
+				background.setLegalReferences(legalRefSectionSeparated);
 				jsonCourtOrder.setBackground(background);
 			}
 		} catch (Exception e) {

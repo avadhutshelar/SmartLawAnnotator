@@ -115,6 +115,14 @@ public class AnnotationController {
 				
 			});
 			
+			jsonCourtOrder.getBackground().getLegalReferences().forEach( a ->{
+				jsonCourtOrderIn.getBackground().getLegalReferences().forEach(ain->{
+					if(a.getRefNumber().equals(ain.getRefNumber())) {
+						a.setLegalRefAcceptRejectDecision(ain.getLegalRefAcceptRejectDecision());
+					}
+				});
+			});
+			
 			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder);
 
 		} catch (Exception e) {
