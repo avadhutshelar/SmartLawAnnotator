@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -162,7 +163,9 @@ public class AnnotationService {
 								if(StringUtils.containsIgnoreCase(ref, sectionAbbr)) {
 									String temp=StringUtils.substringAfter(ref, refCopy);
 									String temp1=StringUtils.substringAfter(temp, sectionAbbr);
-									tempList.add(sectionAbbr.toLowerCase().concat(temp1));
+									if(StringUtils.isNoneBlank(temp1)) {
+										tempList.add(sectionAbbr.toLowerCase().concat(temp1));
+									}
 								}
 							}
 							legalRefDuplicate.add(ref);
@@ -177,32 +180,30 @@ public class AnnotationService {
 				for(String ref:legalRefFound) {
 					String refTemp = ref.replaceAll("[^0-9]+", " ");
 					List<String> sectionList = Arrays.asList(refTemp.trim().split(" "));
-					
-					String startsWithSectionAbbr="";
-					for(String  sectionAbbr : sectionAbbrFound) {
-						if(StringUtils.startsWith(ref, sectionAbbr)) {
-							startsWithSectionAbbr=sectionAbbr;
-						}
-					}
-					
-					String endsWithLegalAct="";
+															
+					LegalAct currentLegalAct=null;
 					for(LegalAct legalAct: legalActFound) {
 						if(ref.endsWith(legalAct.getActName().toLowerCase())) {
-							endsWithLegalAct=legalAct.getActName();
+							currentLegalAct=legalAct;
 						}
 						String[] legalActShortNameArray = legalAct.getActShortNameList().split(",");
 						List<String> legalActShortNameList = Arrays.asList(legalActShortNameArray);						
 						for(String legalActShortName:legalActShortNameList) {
 							if(StringUtils.endsWith(ref, legalActShortName.toLowerCase())) {
-								endsWithLegalAct=legalActShortName;
+								currentLegalAct=legalAct;
 							}
 						}
 					}					
 					
+					/*String sectionListString = sectionList.stream().map(i -> i.toString()).collect(Collectors.joining(","));
+					String temp="section ".concat(sectionListString).concat(" of the ").concat(currentLegalAct.getActName());
+					legalRefSectionSeparated.add(new LegalReference(++count,temp,currentLegalAct,LegalRefAcceptRejectDecision.TBD));
+					*/
 					for(String section:sectionList) {
-						String temp=startsWithSectionAbbr.concat(" ").concat(section).concat(" ").concat(endsWithLegalAct);
-						legalRefSectionSeparated.add(new LegalReference(++count,temp,LegalRefAcceptRejectDecision.TBD));
+						String temp="section ".concat(section).concat(" of the ").concat(currentLegalAct.getActName());
+						legalRefSectionSeparated.add(new LegalReference(++count,temp,currentLegalAct,LegalRefAcceptRejectDecision.TBD));
 					}
+					
 				}
 				
 				background.setLegalReferences(legalRefSectionSeparated);
