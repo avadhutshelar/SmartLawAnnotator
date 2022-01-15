@@ -124,26 +124,16 @@ public class AnnotationService {
 				for (LegalAct legalAct : legalActList) {
 					LegalActFound laFound = new LegalActFound();
 					if (StringUtils.containsIgnoreCase(backgroundText, legalAct.getActName())) {
-						laFound.setActId(legalAct.getActId());
-						laFound.setActName(legalAct.getActName());
-						laFound.setActShortNameList(legalAct.getActShortNameList());
-						laFound.setActYear(legalAct.getActYear());
-						laFound.setMaxSectionNumber(legalAct.getMaxSectionNumber());
-						laFound.setMinSectionNumber(legalAct.getMinSectionNumber());
-						laFound.setWhatsMatched(legalAct.getActName());						
+						laFound.setLegalAct(legalAct);
+						laFound.setActNameMatched(legalAct.getActName());						
 						legalActFound.add(laFound);
 					}
 					String[] legalActShortNameArray = legalAct.getActShortNameList().split(",");
 					List<String> legalActShortNameList = Arrays.asList(legalActShortNameArray);
 					for(String legalActShortName:legalActShortNameList) {
 						if (StringUtils.containsIgnoreCase(backgroundText, legalActShortName)) {
-							laFound.setActId(legalAct.getActId());
-							laFound.setActName(legalAct.getActName());
-							laFound.setActShortNameList(legalAct.getActShortNameList());
-							laFound.setActYear(legalAct.getActYear());
-							laFound.setMaxSectionNumber(legalAct.getMaxSectionNumber());
-							laFound.setMinSectionNumber(legalAct.getMinSectionNumber());
-							laFound.setWhatsMatched(legalActShortName);						
+							laFound.setLegalAct(legalAct);
+							laFound.setActNameMatched(legalAct.getActName());						
 							legalActFound.add(laFound);
 						}
 					}
@@ -152,7 +142,7 @@ public class AnnotationService {
 				Map<Integer, String> backgroundTextSplitByActFound = new HashMap<>();
 				Map<Integer, LegalActFound> actPositionListMap = new HashMap<>();
 				for(LegalActFound legalAct: legalActFound) {
-					Integer actPosition=StringUtils.indexOf(backgroundText, legalAct.getWhatsMatched());					
+					Integer actPosition=StringUtils.indexOf(backgroundText, legalAct.getActNameMatched());					
 					if(actPosition!=-1) {
 						actPositionListMap.put(actPosition, legalAct);
 					}
@@ -162,7 +152,7 @@ public class AnnotationService {
 				int position=0;
 				int lastActEndPosition=0;
 				for(Integer actPosition:actPositionListMapKeys) {
-					int actEndPosition=(actPosition+actPositionListMap.get(actPosition).getWhatsMatched().length());
+					int actEndPosition=(actPosition+actPositionListMap.get(actPosition).getActNameMatched().length());
 					String temp=StringUtils.substring(backgroundText, lastActEndPosition, actEndPosition);
 					backgroundTextSplitByActFound.put(++position, temp);
 					lastActEndPosition=actEndPosition;
@@ -206,12 +196,12 @@ public class AnnotationService {
 					String refTemp = ref.replaceAll("[^0-9]+", " ");
 					List<String> sectionList = Arrays.asList(refTemp.trim().split(" "));
 															
-					LegalAct currentLegalAct=null;
-					for(LegalAct legalAct: legalActFound) {
-						if(ref.endsWith(legalAct.getActName().toLowerCase())) {
+					LegalActFound currentLegalAct=null;
+					for(LegalActFound legalAct: legalActFound) {
+						if(ref.endsWith(legalAct.getLegalAct().getActName().toLowerCase())) {
 							currentLegalAct=legalAct;
 						}
-						String[] legalActShortNameArray = legalAct.getActShortNameList().split(",");
+						String[] legalActShortNameArray = legalAct.getLegalAct().getActShortNameList().split(",");
 						List<String> legalActShortNameList = Arrays.asList(legalActShortNameArray);						
 						for(String legalActShortName:legalActShortNameList) {
 							if(StringUtils.endsWith(ref, legalActShortName.toLowerCase())) {
@@ -220,8 +210,9 @@ public class AnnotationService {
 						}
 					}					
 					
-					String sectionListString = sectionList.stream().map(i -> i.toString()).collect(Collectors.joining(","));					
-					legalRefSectionSeparated.add(new LegalReference(++count,sectionListString,currentLegalAct,LegalRefAcceptRejectDecision.TBD));
+					String sectionListString = sectionList.stream().map(i -> i.toString()).collect(Collectors.joining(","));
+					currentLegalAct.setSectionsMatched(sectionListString);
+					legalRefSectionSeparated.add(new LegalReference(++count,currentLegalAct,LegalRefAcceptRejectDecision.TBD));
 					
 				}
 				

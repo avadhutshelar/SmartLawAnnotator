@@ -1,11 +1,24 @@
 package in.edu.rvce.slanno.dto;
 
 import in.edu.rvce.slanno.entities.LegalAct;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-public class LegalActFound extends LegalAct{
-
-	@Getter @Setter
-	String whatsMatched;
+@Data
+public class LegalActFound {
+	
+	String actNameMatched;
+	
+	String sectionsMatched;
+	
+	LegalAct legalAct;
+	
+	public LegalActFound(String actNameMatched, String sectionsMatched, LegalAct legalAct) {
+		this.actNameMatched=actNameMatched;
+		this.sectionsMatched=sectionsMatched;
+		this.legalAct=legalAct;
+	}
+	
+	public LegalActFound() {
+		
+	}
 }

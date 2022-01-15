@@ -60,7 +60,7 @@ public class AnnotationServiceTest {
 		Background updatedBackground= jsonCourtOrder.getBackground();
 		List<LegalReference> legalReferenceList = updatedBackground.getLegalReferences();
 		List<String> tempList= new ArrayList<>();
-		legalReferenceList.forEach(ref->tempList.add("Section/s "+ref.getSectionListString()+" of the "+ref.getLegalAct().getActName()));
+		legalReferenceList.forEach(ref->tempList.add("Section/s "+ref.getLegalActFound().getSectionsMatched()+" of the "+ref.getLegalActFound().getLegalAct().getActName()));
 		Assert.isTrue(tempList.contains("Section/s 439 of the Code of Criminal Procedure"));
 		Assert.isTrue(tempList.contains("Section/s 498,306,34 of the Indian Penal Code"));
 	}
