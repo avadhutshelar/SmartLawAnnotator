@@ -1,5 +1,6 @@
 package in.edu.rvce.slanno.services;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -9,9 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.util.Assert;
 
 import in.edu.rvce.courtorder.Background;
 import in.edu.rvce.courtorder.JsonCourtOrder;
+import in.edu.rvce.courtorder.LegalReference;
 import in.edu.rvce.slanno.entities.LegalAct;
 import in.edu.rvce.slanno.entities.SystemSetting;
 import in.edu.rvce.slanno.utils.ApplicationConstants;
@@ -53,6 +56,12 @@ public class AnnotationServiceTest {
 				));
 		
 		annotationService.updateSectionReference(jsonCourtOrder);
-
+		
+		Background updatedBackground= jsonCourtOrder.getBackground();
+		List<LegalReference> legalReferenceList = updatedBackground.getLegalReferences();
+		List<String> tempList= new ArrayList<>();
+		legalReferenceList.forEach(ref->tempList.add("Section/s "+ref.getSectionListString()+" of the "+ref.getLegalAct().getActName()));
+		Assert.isTrue(tempList.contains("Section/s 439 of the Code of Criminal Procedure"));
+		Assert.isTrue(tempList.contains("Section/s 498,306,34 of the Indian Penal Code"));
 	}
 }

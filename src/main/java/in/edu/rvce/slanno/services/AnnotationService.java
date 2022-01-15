@@ -6,7 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,6 +24,7 @@ import com.google.gson.GsonBuilder;
 import in.edu.rvce.courtorder.Background;
 import in.edu.rvce.courtorder.JsonCourtOrder;
 import in.edu.rvce.courtorder.LegalReference;
+import in.edu.rvce.slanno.dto.LegalActFound;
 import in.edu.rvce.slanno.entities.LegalAct;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
@@ -115,37 +119,68 @@ public class AnnotationService {
 				}
 
 				List<LegalAct> legalActList = settingsService.getLegalActs();
-				List<LegalAct> legalActFound = new ArrayList<>(); 
+				List<LegalActFound> legalActFound = new ArrayList<>(); 
 				
 				for (LegalAct legalAct : legalActList) {
+					LegalActFound laFound = new LegalActFound();
 					if (StringUtils.containsIgnoreCase(backgroundText, legalAct.getActName())) {
-						legalActFound.add(legalAct);
+						laFound.setActId(legalAct.getActId());
+						laFound.setActName(legalAct.getActName());
+						laFound.setActShortNameList(legalAct.getActShortNameList());
+						laFound.setActYear(legalAct.getActYear());
+						laFound.setMaxSectionNumber(legalAct.getMaxSectionNumber());
+						laFound.setMinSectionNumber(legalAct.getMinSectionNumber());
+						laFound.setWhatsMatched(legalAct.getActName());						
+						legalActFound.add(laFound);
 					}
 					String[] legalActShortNameArray = legalAct.getActShortNameList().split(",");
 					List<String> legalActShortNameList = Arrays.asList(legalActShortNameArray);
 					for(String legalActShortName:legalActShortNameList) {
 						if (StringUtils.containsIgnoreCase(backgroundText, legalActShortName)) {
-							legalActFound.add(legalAct);
+							laFound.setActId(legalAct.getActId());
+							laFound.setActName(legalAct.getActName());
+							laFound.setActShortNameList(legalAct.getActShortNameList());
+							laFound.setActYear(legalAct.getActYear());
+							laFound.setMaxSectionNumber(legalAct.getMaxSectionNumber());
+							laFound.setMinSectionNumber(legalAct.getMinSectionNumber());
+							laFound.setWhatsMatched(legalActShortName);						
+							legalActFound.add(laFound);
 						}
 					}
 				}
 				
+				Map<Integer, String> backgroundTextSplitByActFound = new HashMap<>();
+				Map<Integer, LegalActFound> actPositionListMap = new HashMap<>();
+				for(LegalActFound legalAct: legalActFound) {
+					Integer actPosition=StringUtils.indexOf(backgroundText, legalAct.getWhatsMatched());					
+					if(actPosition!=-1) {
+						actPositionListMap.put(actPosition, legalAct);
+					}
+				}
+				List<Integer> actPositionListMapKeys= new ArrayList<Integer>(actPositionListMap.keySet());
+				Collections.sort(actPositionListMapKeys);
+				int position=0;
+				int lastActEndPosition=0;
+				for(Integer actPosition:actPositionListMapKeys) {
+					int actEndPosition=(actPosition+actPositionListMap.get(actPosition).getWhatsMatched().length());
+					String temp=StringUtils.substring(backgroundText, lastActEndPosition, actEndPosition);
+					backgroundTextSplitByActFound.put(++position, temp);
+					lastActEndPosition=actEndPosition;
+				}
+				
 				List<String> legalRefFound = new ArrayList<>();
 				
-				for (String sectionAbbr : sectionAbbrFound) {
-					for(LegalAct legalAct: legalActFound) {
-						String legalRef=StringUtils.substringBetween(backgroundText.toLowerCase(), sectionAbbr.toLowerCase(), legalAct.getActName().toLowerCase());
-						if(StringUtils.isNotBlank(legalRef)) {
-							legalRef=sectionAbbr.toLowerCase().concat(legalRef).concat(legalAct.getActName()).toLowerCase();
-							legalRefFound.add(legalRef);
-						}
-						String[] legalActShortNameArray = legalAct.getActShortNameList().split(",");
-						List<String> legalActShortNameList = Arrays.asList(legalActShortNameArray);						
-						for(String legalActShortName:legalActShortNameList) {
-							String legalRef1=StringUtils.substringBetween(backgroundText.toLowerCase(), sectionAbbr.toLowerCase(), legalActShortName.toLowerCase());							
-							if(StringUtils.isNotBlank(legalRef1)) {
-								legalRef1=sectionAbbr.toLowerCase().concat(legalRef1).concat(legalActShortName).toLowerCase();
-								legalRefFound.add(legalRef1);
+				for(Integer key: backgroundTextSplitByActFound.keySet()) {
+					String backText=backgroundTextSplitByActFound.get(key);
+					
+					for(String sectionAbbr:sectionAbbrFound) {
+						if(StringUtils.containsAny(backText.toLowerCase(), sectionAbbr.toLowerCase())) {
+							String legalRef = StringUtils.substringAfter(backText.toLowerCase(), sectionAbbr.toLowerCase());
+							if(StringUtils.isNotBlank(legalRef)){
+								legalRef=sectionAbbr.toLowerCase().concat(legalRef);
+								if(!legalRefFound.contains(legalRef)) {
+									legalRefFound.add(legalRef);
+								}
 							}
 						}
 					}
@@ -155,24 +190,14 @@ public class AnnotationService {
 				legalRefFoundCopy.addAll(legalRefFound);
 				List<String> legalRefDuplicate = new ArrayList<>();
 				
-				List<String> tempList = new ArrayList<>();
+				
 				for(String ref:legalRefFound) {
 					for(String refCopy:legalRefFoundCopy) {
-						if(StringUtils.containsIgnoreCase(ref, refCopy) && !StringUtils.equalsIgnoreCase(ref, refCopy)) {
-							for(String  sectionAbbr : sectionAbbrFound) {
-								if(StringUtils.containsIgnoreCase(ref, sectionAbbr)) {
-									String temp=StringUtils.substringAfter(ref, refCopy);
-									String temp1=StringUtils.substringAfter(temp, sectionAbbr);
-									if(StringUtils.isNoneBlank(temp1)) {
-										tempList.add(sectionAbbr.toLowerCase().concat(temp1));
-									}
-								}
-							}
-							legalRefDuplicate.add(ref);
+						if(StringUtils.containsIgnoreCase(ref, refCopy) && !StringUtils.equalsIgnoreCase(ref, refCopy)) {							
+							legalRefDuplicate.add(refCopy);
 						}
 					}
 				}
-				legalRefFound.addAll(tempList);
 				legalRefFound.removeAll(legalRefDuplicate);
 				
 				List<LegalReference> legalRefSectionSeparated= new ArrayList<>();
@@ -195,14 +220,8 @@ public class AnnotationService {
 						}
 					}					
 					
-					/*String sectionListString = sectionList.stream().map(i -> i.toString()).collect(Collectors.joining(","));
-					String temp="section ".concat(sectionListString).concat(" of the ").concat(currentLegalAct.getActName());
-					legalRefSectionSeparated.add(new LegalReference(++count,temp,currentLegalAct,LegalRefAcceptRejectDecision.TBD));
-					*/
-					for(String section:sectionList) {
-						String temp="section ".concat(section).concat(" of the ").concat(currentLegalAct.getActName());
-						legalRefSectionSeparated.add(new LegalReference(++count,temp,currentLegalAct,LegalRefAcceptRejectDecision.TBD));
-					}
+					String sectionListString = sectionList.stream().map(i -> i.toString()).collect(Collectors.joining(","));					
+					legalRefSectionSeparated.add(new LegalReference(++count,sectionListString,currentLegalAct,LegalRefAcceptRejectDecision.TBD));
 					
 				}
 				

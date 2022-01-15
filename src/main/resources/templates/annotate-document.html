@@ -87,7 +87,8 @@
 											</tr>
 											
 											<tr th:each="legalRef,stat1 : *{background.legalReferences}">
-												<td class="col-md-9" th:text="${legalRef.text}" />
+												<!-- <td class="col-md-9" th:text="${legalRef.text}" /> -->
+												<td class="col-md-9" th:text="'Section/s '+ ${legalRef.sectionListString} +' of the ' + ${legalRef.legalAct.actName}" />
 												<td
 													th:each="refDecision : ${T(in.edu.rvce.slanno.enums.LegalRefAcceptRejectDecision).values()}">									
 													<input type="radio" th:field="*{background.legalReferences[__${stat1.index}__].legalRefAcceptRejectDecision}" th:value="${refDecision}" class="custom-control-input">

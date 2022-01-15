@@ -311,7 +311,7 @@ public class ProjectService {
         Properties props = new Properties();
         // set the list of annotators to run
         props.setProperty("annotators", "tokenize,ssplit");
-        props.setProperty("rulesFiles", "D:/git/SmartLawAnnotator/src/main/resources/basic_ner.rules");
+        props.setProperty("rulesFiles", "G:/git/SmartLawAnnotator/src/main/resources/basic_ner.rules");
         // build pipeline
         StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
         // create a document object
