@@ -71,42 +71,54 @@
 </head>
 <body>
 	<div th:replace="fragments/header :: header"></div>
+	<div class="row">
+		<div class="col-md-6">
+			<ul class="nav nav-tabs">
+				<li class="nav-item"><a class="nav-link active" aria-current="page" >Preprocess</a></li>
+				<li class="nav-item"><a class="nav-link" href="#">Json</a></li>
+				<li class="nav-item"><a class="nav-link"  
+					th:href="@{/project/{projectId}/annotate/{docId}(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">Annotate</a></li>
+				<li class="nav-item"><a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a></li>
+			</ul>
+		</div>
+		<div class="col-md-4">
+			<nav aria-label="Page navigation example">
+			  <ul class="pagination justify-content-start pagination-sm">
+			    <li class="page-item">
+			    	<a class="page-link" 
+			    		th:href="@{/project/{projectId}/preprocess/{docId}/prev(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
+			    		Previous
+			    	</a>
+			    </li>
+			    <li class="page-item active" aria-current="page">
+			    	<a class="page-link" 
+			    		th:href="@{/project/{projectId}/preprocess/{docId}(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
+			    		<label th:text="' Current Document : '+${legalDocument.documentId}"></label>
+			    	</a>
+			    </li>    
+			    <li class="page-item">
+			    	<a class="page-link" 
+			    		th:href="@{/project/{projectId}/preprocess/{docId}/next(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
+			    		Next
+			    	</a>
+			   	</li>
+			  </ul>
+			</nav>
+		</div>	
+		<div class="col-md-2">
+			<a th:href="@{/project/view/{id}(id=${legalDocument.project.projectId})}">
+				<h6><label th:text="'Back to : '+${legalDocument.project.projectName}"></label></h6>
+			</a>
+		</div>
+	</div>
+		
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-md-4">
+			<div class="col-md-12">
 				<h3 class="lh-lg">
 					Preprocess Documents					
 				</h3>
-			</div>
-			<div class="col-md-6">
-				<nav aria-label="Page navigation example">
-				  <ul class="pagination justify-content-start pagination-lg">
-				    <li class="page-item">
-				    	<a class="page-link" 
-				    		th:href="@{/project/{projectId}/preprocess/{docId}/prev(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
-				    		Previous
-				    	</a>
-				    </li>
-				    <li class="page-item active" aria-current="page">
-				    	<a class="page-link" 
-				    		th:href="@{/project/{projectId}/preprocess/{docId}(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
-				    		<label th:text="' Current Document : '+${legalDocument.documentId}"></label>
-				    	</a>
-				    </li>    
-				    <li class="page-item">
-				    	<a class="page-link" 
-				    		th:href="@{/project/{projectId}/preprocess/{docId}/next(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
-				    		Next
-				    	</a>
-				   	</li>
-				  </ul>
-				</nav>
-			</div>	
-			<div class="col-md-2">
-				<a th:href="@{/project/view/{id}(id=${legalDocument.project.projectId})}">
-					<h6><label th:text="'Back to : '+${legalDocument.project.projectName}"></label></h6>
-				</a>
-			</div>		
+			</div>					
 		</div>
 		<div class="row">
 			<div class="col-md-10">

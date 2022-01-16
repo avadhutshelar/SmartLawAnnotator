@@ -31,6 +31,7 @@ import in.edu.rvce.courtorder.Background;
 import in.edu.rvce.courtorder.JsonCourtOrder;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
+import in.edu.rvce.slanno.entities.SystemSetting;
 import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
 import in.edu.rvce.slanno.repositories.LegalDocumentRepository;
 import in.edu.rvce.slanno.repositories.ProjectRepository;
@@ -54,6 +55,9 @@ public class ProjectService {
 		return env.getProperty("slanno.dataset.basedir");
 	}
 
+	@Autowired
+	private SettingsService settingsService;
+
 	public Boolean createDirectories(Project project) throws Exception {
 
 		File datasetBaseDir = new File(env.getProperty("slanno.dataset.basedir"));
@@ -65,15 +69,13 @@ public class ProjectService {
 			File projectImportFormat1Dir = new File(projectDatasetBaseDir,
 					env.getProperty("slanno.dataset.import.format1"));
 			projectImportFormat1Dir.mkdir();
-			File projectOrigTextDir = new File(projectDatasetBaseDir, 
-					env.getProperty("slanno.dataset.dir.txt.orig"));
+			File projectOrigTextDir = new File(projectDatasetBaseDir, env.getProperty("slanno.dataset.dir.txt.orig"));
 			projectOrigTextDir.mkdir();
 			File projectProcessedTextDir = new File(projectDatasetBaseDir,
 					env.getProperty("slanno.dataset.dir.txt.processed"));
 			projectProcessedTextDir.mkdir();
-			File projectJsonDir = new File(projectDatasetBaseDir,
-					env.getProperty("slanno.dataset.dir.json"));
-			projectJsonDir.mkdir();			
+			File projectJsonDir = new File(projectDatasetBaseDir, env.getProperty("slanno.dataset.dir.json"));
+			projectJsonDir.mkdir();
 			return Boolean.TRUE;
 		}
 	}
@@ -116,22 +118,22 @@ public class ProjectService {
 
 				String origTextFileNameWithPath = env.getProperty("slanno.dataset.basedir") + "\\"
 						+ project.getProjectDirectoryName() + "\\" + legalDocument2.getOrigTextFilePath();
-				
-				String textOrder=convertPDFtoText(targetPDFFileNameWithPath);
+
+				String textOrder = convertPDFtoText(targetPDFFileNameWithPath);
 
 				legalDocument.setProcessedTextFilePath(env.getProperty("slanno.dataset.dir.txt.processed") + "\\"
 						+ legalDocument.getDocumentId() + ".txt");
-		
+
 				String processedTextFileNameWithPath = env.getProperty("slanno.dataset.basedir") + "\\"
 						+ project.getProjectDirectoryName() + "\\" + legalDocument.getProcessedTextFilePath();
-			
+
 				try {
 					Files.write(Paths.get(origTextFileNameWithPath), textOrder.getBytes());
 					Files.write(Paths.get(processedTextFileNameWithPath), textOrder.getBytes());
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				
+
 				// Mark Stage0 Complete
 				legalDocument2.setAnnotationProcessingStage(AnnotationProcessingStage.STAGE0);
 				legalDocumentRepository.save(legalDocument2);
@@ -148,15 +150,15 @@ public class ProjectService {
 	}
 
 	private String convertPDFtoText(String sourcePDFFileNameWithPath) {
-		
-		String textCourtOrder="";
+
+		String textCourtOrder = "";
 		try {
 			byte[] fileBytes = Files.readAllBytes(Paths.get(sourcePDFFileNameWithPath));
 			PDFtoText pdftotext = new PDFtoText();
 			String temp = pdftotext.generateTxtFromByteArray(fileBytes);
 
-			textCourtOrder=CommonUtils.removeUnnecessaryCharacters(temp);
-			
+			textCourtOrder = CommonUtils.removeUnnecessaryCharacters(temp);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -177,7 +179,7 @@ public class ProjectService {
 
 		return originalText;
 	}
-	
+
 	public String getLegalDocumentProcessedText(Project project, LegalDocument legalDocument) {
 		String originalText = "";
 
@@ -204,65 +206,66 @@ public class ProjectService {
 		LegalDocument legalDocument = legalDocumentRepository.findById(documentId).get();
 		return legalDocument;
 	}
-	
+
 	public void saveUpdatedTextOrder(Project project, LegalDocument legalDocument, String textOrderHidden) {
-		try {			
+		try {
 			legalDocument.setProcessedTextFilePath(env.getProperty("slanno.dataset.dir.txt.processed") + "\\"
 					+ legalDocument.getDocumentId() + ".txt");
-	
+
 			String processedTextFileNameWithPath = env.getProperty("slanno.dataset.basedir") + "\\"
 					+ project.getProjectDirectoryName() + "\\" + legalDocument.getProcessedTextFilePath();
-		
+
 			Files.write(Paths.get(processedTextFileNameWithPath), textOrderHidden.getBytes());
-			
+
 			legalDocumentRepository.save(legalDocument);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void saveJsonOrder(Project project, LegalDocument legalDocument) {
-		try {			
-			
+		try {
+
 			String processedText = "";
 			String processedTextFileNameWithPath = env.getProperty("slanno.dataset.basedir") + "\\"
-					+ project.getProjectDirectoryName() + "\\" + legalDocument.getProcessedTextFilePath();			
-			
+					+ project.getProjectDirectoryName() + "\\" + legalDocument.getProcessedTextFilePath();
+
 			try {
 				processedText = new String(Files.readAllBytes(Paths.get(processedTextFileNameWithPath)));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
+
 			JsonCourtOrder co = getJsonCourtOrder(processedText);
-					
-			legalDocument.setJsonFilePath(env.getProperty("slanno.dataset.dir.json") + "\\"
-					+ legalDocument.getDocumentId() + ".json");
-	
+
+			legalDocument.setJsonFilePath(
+					env.getProperty("slanno.dataset.dir.json") + "\\" + legalDocument.getDocumentId() + ".json");
+
 			String jsonFileNameWithPath = env.getProperty("slanno.dataset.basedir") + "\\"
 					+ project.getProjectDirectoryName() + "\\" + legalDocument.getJsonFilePath();
-			 
-			Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			
-			// Java objects to File
-	        try (FileWriter writer = new FileWriter(jsonFileNameWithPath)) {
-	            gson.toJson(co, writer);
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
 
-	        legalDocumentRepository.save(legalDocument);
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+			// Java objects to File
+			try (FileWriter writer = new FileWriter(jsonFileNameWithPath)) {
+				gson.toJson(co, writer);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			legalDocumentRepository.save(legalDocument);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private JsonCourtOrder getJsonCourtOrder(String processedText) {
 		JsonCourtOrder co = new JsonCourtOrder();
 		co.setProcessedText(processedText);
 
-		String headerEnds=ApplicationConstants.HEADER_ENDS;		
-		String header=StringUtils.substring(processedText, 0, StringUtils.indexOfIgnoreCase(processedText, headerEnds));
+		String headerEnds = ApplicationConstants.HEADER_ENDS;
+		String header = StringUtils.substring(processedText, 0,
+				StringUtils.indexOfIgnoreCase(processedText, headerEnds));
 		co.setHeader(header.trim());
 
 		String backgroundEnds = ApplicationConstants.BACKGROUND_ENDS;
@@ -271,63 +274,87 @@ public class ProjectService {
 				StringUtils.indexOfIgnoreCase(processedText, backgroundEnds));
 		Background back = new Background(background.trim());
 		co.setBackground(back);
-		
+
 		String argumentEnds = ApplicationConstants.ARGUMENT_ENDS;
 		String argument = StringUtils.substring(processedText,
 				StringUtils.indexOfIgnoreCase(processedText, backgroundEnds) + backgroundEnds.length(),
 				StringUtils.lastIndexOfIgnoreCase(processedText, argumentEnds));
-		String[] argumentTextArray=argument.split(argumentEnds, -1);
-		List<String> argumentTextList=Arrays.asList(argumentTextArray);
-		List<Argument> argumentList=new ArrayList<>();
-		int count=0;
-		for(String argumentText:argumentTextList) {
+		String[] argumentTextArray = argument.split(argumentEnds, -1);
+		List<String> argumentTextList = Arrays.asList(argumentTextArray);
+		List<Argument> argumentList = new ArrayList<>();
+		int count = 0;
+		for (String argumentText : argumentTextList) {
 			Argument arg = new Argument();
 			arg.setArgumentNumber(++count);
 			arg.setText(argumentText.trim());
-			List<ArgumentSentence> argumentSentences= splitArgumentSentences(argumentText);
+			List<ArgumentSentence> argumentSentences = splitArgumentSentences(argumentText);
 			arg.setArgumentSentences(argumentSentences);
 			argumentList.add(arg);
-		}		
+		}
 		co.setArguments(argumentList);
-		
+
 		String orderEnds = ApplicationConstants.ORDER_ENDS;
 		String order = StringUtils.substring(processedText,
 				StringUtils.lastIndexOfIgnoreCase(processedText, argumentEnds) + argumentEnds.length(),
 				StringUtils.indexOfIgnoreCase(processedText, orderEnds));
 		co.setOrder(order.trim());
-		
+
 		String footer = StringUtils.substring(processedText,
 				StringUtils.lastIndexOfIgnoreCase(processedText, orderEnds) + orderEnds.length(),
 				processedText.length());
 		co.setFooter(footer.trim());
-		
+
 		return co;
 	}
-	
-	private List<ArgumentSentence> splitArgumentSentences(String text) {
-    	List<ArgumentSentence> argumentSentences = new ArrayList<ArgumentSentence>(0);
-    	
-    	// set up pipeline properties
-        Properties props = new Properties();
-        // set the list of annotators to run
-        props.setProperty("annotators", "tokenize,ssplit");
-        props.setProperty("rulesFiles", "G:/git/SmartLawAnnotator/src/main/resources/basic_ner.rules");
-        // build pipeline
-        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-        // create a document object
-        CoreDocument doc = new CoreDocument(text);
-        // annotate
-        pipeline.annotate(doc);
-        // display sentences
-        int count=0;
-        for (CoreSentence sent : doc.sentences()) {
-            //System.out.println(sent.text());
-            ArgumentSentence argumentSentence=new ArgumentSentence();
-            argumentSentence.setSentenceNumber(++count);
-            argumentSentence.setText(sent.text());
-            argumentSentences.add(argumentSentence);
-        }
-    	
-    	return argumentSentences;
-    }
+
+	public List<ArgumentSentence> splitArgumentSentences(String text) {
+		List<ArgumentSentence> argumentSentences = new ArrayList<ArgumentSentence>(0);
+
+		try {
+			// set up pipeline properties
+			Properties props = new Properties();
+			// set the list of annotators to run
+			props.setProperty("annotators", "tokenize,ssplit");
+			props.setProperty("rulesFiles", "G:/git/SmartLawAnnotator/src/main/resources/basic_ner.rules");
+			// build pipeline
+			StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+			// create a document object
+			CoreDocument doc = new CoreDocument(text);
+			// annotate
+			pipeline.annotate(doc);
+			// display sentences
+			int count = 0;
+			ArgumentSentence argumentSentenceLast = new ArgumentSentence();
+
+			List<SystemSetting> systemSettingList = settingsService.getSystemSettings();
+			SystemSetting abbrInSentenceSetting = systemSettingList.stream()
+					.filter(s -> s.getKey().equalsIgnoreCase(ApplicationConstants.ABBRS_IN_SENTENCE_LIST)).findFirst()
+					.get();
+			String[] abbrInSentenceArray = abbrInSentenceSetting.getValue().split(",");
+			List<String> abbrInSentenceList = Arrays.asList(abbrInSentenceArray);
+
+			for (CoreSentence sent : doc.sentences()) {
+				// System.out.println(sent.text());
+				String lastSentText = argumentSentenceLast.getText();
+				if (count > 0 && abbrInSentenceList.stream().anyMatch(abbr -> lastSentText.endsWith(abbr))) {
+					argumentSentences.forEach(argSent -> {
+						if (StringUtils.equalsIgnoreCase(lastSentText, argSent.getText())) {
+							argSent.setText(argSent.getText().concat(" ").concat(sent.text()));
+						}
+					});
+				} else {
+					ArgumentSentence argumentSentenceCurrent = new ArgumentSentence();
+					argumentSentenceCurrent.setSentenceNumber(++count);
+					argumentSentenceCurrent.setText(sent.text());
+					argumentSentences.add(argumentSentenceCurrent);
+					argumentSentenceLast = argumentSentenceCurrent;
+				}
+
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return argumentSentences;
+	}
 }
