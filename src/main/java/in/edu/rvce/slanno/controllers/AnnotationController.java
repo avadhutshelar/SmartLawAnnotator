@@ -123,6 +123,8 @@ public class AnnotationController {
 				});
 			});
 			
+			jsonCourtOrder.getOrder().setOrderType(jsonCourtOrderIn.getOrder().getOrderType());
+			
 			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder);
 
 		} catch (Exception e) {

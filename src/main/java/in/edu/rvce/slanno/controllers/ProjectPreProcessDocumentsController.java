@@ -1,5 +1,6 @@
 package in.edu.rvce.slanno.controllers;
 
+import java.io.StringWriter;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +12,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import in.edu.rvce.courtorder.JsonCourtOrder;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
+import in.edu.rvce.slanno.services.AnnotationService;
 import in.edu.rvce.slanno.services.ProjectService;
 import in.edu.rvce.slanno.utils.SessionMessage;
 
@@ -22,6 +28,10 @@ public class ProjectPreProcessDocumentsController {
 
 	@Autowired
 	private ProjectService projectService;
+	
+	@Autowired
+	private AnnotationService annotationService;
+
 	
 	@GetMapping("/project/{projectId}/preprocess")
 	public RedirectView preProcess(SessionMessage message, Model model, @PathVariable Integer projectId) {
@@ -270,4 +280,36 @@ public class ProjectPreProcessDocumentsController {
 		return "project-preprocess-document";
 	}
 
+	@GetMapping("/project/{projectId}/veiwJson/{docId}")
+	public String viewJson(SessionMessage message, Model model, @PathVariable Integer projectId, @PathVariable Long docId) {
+		String successMessage = "";
+		String errorMessage = "";
+		try {
+			Project project = projectService.getProjectById(projectId);
+			LegalDocument legalDocument= projectService.getLegalDocumentByDocumentId(docId);
+			
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument);
+			
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+			String json = "";
+			// Java objects to File
+			try{
+				json=gson.toJson(jsonCourtOrder);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			message.setTextOrder(json);
+			model.addAttribute("project", project);
+			//model.addAttribute("json", json);
+			model.addAttribute("legalDocument", legalDocument);
+		} catch (Exception e) {
+			errorMessage = "Error in retriving the legal document: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);			
+		}
+		return "project-json-viewer";
+	}
 }

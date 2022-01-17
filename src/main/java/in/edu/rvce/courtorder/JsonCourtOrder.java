@@ -10,6 +10,6 @@ public class JsonCourtOrder {
 	String header;
 	Background background;
 	List<Argument> arguments;
-	String order;
+	Order order;
 	String footer;
 }

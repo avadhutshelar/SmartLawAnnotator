@@ -29,6 +29,7 @@ import in.edu.rvce.courtorder.Argument;
 import in.edu.rvce.courtorder.ArgumentSentence;
 import in.edu.rvce.courtorder.Background;
 import in.edu.rvce.courtorder.JsonCourtOrder;
+import in.edu.rvce.courtorder.Order;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.entities.SystemSetting;
@@ -294,10 +295,11 @@ public class ProjectService {
 		co.setArguments(argumentList);
 
 		String orderEnds = ApplicationConstants.ORDER_ENDS;
-		String order = StringUtils.substring(processedText,
+		String orderText = StringUtils.substring(processedText,
 				StringUtils.lastIndexOfIgnoreCase(processedText, argumentEnds) + argumentEnds.length(),
 				StringUtils.indexOfIgnoreCase(processedText, orderEnds));
-		co.setOrder(order.trim());
+		Order order= new Order(orderText.trim());
+		co.setOrder(order);
 
 		String footer = StringUtils.substring(processedText,
 				StringUtils.lastIndexOfIgnoreCase(processedText, orderEnds) + orderEnds.length(),
