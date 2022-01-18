@@ -133,7 +133,7 @@ public class AnnotationService {
 					for(String legalActShortName:legalActShortNameList) {
 						if (StringUtils.containsIgnoreCase(backgroundText, legalActShortName)) {
 							laFound.setLegalAct(legalAct);
-							laFound.setActNameMatched(legalAct.getActName());						
+							laFound.setActNameMatched(legalActShortName);						
 							legalActFound.add(laFound);
 						}
 					}
@@ -174,6 +174,7 @@ public class AnnotationService {
 							}
 						}
 					}
+					
 				}
 				
 				List<String> legalRefFoundCopy = new ArrayList<>();

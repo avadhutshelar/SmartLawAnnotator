@@ -2,8 +2,8 @@ package in.edu.rvce.slanno.enums;
 
 public enum LegalRefAcceptRejectDecision {
 
-	ACCEPT("Accept"),
-	REJECT("Reject"),
+	ACCEPT_SUGGESTION("Accept Suggestion"),
+	REJECT_SUGGESTION("Reject Suggestion"),
 	TBD("TBD");
 		
 	private final String displayValue;
