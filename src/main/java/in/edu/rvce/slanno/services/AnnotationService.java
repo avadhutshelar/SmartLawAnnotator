@@ -201,12 +201,14 @@ public class AnnotationService {
 					for(LegalActFound legalAct: legalActFound) {
 						if(ref.endsWith(legalAct.getLegalAct().getActName().toLowerCase())) {
 							currentLegalAct=legalAct;
+							currentLegalAct.setStringMatched(ref);
 						}
 						String[] legalActShortNameArray = legalAct.getLegalAct().getActShortNameList().split(",");
 						List<String> legalActShortNameList = Arrays.asList(legalActShortNameArray);						
 						for(String legalActShortName:legalActShortNameList) {
 							if(StringUtils.endsWith(ref, legalActShortName.toLowerCase())) {
 								currentLegalAct=legalAct;
+								currentLegalAct.setStringMatched(ref);
 							}
 						}
 					}					

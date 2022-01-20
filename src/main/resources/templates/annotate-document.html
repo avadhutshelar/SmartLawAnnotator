@@ -29,9 +29,9 @@
 			<ul class="nav nav-tabs">
 				<li class="nav-item"><a class="nav-link" 
 					th:href="@{/project/{projectId}/preprocess/{docId}(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">Preprocess</a></li>
-				<li class="nav-item"><a class="nav-link" href="#">Json</a></li>
-				<li class="nav-item"><a class="nav-link active" aria-current="page" href="#">Annotate</a></li>
-				<li class="nav-item"><a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a></li>
+				<li class="nav-item"><a class="nav-link" 
+					th:href="@{/project/{projectId}/veiwJson/{docId}(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">Json</a></li>
+				<li class="nav-item"><a class="nav-link active" aria-current="page" href="#">Annotate</a></li>				
 			</ul>
 		</div>
 		<div class="col-md-4">

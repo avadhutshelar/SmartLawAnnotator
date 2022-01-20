@@ -5,20 +5,23 @@ import lombok.Data;
 
 @Data
 public class LegalActFound {
-	
+
 	String actNameMatched;
-	
+
 	String sectionsMatched;
-	
+
+	String stringMatched;
+
 	LegalAct legalAct;
-	
-	public LegalActFound(String actNameMatched, String sectionsMatched, LegalAct legalAct) {
-		this.actNameMatched=actNameMatched;
-		this.sectionsMatched=sectionsMatched;
-		this.legalAct=legalAct;
+
+	public LegalActFound(String actNameMatched, String sectionsMatched, String stringMatched, LegalAct legalAct) {
+		this.actNameMatched = actNameMatched;
+		this.sectionsMatched = sectionsMatched;
+		this.stringMatched = stringMatched;
+		this.legalAct = legalAct;
 	}
-	
+
 	public LegalActFound() {
-		
+
 	}
 }
