@@ -3,7 +3,8 @@ package in.edu.rvce.slanno.enums;
 public enum OrderType {
 
 	ACCEPTED("Accepted"),
-	REJECTED("Rejected");
+	REJECTED("Rejected"),
+	TBD("TBD");
 		
 	private final String displayValue;
 	

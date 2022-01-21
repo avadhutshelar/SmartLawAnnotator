@@ -34,6 +34,9 @@ import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.entities.SystemSetting;
 import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
+import in.edu.rvce.slanno.enums.ArgumentBy;
+import in.edu.rvce.slanno.enums.ArgumentSentenceType;
+import in.edu.rvce.slanno.enums.OrderType;
 import in.edu.rvce.slanno.repositories.LegalDocumentRepository;
 import in.edu.rvce.slanno.repositories.ProjectRepository;
 import in.edu.rvce.slanno.utils.ApplicationConstants;
@@ -290,6 +293,7 @@ public class ProjectService {
 			arg.setText(argumentText.trim());
 			List<ArgumentSentence> argumentSentences = splitArgumentSentences(argumentText);
 			arg.setArgumentSentences(argumentSentences);
+			arg.setArgumentBy(ArgumentBy.TBD);
 			argumentList.add(arg);
 		}
 		co.setArguments(argumentList);
@@ -298,7 +302,7 @@ public class ProjectService {
 		String orderText = StringUtils.substring(processedText,
 				StringUtils.lastIndexOfIgnoreCase(processedText, argumentEnds) + argumentEnds.length(),
 				StringUtils.indexOfIgnoreCase(processedText, orderEnds));
-		Order order= new Order(orderText.trim());
+		Order order= new Order(orderText.trim(),OrderType.TBD);
 		co.setOrder(order);
 
 		String footer = StringUtils.substring(processedText,
@@ -348,6 +352,7 @@ public class ProjectService {
 					ArgumentSentence argumentSentenceCurrent = new ArgumentSentence();
 					argumentSentenceCurrent.setSentenceNumber(++count);
 					argumentSentenceCurrent.setText(sent.text());
+					argumentSentenceCurrent.setArgumentSentenceType(ArgumentSentenceType.TBD);
 					argumentSentences.add(argumentSentenceCurrent);
 					argumentSentenceLast = argumentSentenceCurrent;
 				}

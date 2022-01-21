@@ -4,7 +4,8 @@ public enum ArgumentBy {
 
 	APPLICANT("Applicant Lawyer"),
 	RESPONDENT("Respondent Lawyer"),
-	JUDGE("Judge");
+	JUDGE("Judge"),
+	TBD("TBD");
 		
 	private final String displayValue;
 	

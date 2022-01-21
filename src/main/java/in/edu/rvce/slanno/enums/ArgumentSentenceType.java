@@ -3,7 +3,8 @@ package in.edu.rvce.slanno.enums;
 public enum ArgumentSentenceType {
 	
 	PREMISE("Premise or Evidence"),
-	CONCLUSION("Conclusion or Claim");
+	CONCLUSION("Conclusion or Claim"),
+	TBD("TBD");
 		
 	private final String displayValue;
 	

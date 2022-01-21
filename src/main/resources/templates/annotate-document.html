@@ -172,7 +172,7 @@
 															<div class="custom-control custom-radio custom-control-inline">
 																 
 																<input type="radio" th:field="*{arguments[__${stat.index}__].argumentBy}" th:value="${argBy}" class="custom-control-input">
-                  													<label class="custom-control-label" th:text="${argBy.displayValue}">sentType</label>
+                  													<label class="custom-control-label" th:text="${argBy.displayValue}">argBy</label>
                   													<input type="hidden" th:field="*{arguments[__${stat.index}__].argumentNumber}">
 															</div>
 														</div>
@@ -184,16 +184,17 @@
 									<table class="table table-striped table-responsive-md">
 										<thead>
 											<tr>
-												<td class="col-md-9 h6 text-center" th:text="'Sentences'" />
+												<td class="col-md-8 h6 text-center" th:text="'Sentences'" />
 												<td class="h6 text-center" colspan="2" th:text="'Sentence Type'"></td>
 											</tr>
 										</thead>
 										<tbody>
 											<tr th:each="argumentSentence,stat1 : *{arguments[__${stat.index}__].argumentSentences}">
-												<td class="col-md-9" th:text="${argumentSentence.text}" />
-												<td
+												<td class="col-md-8" th:text="${argumentSentence.text}" />
+												<td class="align-middle"
 													th:each="sentType : ${T(in.edu.rvce.slanno.enums.ArgumentSentenceType).values()}">									
-													<input type="radio" th:field="*{arguments[__${stat.index}__].argumentSentences[__${stat1.index}__].argumentSentenceType}" th:value="${sentType}" class="custom-control-input">
+													<input type="radio" th:field="*{arguments[__${stat.index}__].argumentSentences[__${stat1.index}__].argumentSentenceType}" 
+														th:value="${sentType}" class="custom-control-input">
 				                    				<label class="custom-control-label" th:text="${sentType.displayValue}">sentType</label>
 				                    				<input type="hidden" th:field="*{arguments[__${stat.index}__].argumentSentences[__${stat1.index}__].sentenceNumber}">
 												</td>

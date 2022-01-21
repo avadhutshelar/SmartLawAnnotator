@@ -13,13 +13,12 @@ public class Order {
 	AttendPoliceStationRecurrence attendPoliceStationRecurrence;
 	String attendPoliceStationFrequency;
 		
-	public Order(String text) {
-		super();
+	public Order(String text, OrderType orderType) {
 		this.text = text;
+		this.orderType=orderType;
 	}
 
 	public Order() {
-		super();
 	}
 
 }
