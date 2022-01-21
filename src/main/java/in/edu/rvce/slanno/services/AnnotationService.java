@@ -227,4 +227,44 @@ public class AnnotationService {
 		}
 		return jsonCourtOrder;
 	}
+	
+	public JsonCourtOrder addLegalActFound(JsonCourtOrder jsonCourtOrder,LegalActFound legalActFound) {
+		
+		try {
+			List<LegalAct> legalActList = settingsService.getLegalActs();
+			Boolean flag=Boolean.FALSE;
+			LegalAct legalActTemp= new LegalAct();
+			for (LegalAct legalAct: legalActList) {
+				String matched = legalActFound.getActNameMatched();
+				if(StringUtils.equalsIgnoreCase(matched,legalAct.getActName())) {
+					flag=Boolean.TRUE;
+					legalActTemp = legalAct;
+					break;
+				}else if(StringUtils.equalsAnyIgnoreCase(matched, legalAct.getActShortNameList())) {
+					flag=Boolean.TRUE;
+					legalActTemp = legalAct;
+					break;
+				}
+			}
+			if (flag) {
+				LegalReference legalReference = new LegalReference();
+				legalReference.setLegalActFound(legalActFound);
+				legalReference.setLegalRefAcceptRejectDecision(LegalRefAcceptRejectDecision.ACCEPT_SUGGESTION);
+				legalActFound.setLegalAct(legalActTemp);
+				legalReference.setLegalActFound(legalActFound);
+				
+				List<LegalReference> legalReferences=jsonCourtOrder.getBackground().getLegalReferences();
+				if(CollectionUtils.isNotEmpty(legalReferences)) {
+					legalReferences.add(legalReference);
+				}else {
+					legalReferences = new ArrayList<>();
+					legalReferences.add(legalReference);
+					jsonCourtOrder.getBackground().setLegalReferences(legalReferences);
+				}
+			}	
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return jsonCourtOrder;
+	}
 }

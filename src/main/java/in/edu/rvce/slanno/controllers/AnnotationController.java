@@ -9,13 +9,18 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
 import in.edu.rvce.courtorder.Argument;
 import in.edu.rvce.courtorder.JsonCourtOrder;
+import in.edu.rvce.courtorder.LegalReference;
+import in.edu.rvce.slanno.dto.LegalActFound;
+import in.edu.rvce.slanno.entities.LegalAct;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
+import in.edu.rvce.slanno.enums.LegalRefAcceptRejectDecision;
 import in.edu.rvce.slanno.services.AnnotationService;
 import in.edu.rvce.slanno.services.ProjectService;
 import in.edu.rvce.slanno.utils.SessionMessage;
@@ -261,5 +266,37 @@ public class AnnotationController {
 			model.addAttribute("message", message);
 		}
 		return new RedirectView("/project/" + projectId + "/annotate/" + docId+ "/argument/" + argNum);
+	}
+	
+	@PostMapping("/project/{projectId}/annotate/{docId}/legalReference/add")
+	public RedirectView addLegalReference(SessionMessage message, Model model, @PathVariable Integer projectId,
+			@PathVariable Long docId, 
+			@RequestParam(value = "actNameMatched", required = true) String actNameMatched,
+			@RequestParam(value = "sectionsMatched", required = true) String sectionsMatched,
+			@RequestParam(value = "stringMatched", required = true) String stringMatched) {
+	
+		String successMessage = "";
+		String errorMessage = "";		
+		try {
+			Project project = projectService.getProjectById(projectId);
+			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
+			JsonCourtOrder jsonCourtOrderTemp = annotationService.getJsonCourtOrder(project, legalDocument);
+			
+			LegalActFound legalActFound = new LegalActFound();
+			legalActFound.setActNameMatched(actNameMatched);
+			legalActFound.setSectionsMatched(sectionsMatched);
+			legalActFound.setStringMatched(stringMatched);
+			
+			JsonCourtOrder jsonCourtOrder = annotationService.addLegalActFound(jsonCourtOrderTemp, legalActFound);
+			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder);
+			
+		}catch (Exception e) {
+			errorMessage = "Error in retriving the legal document: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);
+		}
+		return new RedirectView("/project/" + projectId + "/annotate/" + docId);
 	}
 }
