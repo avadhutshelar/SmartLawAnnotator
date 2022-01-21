@@ -223,19 +223,48 @@
 									<table class="table mb-0">
 										<thead>
 											<tr>
-												<td class="col-md-10 h6 text-center" th:text="'Order'" />
-												<td class="col-md-2 h6 text-center" colspan="2" th:text="'Order Type'"></td>
+												<td class="col-md-11 h6 text-center" th:text="'Order'" />
+												<td class="col-md-1 h6 text-center" colspan="2" th:text="'Order Type'"></td>
 											</tr>
 										</thead>
 										<tbody>									
 											<tr>
-												<td class="col-md-9"  th:text="${jsonCourtOrder.order.text}" />
-												<td 
-													th:each="orderType : ${T(in.edu.rvce.slanno.enums.OrderType).values()}">									
-													<input type="radio" th:field="${jsonCourtOrder.order.orderType}" th:value="${orderType}" class="custom-control-input">
-				                    				<label class="custom-control-label" th:text="${orderType.displayValue}">orderType</label>				                    				
+												<td class="col-md-11"  th:text="${jsonCourtOrder.order.text}" />
+												<td class="col-md-1">
+													<div th:each="orderType : ${T(in.edu.rvce.slanno.enums.OrderType).values()}">	
+														<div class="custom-control custom-radio custom-control-inline">								
+															<input type="radio" th:field="${jsonCourtOrder.order.orderType}" th:value="${orderType}" class="custom-control-input">
+						                    				<label class="custom-control-label" th:text="${orderType.displayValue}">orderType</label>		
+					                    				</div>		                    				
+													</div>
 												</td>
-											</tr>			
+											</tr>
+											<tr>
+												<td class="col-md-11 h6 text-end align-middle"  th:text="'Bond Amount in case Accepted'" />
+												<td class="col-md-1">
+													<input type="text" class="form-control" th:name="${jsonCourtOrder.order.bondAmount}"
+														th:field="${jsonCourtOrder.order.bondAmount}" >
+												</td>												
+											</tr>	
+											<tr>
+												<td class="col-md-11 h6 text-end align-middle"  th:text="'Attend Police Station Recurrence in case Accepted'" />
+												<td class="col-md-1">
+													<div th:each="attendPoliceStationRecurrence : ${T(in.edu.rvce.slanno.enums.AttendPoliceStationRecurrence).values()}">
+														<div class="custom-control custom-radio custom-control-inline">
+															<input type="radio" th:field="${jsonCourtOrder.order.attendPoliceStationRecurrence}" 
+																th:value="${attendPoliceStationRecurrence}" class="custom-control-input">
+						                    				<label class="custom-control-label" th:text="${attendPoliceStationRecurrence.displayValue}">attendPoliceStationRecurrence</label>
+														</div>
+													 </div>
+												</td>												
+											</tr>
+											<tr>
+												<td class="col-md-11 h6 text-end align-middle"  th:text="'Attend Police Station Frequency in case Accepted'" />
+												<td class="col-md-1">
+													<input type="text" class="form-control" th:name="${jsonCourtOrder.order.attendPoliceStationFrequency}"
+														th:field="${jsonCourtOrder.order.attendPoliceStationFrequency}" >
+												</td>												
+											</tr>				
 										</tbody>
 									</table>
 								</div>

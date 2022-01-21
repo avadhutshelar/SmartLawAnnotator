@@ -7,9 +7,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -254,10 +256,15 @@ public class AnnotationService {
 				legalReference.setLegalActFound(legalActFound);
 				
 				List<LegalReference> legalReferences=jsonCourtOrder.getBackground().getLegalReferences();
-				if(CollectionUtils.isNotEmpty(legalReferences)) {
+				Integer refNumber=1;
+				if(CollectionUtils.isNotEmpty(legalReferences)) {					
+					LegalReference maxLegalRef=legalReferences.stream().max(Comparator.comparing(LegalReference::getRefNumber)).orElseThrow(NoSuchElementException::new);
+					refNumber = maxLegalRef.getRefNumber()+1;
+					legalReference.setRefNumber(refNumber);
 					legalReferences.add(legalReference);
 				}else {
 					legalReferences = new ArrayList<>();
+					legalReference.setRefNumber(refNumber);
 					legalReferences.add(legalReference);
 					jsonCourtOrder.getBackground().setLegalReferences(legalReferences);
 				}

@@ -21,6 +21,7 @@ import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
 import in.edu.rvce.slanno.enums.LegalRefAcceptRejectDecision;
+import in.edu.rvce.slanno.enums.OrderType;
 import in.edu.rvce.slanno.services.AnnotationService;
 import in.edu.rvce.slanno.services.ProjectService;
 import in.edu.rvce.slanno.utils.SessionMessage;
@@ -94,6 +95,16 @@ public class AnnotationController {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
 			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument);
+
+			//Update Legal Reference
+			jsonCourtOrder.getBackground().getLegalReferences().forEach( a ->{
+				jsonCourtOrderIn.getBackground().getLegalReferences().forEach(ain->{
+					if(a.getRefNumber().equals(ain.getRefNumber())) {
+						a.setLegalRefAcceptRejectDecision(ain.getLegalRefAcceptRejectDecision());
+					}
+				});
+			});
+			
 			//Update argumentBy
 			jsonCourtOrder.getArguments().forEach(a -> {
 				
@@ -120,16 +131,17 @@ public class AnnotationController {
 				
 			});
 			
-			jsonCourtOrder.getBackground().getLegalReferences().forEach( a ->{
-				jsonCourtOrderIn.getBackground().getLegalReferences().forEach(ain->{
-					if(a.getRefNumber().equals(ain.getRefNumber())) {
-						a.setLegalRefAcceptRejectDecision(ain.getLegalRefAcceptRejectDecision());
-					}
-				});
-			});
-			
+			//Update Order			
 			jsonCourtOrder.getOrder().setOrderType(jsonCourtOrderIn.getOrder().getOrderType());
-			
+			if(jsonCourtOrderIn.getOrder().getOrderType().equals(OrderType.ACCEPTED)) {
+				jsonCourtOrder.getOrder().setBondAmount(jsonCourtOrderIn.getOrder().getBondAmount());
+				jsonCourtOrder.getOrder().setAttendPoliceStationRecurrence(jsonCourtOrderIn.getOrder().getAttendPoliceStationRecurrence());
+				jsonCourtOrder.getOrder().setAttendPoliceStationFrequency(jsonCourtOrderIn.getOrder().getAttendPoliceStationFrequency());
+			}else {
+				jsonCourtOrder.getOrder().setBondAmount(null);
+				jsonCourtOrder.getOrder().setAttendPoliceStationRecurrence(null);
+				jsonCourtOrder.getOrder().setAttendPoliceStationFrequency(null);
+			}
 			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder);
 
 		} catch (Exception e) {
