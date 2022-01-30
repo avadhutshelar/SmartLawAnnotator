@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>User Management</title>
+<link rel="stylesheet"	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+<script	th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script	th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+<!-- <script type="text/javascript" th:src="@{js/main.js}" src="../static/js/main.js"></script> -->
+</head>
+<body>
+	<div th:replace="fragments/header :: header"></div>
+	<div class="container-fluid">	
+		<div class="row">
+			<h2 class="lh-lg"><label>User Management</label></h2>
+		</div>
+		<div class="row">
+			<div class="col-md-2">
+				<div th:replace="fragments/leftSidebar :: viewSettingsLeftSidebar"></div>
+			</div>
+			<div class="col-md-8">
+				<h4 class="lh-sm">
+					<label>User Management</label>
+				</h4>
+				<form action="#" th:action="@{/users/add}" th:object="${userDto}" method="post" >
+					<table class="table table-striped table-responsive-md">
+						<tbody>							
+							<tr>
+								<td><label for="username" class="col-form-label">Username: </label></td>
+								<td><input type="text" th:field="*{username}" class="form-control" id="username" placeholder="Type username here">
+									<span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="text-danger"></span>
+								</td>
+							</tr>
+							
+							<tr>
+								<td><label for="password" class="col-form-label">Password: </label></td>
+								<td><input type="text" th:field="*{password}" class="form-control" id="password" placeholder="Type password here">
+									<span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger"></span>
+								</td>
+							</tr>
+							
+							<tr>
+								<td><label for="enabled" class="col-form-label">Enabled: </label></td>
+								<td>
+									<div
+										th:each="uenabled : ${T(in.edu.rvce.slanno.enums.UserEnabled).values()}">											
+										<input type="radio" th:field="*{enabled}" th:value="${uenabled}" class="custom-control-input">
+                    					<label class="custom-control-label" th:for="${#ids.prev('enabled')}" th:text="${uenabled}">uenabled</label>
+									</div>
+									<span th:if="${#fields.hasErrors('enabled')}" th:errors="*{enabled}" class="text-danger"></span>
+								</td>
+							</tr>
+							
+							<tr>
+								<td><label for="authority" class="col-form-label">Role: </label></td>
+								<td>
+									<div
+										th:each="autho : ${T(in.edu.rvce.slanno.enums.UserAuthorities).values()}">											
+										<input type="radio" th:field="*{authority}" th:value="${autho}" class="custom-control-input">
+                    					<label class="custom-control-label" th:for="${#ids.prev('authority')}" th:text="${autho}">autho</label>
+									</div>
+									<span th:if="${#fields.hasErrors('authority')}" th:errors="*{authority}" class="text-danger"></span>
+								</td>
+							</tr>
+							
+							<tr>									
+								<td colspan="2"><input type="submit" class="btn btn-primary" value="Add User"></td>									
+							</tr>
+							<tr>									
+								<td colspan="2">
+									<div th:if="${message != null}">
+										<label for="name" class="text-success"	th:text="${message.successMessage}"></label>	
+										<label for="name" class="text-danger" th:text="${message.errorMessage}"></label>
+									</div>								
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</form>
+				
+				<table class="table table-striped table-responsive-md">
+					<tbody>
+						<tr>
+							<th>User name</th>
+							<th>Password</th>
+							<th>Enabled</th>
+							<th>Role</th>	
+							<th>Edit</th>													
+						</tr>
+						<tr th:each="userDto: ${userDtoList}">
+							<td th:text="${userDto.username}" />
+							<td th:text="${userDto.password}"/>
+							<td th:text="${userDto.enabled}"/>
+							<td th:text="${userDto.authority}"/>
+							<td><button type="button" class="btn btn-warning" data-bs-toggle="modal" th:attr="data-bs-target=${'#editModal'+userDto.username}">Edit</button></td>	
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="col-md-2">
+			
+			</div>
+		</div>
+	</div>
+
+
+	<div th:each="userDto: ${userDtoList}" >
+	  <div class="modal" tabindex="-1" th:attr="id=${'editModal' + userDto.username}">
+		  <div class="modal-dialog">
+		  	<form method="post" 
+				th:action="@{/users/edit/{username}(username=${userDto.username})}" th:object="${userDto}">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" th:text="${'Edit User - '+userDto.username}"></h5>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		      </div>
+		      <div class="modal-body">
+		        
+		    		<table class="table table-striped table-responsive-md">
+						<tbody>							
+							<tr>
+								<td><label for="username" class="col-form-label">Username: </label></td>
+								<td>
+									<label for="username" class="col-form-label" th:text="*{username}"></label>						
+								</td>
+							</tr>
+							<tr>
+								<td><label for="password" class="col-form-label">Password: </label></td>
+								<td>
+									<input type="text" th:value="*{password}"/>							
+								</td>
+							</tr>	
+							<tr>
+								<td><label for="enabled" class="col-form-label">Enabled: </label></td>
+								<td>
+									<div
+										th:each="uenabled : ${T(in.edu.rvce.slanno.enums.UserEnabled).values()}">											
+										<input type="radio" th:field="*{enabled}" th:value="${uenabled}" class="custom-control-input">
+                    					<label class="custom-control-label" th:for="${#ids.prev('enabled')}" th:text="${uenabled}">uenabled</label>
+									</div>								
+								</td>
+							</tr>	
+							<tr>
+								<td><label for="authority" class="col-form-label">Role: </label></td>
+								<td>
+									<div
+										th:each="autho : ${T(in.edu.rvce.slanno.enums.UserAuthorities).values()}">											
+										<input type="radio" th:field="*{authority}" th:value="${autho}" class="custom-control-input">
+                    					<label class="custom-control-label" th:for="${#ids.prev('authority')}" th:text="${autho}">autho</label>
+									</div>
+									<span th:if="${#fields.hasErrors('authority')}" th:errors="*{authority}" class="text-danger"></span>
+								</td>
+							</tr>	
+						</tbody>
+					</table>
+				
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		        <button type="submit" class="btn btn-primary">Update</button>
+		      </div>		      
+		    </div>
+		    </form>
+		  </div>
+		</div>
+	</div>
+		
+</body>
+</html>

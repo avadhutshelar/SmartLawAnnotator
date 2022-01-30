@@ -37,4 +37,5 @@ public class SettingsService {
 		List<SystemSetting> systemSettingList = Lists.newArrayList(systemSettingRepository.findAll());
 		return systemSettingList;
 	}
+	
 }
