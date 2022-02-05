@@ -39,6 +39,8 @@ public class Project {
 	)
 	List<LegalDocument> legalDocuments=new ArrayList<>();
 	
+	String annotatorUserListString;
+	
 	public Project() {
 		
 	}

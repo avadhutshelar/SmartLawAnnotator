@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Projects</title>
+<link rel="stylesheet"
+	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+<script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+</head>
+<body>
+	<div th:replace="fragments/header :: header"></div>
+	<div class="container-fluid">
+		<div class="row">
+			<h2 class="lh-lg">
+				<label th:text="${project.projectName}"></label>
+			</h2>
+		</div>
+		<div class="row">
+			<div class="col-md-2">
+				<div th:replace="fragments/leftSidebar :: viewProjectLeftSidebar"></div>
+			</div>
+			<div class="col-md-8">
+				<h4 class="lh-sm">
+					<label>Project Annotators</label>
+				</h4>
+				<table class="table table-striped table-responsive-md">
+					<tbody>
+						<tr>
+							<td><label th:text="'Project ID'"></label></td>
+							<td th:text="${project.projectId}" />
+						</tr>
+						<tr>
+							<td><label th:text="'Project Name'"></label></td>
+							<td th:text="${project.projectName}" />
+						</tr>
+						<tr>
+							<td><label th:text="'Project Annotators'"></label></td>
+							<td th:text="${project.annotatorUserListString}" />
+						</tr>
+					</tbody>
+				</table>
+				
+				<h4 class="lh-sm">
+					<label>Edit Annotators</label>
+				</h4>
+				<form method="post" th:object="${userProjectDto}"
+						th:action="@{/project/{projectId}/annotators(projectId=${project.projectId})}">
+					
+					<table class="table table-striped table-responsive-md">
+						<tbody>
+							<tr>
+								<th>User name</th>
+								<th>Enabled</th>
+								<th>Role</th>	
+								<th>Is Annotator</th>	
+							</tr>
+							<tr th:each="userDto, itemStat: *{userDtoList}">
+								<td>
+									<label class="custom-control-label" th:text="${userDto.username}">username</label>
+									<input type="hidden" th:field="*{userDtoList[__${itemStat.index}__].username}" />
+								</td>
+								<td th:text="${userDto.enabled}"/>
+								<td th:text="${userDto.authority}"/>
+								<td><input type="checkbox" th:field="*{userDtoList[__${itemStat.index}__].isAnnotatorForProject}" /></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td><input type="submit" value="Update Annotators"/></td>
+							</tr>
+						</tbody>
+					</table>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

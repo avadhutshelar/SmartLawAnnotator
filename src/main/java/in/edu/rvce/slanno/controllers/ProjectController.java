@@ -1,9 +1,13 @@
 package in.edu.rvce.slanno.controllers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,8 +19,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import in.edu.rvce.slanno.dto.UserProjectDto;
 import in.edu.rvce.slanno.entities.Project;
+import in.edu.rvce.slanno.enums.UserDto;
 import in.edu.rvce.slanno.services.ProjectService;
+import in.edu.rvce.slanno.services.UsersService;
 import in.edu.rvce.slanno.utils.SessionMessage;
 
 @Controller
@@ -24,6 +31,9 @@ public class ProjectController {
 
 	@Autowired
 	private ProjectService projectService;
+	
+	@Autowired
+	UsersService usersService;
 
 	@GetMapping("/project/create")
 	public String createProject(SessionMessage message, Model model) {
@@ -43,7 +53,7 @@ public class ProjectController {
 				errorMessage = "One or more mandatory parameters missing. Please check";
 			} else if (!projectService.createDirectories(project)) {
 				errorMessage = "Given Project Directory Already Present. Type Some Other Name.";
-			} else if (projectService.createProject(project)) {
+			} else if (projectService.createOrUpdateProject(project)) {
 				successMessage = "Project " + project.getProjectName() + " Created Successfully";
 			}
 		} catch (Exception e) {
@@ -138,5 +148,72 @@ public class ProjectController {
 		}
 		return "project-import-documents";
 	}	
+	
+	@GetMapping("/project/{projectId}/annotators")
+	public String projectAnnotators(SessionMessage message, Model model, @PathVariable Integer projectId) {
+		String successMessage = "";
+		String errorMessage = "";
+		try {
+			Project project = projectService.getProjectById(projectId);
+			
+			List<UserDto> userDtoList = usersService.getUserDtos();
+			UserProjectDto userProjectDto = new UserProjectDto();
+			List<UserDto> userDtoListTemp = new ArrayList<>();
+			userDtoList.forEach(userDto->{
+				String[] usernamesArray =  project.getAnnotatorUserListString().split(",");
+				List<String> usernames = Arrays.asList(usernamesArray);
+				if(usernames.contains(userDto.getUsername())) {
+					userDto.setIsAnnotatorForProject(Boolean.TRUE);
+				}
+				userDtoListTemp.add(userDto);
+			});
+			userProjectDto.setUserDtoList(userDtoListTemp);
+			
+			model.addAttribute("userProjectDto", userProjectDto);
+			model.addAttribute("project", project);
+		} catch (Exception e) {
+			errorMessage = "Error in retriving the project annotators: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);			
+		}
+		return "project-annotators";
+	}
 
+	@PostMapping("/project/{projectId}/annotators")
+	public String updateProjectAnnotators(UserProjectDto userProjectDto,
+				BindingResult result, SessionMessage message, Model model, @PathVariable Integer projectId)
+			throws Exception {
+		String successMessage = "";
+		String errorMessage = "";
+		try {
+			if (result.hasErrors()) {
+				errorMessage = "One or more mandatory parameters missing. Please check";
+			} else {		
+				
+				Project project = projectService.getProjectById(projectId);
+					
+				List<String> annotatorUserList = new ArrayList<>();
+				userProjectDto.getUserDtoList().forEach(user->{
+					if(user.getIsAnnotatorForProject().equals(Boolean.TRUE)) {
+						annotatorUserList.add(user.getUsername());
+					}					
+				});
+				String annotatorUserListString=annotatorUserList.stream().map(a -> String.valueOf(a))
+						.collect(Collectors.joining(","));			
+				
+				project.setAnnotatorUserListString(annotatorUserListString);
+				projectService.createOrUpdateProject(project);
+				
+			}
+		} catch (Exception e) {
+			errorMessage = "Updating Annotators Failed with follwing error:\n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);
+		}
+		return "redirect:/project/"+projectId+"/annotators";
+	}	
 }

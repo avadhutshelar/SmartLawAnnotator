@@ -19,4 +19,8 @@ public class UserDto {
 	
 	@NotNull(message = "Role is mandatory")
 	UserAuthorities authority;
+	
+	Boolean isAnnotatorForProject;
+
+	Boolean isAdminForProject;
 }

@@ -2,7 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
 <title>Projects</title>
-<link rel="stylesheet"	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+<link rel="stylesheet"
+	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
 <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
 <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
 </head>
@@ -19,14 +20,16 @@
 						<tr>
 							<th>Project ID</th>
 							<th>Project Name</th>
+							<th>Annotators</th>
 						</tr>
 						<tr th:each="project: ${projectList}">
 							<td th:text="${project.projectId}" />
-							<td>
-								<a th:href="@{/project/view/{id}(id=${project.projectId})}">
-								<label th:text="${project.projectName}"></label>
-								</a>
-							</td>
+							<td><a
+								th:href="@{/project/view/{id}(id=${project.projectId})}"> <label
+									th:text="${project.projectName}"></label>
+							</a></td>
+							<td th:text="${project.annotatorUserListString}" />
+
 						</tr>
 					</tbody>
 				</table>

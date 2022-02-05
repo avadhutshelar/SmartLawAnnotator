@@ -84,7 +84,7 @@ public class ProjectService {
 		}
 	}
 
-	public Boolean createProject(Project project) throws Exception {
+	public Boolean createOrUpdateProject(Project project) throws Exception {
 		projectRepository.save(project);
 		return Boolean.TRUE;
 	}
@@ -93,7 +93,7 @@ public class ProjectService {
 		List<Project> projectList = Lists.newArrayList(projectRepository.findAll());
 		return projectList;
 	}
-
+	
 	public Project getProjectById(Integer projectId) throws Exception {
 		Project project = projectRepository.findById(projectId).get();
 		return project;
@@ -364,4 +364,14 @@ public class ProjectService {
 
 		return argumentSentences;
 	}
+	
+	/*
+	 * public List<ProjectAnnotator> getAllProjectAnnotators() throws Exception {
+	 * List<ProjectAnnotator> projectAnnotatorList =
+	 * Lists.newArrayList(projectAnnotatorRepository.findAll()); return
+	 * projectAnnotatorList; }
+	 * 
+	 * public void addOrUpdateProjectAnnotator(ProjectAnnotator projectAnnotator) {
+	 * projectAnnotatorRepository.save(projectAnnotator); }
+	 */
 }
