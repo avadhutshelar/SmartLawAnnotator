@@ -98,6 +98,19 @@ public class UsersService {
 		}
 		
 		authoritiesRepository.save(authority);
-	}	
+	}
+	
+	public void deleteUser(String username) {
+		
+		Authorities authority = authoritiesRepository.findById(username).orElse(null);//TODO-AuthoritiesNotFoundException
+		
+		authoritiesRepository.delete(authority);
+		
+		Users user = usersRepository.findById(username).orElse(null); //TODO-UserNotFoundException
+		
+		usersRepository.delete(user);
+		
+		
+	}
 	
 }

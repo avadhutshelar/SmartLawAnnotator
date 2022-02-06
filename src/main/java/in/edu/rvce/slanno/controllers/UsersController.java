@@ -68,7 +68,7 @@ public class UsersController {
 			message.setErrorMessage(errorMessage);
 			model.addAttribute("message", message);
 		}
-		return "redirect:/users";
+		return "users";
 	}
 
 	@RequestMapping("/users/edit/{username}")
@@ -81,7 +81,7 @@ public class UsersController {
 			userDto = usersService.getUserDto(username);
 			model.addAttribute("userDto", userDto);
 		} catch (Exception e) {
-			errorMessage = "User Addition Failed with follwing error:\n" + e.getMessage();
+			errorMessage = "User edit failed with following error:\n" + e.getMessage();
 		} finally {
 			message.setSuccessMessage(successMessage);
 			message.setErrorMessage(errorMessage);
@@ -103,7 +103,24 @@ public class UsersController {
 				successMessage = "User :: " + userDto.getUsername() + " :: Created Successfully";
 			}
 		} catch (Exception e) {
-			errorMessage = "User Addition Failed with follwing error:\n" + e.getMessage();
+			errorMessage = "User edit failed with follwing error:\n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);
+		}
+		return "redirect:/users";
+	}
+	
+	@PostMapping("/users/delete/{username}")
+	public String deleteUser(@PathVariable("username") String username, SessionMessage message, Model model) {
+		String successMessage = "";
+		String errorMessage = "";
+		try {
+			usersService.deleteUser(username);
+			successMessage = "User :: " + username + " :: Deleted Successfully";
+		} catch (Exception e) {
+			errorMessage = "User deletion Failed with follwing error:\n" + e.getMessage();
 		} finally {
 			message.setSuccessMessage(successMessage);
 			message.setErrorMessage(errorMessage);
