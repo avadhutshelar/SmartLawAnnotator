@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,13 +15,10 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import in.edu.rvce.courtorder.Argument;
 import in.edu.rvce.courtorder.JsonCourtOrder;
-import in.edu.rvce.courtorder.LegalReference;
 import in.edu.rvce.slanno.dto.LegalActFound;
-import in.edu.rvce.slanno.entities.LegalAct;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
-import in.edu.rvce.slanno.enums.LegalRefAcceptRejectDecision;
 import in.edu.rvce.slanno.enums.OrderType;
 import in.edu.rvce.slanno.services.AnnotationService;
 import in.edu.rvce.slanno.services.ProjectService;
@@ -63,14 +61,14 @@ public class AnnotationController {
 
 	@GetMapping("/project/{projectId}/annotate/{docId}")
 	public String annotateDocuments(SessionMessage message, Model model, @PathVariable Integer projectId,
-			@PathVariable Long docId) {
+			@PathVariable Long docId, Authentication authentication) {
 		String successMessage = "";
 		String errorMessage = "";
 		try {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
 
-			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument);
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
 			String textOrder = jsonCourtOrder.getProcessedText();
 			message.setTextOrder(textOrder);
 			model.addAttribute("project", project);
@@ -88,13 +86,13 @@ public class AnnotationController {
 
 	@PostMapping("/project/{projectId}/annotate/{docId}")
 	public RedirectView updateJsonCourtOrder(SessionMessage message, Model model, @PathVariable Integer projectId,
-			@PathVariable Long docId, JsonCourtOrder jsonCourtOrderIn) {
+			@PathVariable Long docId, JsonCourtOrder jsonCourtOrderIn, Authentication authentication) {
 		String successMessage = "";
 		String errorMessage = "";
 		try {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
-			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument);
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
 
 			//Update Legal Reference
 			jsonCourtOrder.getBackground().getLegalReferences().forEach( a ->{
@@ -228,13 +226,13 @@ public class AnnotationController {
 	
 	@GetMapping("/project/{projectId}/annotate/{docId}/argument/{argNum}")
 	public String getArgument(SessionMessage message, Model model, @PathVariable Integer projectId,
-			@PathVariable Long docId,  @PathVariable Integer argNum) {
+			@PathVariable Long docId,  @PathVariable Integer argNum, Authentication authentication) {
 		String successMessage = "";
 		String errorMessage = "";
 		try {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
-			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument);			
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);			
 			List<Argument> argumentList = jsonCourtOrder.getArguments().stream().filter(arg->arg.getArgumentNumber().equals(argNum)).collect(Collectors.toList());
 			
 			model.addAttribute("project", project);
@@ -253,13 +251,13 @@ public class AnnotationController {
 
 	@PostMapping("/project/{projectId}/annotate/{docId}/argument/{argNum}")
 	public RedirectView updateArgBy(SessionMessage message, Model model, @PathVariable Integer projectId,
-			@PathVariable Long docId, @PathVariable Integer argNum, Argument argument) {
+			@PathVariable Long docId, @PathVariable Integer argNum, Argument argument, Authentication authentication) {
 		String successMessage = "";
 		String errorMessage = "";
 		try {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
-			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument);
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
 			//Update argumentBy
 			jsonCourtOrder.getArguments().forEach(a -> {
 				if (a.getArgumentNumber().equals(argNum)) {
@@ -282,7 +280,7 @@ public class AnnotationController {
 	
 	@PostMapping("/project/{projectId}/annotate/{docId}/legalReference/add")
 	public RedirectView addLegalReference(SessionMessage message, Model model, @PathVariable Integer projectId,
-			@PathVariable Long docId, 
+			@PathVariable Long docId, Authentication authentication,
 			@RequestParam(value = "actNameMatched", required = true) String actNameMatched,
 			@RequestParam(value = "sectionsMatched", required = true) String sectionsMatched,
 			@RequestParam(value = "stringMatched", required = true) String stringMatched) {
@@ -292,7 +290,7 @@ public class AnnotationController {
 		try {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
-			JsonCourtOrder jsonCourtOrderTemp = annotationService.getJsonCourtOrder(project, legalDocument);
+			JsonCourtOrder jsonCourtOrderTemp = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
 			
 			LegalActFound legalActFound = new LegalActFound();
 			legalActFound.setActNameMatched(actNameMatched);

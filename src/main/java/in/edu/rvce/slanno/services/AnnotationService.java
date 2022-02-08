@@ -18,6 +18,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
@@ -26,6 +27,7 @@ import com.google.gson.GsonBuilder;
 import in.edu.rvce.courtorder.Background;
 import in.edu.rvce.courtorder.JsonCourtOrder;
 import in.edu.rvce.courtorder.LegalReference;
+import in.edu.rvce.courtorder.annotations.LegalRefAcceptRejectDecisionAnnotations;
 import in.edu.rvce.slanno.dto.LegalActFound;
 import in.edu.rvce.slanno.entities.LegalAct;
 import in.edu.rvce.slanno.entities.LegalDocument;
@@ -47,7 +49,7 @@ public class AnnotationService {
 	@Autowired
 	private SettingsService settingsService;
 
-	public JsonCourtOrder getJsonCourtOrder(Project project, LegalDocument legalDocument) {
+	public JsonCourtOrder getJsonCourtOrder(Project project, LegalDocument legalDocument, Authentication authentication) {
 		JsonCourtOrder jsonCourtOrder = new JsonCourtOrder();
 
 		String jsonText = "";
@@ -67,8 +69,9 @@ public class AnnotationService {
 		try {
 			jsonCourtOrder = gson.fromJson(jsonText, JsonCourtOrder.class);
 			if(CollectionUtils.isEmpty(jsonCourtOrder.getBackground().getLegalReferences())) {
-				updateSectionReference(jsonCourtOrder);
-			}			
+				updateSectionReference(jsonCourtOrder,project);
+			}		
+			updateAnnotationsByUser(jsonCourtOrder, authentication);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -100,7 +103,7 @@ public class AnnotationService {
 		}
 	}
 
-	public JsonCourtOrder updateSectionReference(JsonCourtOrder jsonCourtOrder) {
+	public JsonCourtOrder updateSectionReference(JsonCourtOrder jsonCourtOrder, Project project) {
 		try {
 			if (jsonCourtOrder.getBackground() != null) {
 				Background background = jsonCourtOrder.getBackground();
@@ -217,7 +220,12 @@ public class AnnotationService {
 					
 					String sectionListString = sectionList.stream().map(i -> i.toString()).collect(Collectors.joining(","));
 					currentLegalAct.setSectionsMatched(sectionListString);
-					legalRefSectionSeparated.add(new LegalReference(++count,currentLegalAct,LegalRefAcceptRejectDecision.TBD));
+					String annotatorUserListString=project.getAnnotatorUserListString();
+					List<String> annotatorUserList= Arrays.asList(annotatorUserListString.split(",")); 
+					List<LegalRefAcceptRejectDecisionAnnotations> legalRefAcceptRejectDecisionAnnotations = new ArrayList<>();
+					annotatorUserList.forEach(username->{legalRefAcceptRejectDecisionAnnotations.add(
+							new LegalRefAcceptRejectDecisionAnnotations(username,LegalRefAcceptRejectDecision.TBD));});
+					legalRefSectionSeparated.add(new LegalReference(++count,currentLegalAct,LegalRefAcceptRejectDecision.TBD,legalRefAcceptRejectDecisionAnnotations));
 					
 				}
 				
@@ -273,5 +281,17 @@ public class AnnotationService {
 			e.printStackTrace();
 		}
 		return jsonCourtOrder;
+	}
+	
+	public void updateAnnotationsByUser(JsonCourtOrder jsonCourtOrder, Authentication authentication) {
+		jsonCourtOrder.getBackground().getLegalReferences().forEach(legalRef->{
+			String username =authentication.getName();
+			List<LegalRefAcceptRejectDecisionAnnotations> legalRefAcceptRejectDecisionAnnotations = legalRef.getLegalRefAcceptRejectDecisionAnnotations();
+			legalRefAcceptRejectDecisionAnnotations.forEach(decision->{
+				if(StringUtils.equalsIgnoreCase(username, decision.getUsername())) {
+					legalRef.setLegalRefAcceptRejectDecision(decision.getLegalRefAcceptRejectDecision());
+				}				
+			});			
+			});
 	}
 }

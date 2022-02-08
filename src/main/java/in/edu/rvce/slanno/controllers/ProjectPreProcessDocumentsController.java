@@ -3,6 +3,7 @@ package in.edu.rvce.slanno.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -280,14 +281,14 @@ public class ProjectPreProcessDocumentsController {
 	}
 
 	@GetMapping("/project/{projectId}/veiwJson/{docId}")
-	public String viewJson(SessionMessage message, Model model, @PathVariable Integer projectId, @PathVariable Long docId) {
+	public String viewJson(SessionMessage message, Model model, @PathVariable Integer projectId, @PathVariable Long docId, Authentication authentication) {
 		String successMessage = "";
 		String errorMessage = "";
 		try {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument= projectService.getLegalDocumentByDocumentId(docId);
 			
-			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument);
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
 			
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
