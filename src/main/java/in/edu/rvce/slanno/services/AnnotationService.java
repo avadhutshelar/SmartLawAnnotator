@@ -34,6 +34,7 @@ import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.entities.SystemSetting;
 import in.edu.rvce.slanno.enums.LegalRefAcceptRejectDecision;
+import in.edu.rvce.slanno.enums.OrderType;
 import in.edu.rvce.slanno.repositories.LegalDocumentRepository;
 import in.edu.rvce.slanno.utils.ApplicationConstants;
 
@@ -71,7 +72,7 @@ public class AnnotationService {
 			if(CollectionUtils.isEmpty(jsonCourtOrder.getBackground().getLegalReferences())) {
 				updateSectionReference(jsonCourtOrder,project);
 			}		
-			updateAnnotationsByUser(jsonCourtOrder, authentication);
+			getUpdatedAnnotationsByUser(jsonCourtOrder, authentication);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -283,7 +284,7 @@ public class AnnotationService {
 		return jsonCourtOrder;
 	}
 	
-	public void updateAnnotationsByUser(JsonCourtOrder jsonCourtOrder, Authentication authentication) {
+	private void getUpdatedAnnotationsByUser(JsonCourtOrder jsonCourtOrder, Authentication authentication) {
 		jsonCourtOrder.getBackground().getLegalReferences().forEach(legalRef->{
 			String username =authentication.getName();
 			List<LegalRefAcceptRejectDecisionAnnotations> legalRefAcceptRejectDecisionAnnotations = legalRef.getLegalRefAcceptRejectDecisionAnnotations();
@@ -293,5 +294,79 @@ public class AnnotationService {
 				}				
 			});			
 			});
+	}
+	
+	public void updateLegalRefsByUser(JsonCourtOrder jsonCourtOrder, JsonCourtOrder jsonCourtOrderIn, Authentication authentication) {
+		jsonCourtOrder.getBackground().getLegalReferences().forEach( a ->{
+			jsonCourtOrderIn.getBackground().getLegalReferences().forEach(ain->{
+				if(a.getRefNumber().equals(ain.getRefNumber())) {
+					List<LegalRefAcceptRejectDecisionAnnotations> legalRefAcceptRejectDecisionAnnotations = a.getLegalRefAcceptRejectDecisionAnnotations();
+					legalRefAcceptRejectDecisionAnnotations.forEach(decision->{
+						if(StringUtils.equalsIgnoreCase(authentication.getName(), decision.getUsername())) {
+							decision.setLegalRefAcceptRejectDecision(ain.getLegalRefAcceptRejectDecision());
+						}
+					});
+					//a.setLegalRefAcceptRejectDecision(ain.getLegalRefAcceptRejectDecision());
+				}
+			});
+		});
+		jsonCourtOrder.getBackground().getLegalReferences().forEach( a ->{
+			List<LegalRefAcceptRejectDecisionAnnotations> legalRefAcceptRejectDecisionAnnotations = a.getLegalRefAcceptRejectDecisionAnnotations();
+			Map<String,Integer> legalRefCountMap = new HashMap<>();
+			legalRefAcceptRejectDecisionAnnotations.forEach(decision->{
+				String refDecision = decision.getLegalRefAcceptRejectDecision().getDisplayValue();
+				if (!legalRefCountMap.containsKey(refDecision)) {  // first time we've seen this string
+					legalRefCountMap.put(refDecision, 1);
+			    }
+			    else {
+			      int count = legalRefCountMap.get(refDecision);
+			      legalRefCountMap.put(refDecision, count + 1);
+			    }
+			});	
+			String maxRefDecision=Collections.max(legalRefCountMap.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
+			a.setLegalRefAcceptRejectDecision(LegalRefAcceptRejectDecision.valueOf(maxRefDecision));
+		});
+		
+	}
+	
+	public void updateArgumentsByUser(JsonCourtOrder jsonCourtOrder, JsonCourtOrder jsonCourtOrderIn) {
+		
+		jsonCourtOrder.getArguments().forEach(a -> {
+			
+			jsonCourtOrderIn.getArguments().forEach(ain -> {
+				
+				if (a.getArgumentNumber().equals(ain.getArgumentNumber())) {
+					
+					a.setArgumentBy(ain.getArgumentBy());
+					//a.setArgumentSentences(ain.getArgumentSentences());
+					a.getArgumentSentences().forEach(s->{
+						
+						ain.getArgumentSentences().forEach(sin->{
+						
+							if(s.getSentenceNumber().equals(sin.getSentenceNumber())) {
+								s.setArgumentSentenceType(sin.getArgumentSentenceType());
+							}
+							
+						});
+						
+					});
+				}
+			
+			});
+			
+		});
+	}
+	
+	public void updateOrderByUser(JsonCourtOrder jsonCourtOrder, JsonCourtOrder jsonCourtOrderIn) {
+		jsonCourtOrder.getOrder().setOrderType(jsonCourtOrderIn.getOrder().getOrderType());
+		if(jsonCourtOrderIn.getOrder().getOrderType().equals(OrderType.ACCEPTED)) {
+			jsonCourtOrder.getOrder().setBondAmount(jsonCourtOrderIn.getOrder().getBondAmount());
+			jsonCourtOrder.getOrder().setAttendPoliceStationRecurrence(jsonCourtOrderIn.getOrder().getAttendPoliceStationRecurrence());
+			jsonCourtOrder.getOrder().setAttendPoliceStationFrequency(jsonCourtOrderIn.getOrder().getAttendPoliceStationFrequency());
+		}else {
+			jsonCourtOrder.getOrder().setBondAmount(null);
+			jsonCourtOrder.getOrder().setAttendPoliceStationRecurrence(null);
+			jsonCourtOrder.getOrder().setAttendPoliceStationFrequency(null);
+		}
 	}
 }

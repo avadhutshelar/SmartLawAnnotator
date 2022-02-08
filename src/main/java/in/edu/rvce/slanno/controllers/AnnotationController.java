@@ -3,6 +3,7 @@ package in.edu.rvce.slanno.controllers;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import in.edu.rvce.courtorder.Argument;
 import in.edu.rvce.courtorder.JsonCourtOrder;
+import in.edu.rvce.courtorder.annotations.LegalRefAcceptRejectDecisionAnnotations;
 import in.edu.rvce.slanno.dto.LegalActFound;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
@@ -95,51 +97,14 @@ public class AnnotationController {
 			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
 
 			//Update Legal Reference
-			jsonCourtOrder.getBackground().getLegalReferences().forEach( a ->{
-				jsonCourtOrderIn.getBackground().getLegalReferences().forEach(ain->{
-					if(a.getRefNumber().equals(ain.getRefNumber())) {
-						a.setLegalRefAcceptRejectDecision(ain.getLegalRefAcceptRejectDecision());
-					}
-				});
-			});
+			annotationService.updateLegalRefsByUser(jsonCourtOrder, jsonCourtOrderIn, authentication);
 			
 			//Update argumentBy
-			jsonCourtOrder.getArguments().forEach(a -> {
-				
-				jsonCourtOrderIn.getArguments().forEach(ain -> {
-					
-					if (a.getArgumentNumber().equals(ain.getArgumentNumber())) {
-						
-						a.setArgumentBy(ain.getArgumentBy());
-						//a.setArgumentSentences(ain.getArgumentSentences());
-						a.getArgumentSentences().forEach(s->{
-							
-							ain.getArgumentSentences().forEach(sin->{
-							
-								if(s.getSentenceNumber().equals(sin.getSentenceNumber())) {
-									s.setArgumentSentenceType(sin.getArgumentSentenceType());
-								}
-								
-							});
-							
-						});
-					}
-				
-				});
-				
-			});
+			annotationService.updateArgumentsByUser(jsonCourtOrder, jsonCourtOrderIn);
 			
 			//Update Order			
-			jsonCourtOrder.getOrder().setOrderType(jsonCourtOrderIn.getOrder().getOrderType());
-			if(jsonCourtOrderIn.getOrder().getOrderType().equals(OrderType.ACCEPTED)) {
-				jsonCourtOrder.getOrder().setBondAmount(jsonCourtOrderIn.getOrder().getBondAmount());
-				jsonCourtOrder.getOrder().setAttendPoliceStationRecurrence(jsonCourtOrderIn.getOrder().getAttendPoliceStationRecurrence());
-				jsonCourtOrder.getOrder().setAttendPoliceStationFrequency(jsonCourtOrderIn.getOrder().getAttendPoliceStationFrequency());
-			}else {
-				jsonCourtOrder.getOrder().setBondAmount(null);
-				jsonCourtOrder.getOrder().setAttendPoliceStationRecurrence(null);
-				jsonCourtOrder.getOrder().setAttendPoliceStationFrequency(null);
-			}
+			annotationService.updateOrderByUser(jsonCourtOrder, jsonCourtOrderIn);
+			
 			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder);
 
 		} catch (Exception e) {
