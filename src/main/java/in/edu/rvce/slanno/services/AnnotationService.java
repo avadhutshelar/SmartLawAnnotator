@@ -24,15 +24,20 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import in.edu.rvce.courtorder.ArgumentSentence;
 import in.edu.rvce.courtorder.Background;
 import in.edu.rvce.courtorder.JsonCourtOrder;
 import in.edu.rvce.courtorder.LegalReference;
+import in.edu.rvce.courtorder.annotations.ArgumentByAnnotations;
+import in.edu.rvce.courtorder.annotations.ArgumentSentenceTypeAnnotations;
 import in.edu.rvce.courtorder.annotations.LegalRefAcceptRejectDecisionAnnotations;
 import in.edu.rvce.slanno.dto.LegalActFound;
 import in.edu.rvce.slanno.entities.LegalAct;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.entities.SystemSetting;
+import in.edu.rvce.slanno.enums.ArgumentBy;
+import in.edu.rvce.slanno.enums.ArgumentSentenceType;
 import in.edu.rvce.slanno.enums.LegalRefAcceptRejectDecision;
 import in.edu.rvce.slanno.enums.OrderType;
 import in.edu.rvce.slanno.repositories.LegalDocumentRepository;
@@ -72,7 +77,8 @@ public class AnnotationService {
 			if(CollectionUtils.isEmpty(jsonCourtOrder.getBackground().getLegalReferences())) {
 				updateSectionReference(jsonCourtOrder,project);
 			}		
-			getUpdatedAnnotationsByUser(jsonCourtOrder, authentication);
+			getUpdatedLegalRefsByUser(jsonCourtOrder, authentication);
+			getUpdatedArgumentsByUser(jsonCourtOrder, authentication);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -284,12 +290,11 @@ public class AnnotationService {
 		return jsonCourtOrder;
 	}
 	
-	private void getUpdatedAnnotationsByUser(JsonCourtOrder jsonCourtOrder, Authentication authentication) {
-		jsonCourtOrder.getBackground().getLegalReferences().forEach(legalRef->{
-			String username =authentication.getName();
+	private void getUpdatedLegalRefsByUser(JsonCourtOrder jsonCourtOrder, Authentication authentication) {
+		jsonCourtOrder.getBackground().getLegalReferences().forEach(legalRef->{			
 			List<LegalRefAcceptRejectDecisionAnnotations> legalRefAcceptRejectDecisionAnnotations = legalRef.getLegalRefAcceptRejectDecisionAnnotations();
 			legalRefAcceptRejectDecisionAnnotations.forEach(decision->{
-				if(StringUtils.equalsIgnoreCase(username, decision.getUsername())) {
+				if(StringUtils.equalsIgnoreCase(authentication.getName(), decision.getUsername())) {
 					legalRef.setLegalRefAcceptRejectDecision(decision.getLegalRefAcceptRejectDecision());
 				}				
 			});			
@@ -297,6 +302,7 @@ public class AnnotationService {
 	}
 	
 	public void updateLegalRefsByUser(JsonCourtOrder jsonCourtOrder, JsonCourtOrder jsonCourtOrderIn, Authentication authentication) {
+		//assign legal ref to specific user
 		jsonCourtOrder.getBackground().getLegalReferences().forEach( a ->{
 			jsonCourtOrderIn.getBackground().getLegalReferences().forEach(ain->{
 				if(a.getRefNumber().equals(ain.getRefNumber())) {
@@ -305,11 +311,11 @@ public class AnnotationService {
 						if(StringUtils.equalsIgnoreCase(authentication.getName(), decision.getUsername())) {
 							decision.setLegalRefAcceptRejectDecision(ain.getLegalRefAcceptRejectDecision());
 						}
-					});
-					//a.setLegalRefAcceptRejectDecision(ain.getLegalRefAcceptRejectDecision());
+					});					
 				}
 			});
 		});
+		//re-calculate the legalref
 		jsonCourtOrder.getBackground().getLegalReferences().forEach( a ->{
 			List<LegalRefAcceptRejectDecisionAnnotations> legalRefAcceptRejectDecisionAnnotations = a.getLegalRefAcceptRejectDecisionAnnotations();
 			Map<String,Integer> legalRefCountMap = new HashMap<>();
@@ -324,12 +330,31 @@ public class AnnotationService {
 			    }
 			});	
 			String maxRefDecision=Collections.max(legalRefCountMap.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
-			a.setLegalRefAcceptRejectDecision(LegalRefAcceptRejectDecision.valueOf(maxRefDecision));
+			a.setLegalRefAcceptRejectDecision(getLegalRefAcceptRejectDecisionForDisplayValue(maxRefDecision));
 		});
 		
 	}
 	
-	public void updateArgumentsByUser(JsonCourtOrder jsonCourtOrder, JsonCourtOrder jsonCourtOrderIn) {
+	private void getUpdatedArgumentsByUser(JsonCourtOrder jsonCourtOrder, Authentication authentication) {
+		jsonCourtOrder.getArguments().forEach(a -> {
+			List<ArgumentByAnnotations> argumentByAnnotations = a.getArgumentByAnnotations();
+			argumentByAnnotations.forEach(argumentByAnno->{
+				if(StringUtils.equalsIgnoreCase(authentication.getName(), argumentByAnno.getUsername())) {
+					a.setArgumentBy(argumentByAnno.getArgumentBy());					
+				}
+			});			
+			a.getArgumentSentences().forEach(sent->{
+				List<ArgumentSentenceTypeAnnotations> argumentSentenceTypeAnnotations = sent.getArgumentSentenceTypeAnnotations();
+				argumentSentenceTypeAnnotations.forEach(sentType->{
+					if(StringUtils.equalsIgnoreCase(authentication.getName(), sentType.getUsername())) {
+						sent.setArgumentSentenceType(sentType.getArgumentSentenceType());
+					}
+				});
+			});
+		});
+	}
+	
+	public void updateArgumentsByUser(JsonCourtOrder jsonCourtOrder, JsonCourtOrder jsonCourtOrderIn, Authentication authentication) {
 		
 		jsonCourtOrder.getArguments().forEach(a -> {
 			
@@ -337,8 +362,14 @@ public class AnnotationService {
 				
 				if (a.getArgumentNumber().equals(ain.getArgumentNumber())) {
 					
-					a.setArgumentBy(ain.getArgumentBy());
-					//a.setArgumentSentences(ain.getArgumentSentences());
+					//assign argumentBy to specific user
+					List<ArgumentByAnnotations> argumentByAnnotations = a.getArgumentByAnnotations();
+					argumentByAnnotations.forEach(argumentByAnno->{
+						if(StringUtils.equalsIgnoreCase(authentication.getName(), argumentByAnno.getUsername())) {
+							argumentByAnno.setArgumentBy(ain.getArgumentBy());
+						}
+					});
+					//a.setArgumentBy(ain.getArgumentBy());
 					a.getArgumentSentences().forEach(s->{
 						
 						ain.getArgumentSentences().forEach(sin->{
@@ -349,6 +380,51 @@ public class AnnotationService {
 							
 						});
 						
+					});
+				}
+			
+			});
+			
+		});
+		//re-calculate argumentBy and sentenceType
+		jsonCourtOrder.getArguments().forEach(a -> {
+			
+			jsonCourtOrderIn.getArguments().forEach(ain -> {
+				
+				if (a.getArgumentNumber().equals(ain.getArgumentNumber())) {
+					
+					//re-calculate argumentBy
+					List<ArgumentByAnnotations> argumentByAnnotations = a.getArgumentByAnnotations();
+					Map<String,Integer> argumentByCountMap = new HashMap<>();
+					argumentByAnnotations.forEach(argumentByAnno->{
+						String argBy = argumentByAnno.getArgumentBy().getDisplayValue();
+						if (!argumentByCountMap.containsKey(argBy)) {  // first time we've seen this string
+							argumentByCountMap.put(argBy, 1);
+					    }
+					    else {
+					      int count = argumentByCountMap.get(argBy);
+					      argumentByCountMap.put(argBy, count + 1);
+					    }
+					});	
+					String maxArgBy=Collections.max(argumentByCountMap.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
+					a.setArgumentBy(getArgumentByForDisplayValue(maxArgBy));
+					
+					//re-calculate sentence type
+					a.getArgumentSentences().forEach(sent->{
+						List<ArgumentSentenceTypeAnnotations> argumentSentenceTypeAnnotations = sent.getArgumentSentenceTypeAnnotations();
+						Map<String,Integer> argumentSentenceTypeCountMap = new HashMap<>();
+						argumentSentenceTypeAnnotations.forEach(sentTypeAnno->{
+							String sentType = sentTypeAnno.getArgumentSentenceType().getDisplayValue();
+							if (!argumentSentenceTypeCountMap.containsKey(sentType)) {  // first time we've seen this string
+								argumentSentenceTypeCountMap.put(sentType, 1);
+						    }
+						    else {
+						      int count = argumentSentenceTypeCountMap.get(sentType);
+						      argumentSentenceTypeCountMap.put(sentType, count + 1);
+						    }
+						});	
+						String maxsentType=Collections.max(argumentSentenceTypeCountMap.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
+						sent.setArgumentSentenceType(getArgumentSentenceTypeForDisplayValue(maxsentType));
 					});
 				}
 			
@@ -369,4 +445,43 @@ public class AnnotationService {
 			jsonCourtOrder.getOrder().setAttendPoliceStationFrequency(null);
 		}
 	}
+	
+	private LegalRefAcceptRejectDecision getLegalRefAcceptRejectDecisionForDisplayValue(String displayValue) {
+		LegalRefAcceptRejectDecision dec = LegalRefAcceptRejectDecision.TBD;
+		if(StringUtils.equalsIgnoreCase(displayValue, LegalRefAcceptRejectDecision.ACCEPT_SUGGESTION.getDisplayValue())) {
+			dec = LegalRefAcceptRejectDecision.ACCEPT_SUGGESTION;
+		}else if(StringUtils.equalsIgnoreCase(displayValue, LegalRefAcceptRejectDecision.REJECT_SUGGESTION.getDisplayValue())) {
+			dec = LegalRefAcceptRejectDecision.REJECT_SUGGESTION;
+		}else if(StringUtils.equalsIgnoreCase(displayValue, LegalRefAcceptRejectDecision.TBD.getDisplayValue())) {
+			dec = LegalRefAcceptRejectDecision.TBD;
+		}
+		return dec;
+	}
+	
+	private ArgumentSentenceType getArgumentSentenceTypeForDisplayValue(String displayValue) {
+		ArgumentSentenceType sentType= ArgumentSentenceType.TBD;
+		if(StringUtils.equalsIgnoreCase(displayValue, ArgumentSentenceType.PREMISE.getDisplayValue())) {
+			sentType = ArgumentSentenceType.PREMISE;
+		}else if(StringUtils.equalsIgnoreCase(displayValue, ArgumentSentenceType.CONCLUSION.getDisplayValue())) {
+			sentType = ArgumentSentenceType.CONCLUSION;
+		}else if(StringUtils.equalsIgnoreCase(displayValue, ArgumentSentenceType.TBD.getDisplayValue())) {
+			sentType = ArgumentSentenceType.TBD;
+		}
+		return sentType;
+	}
+	
+	private ArgumentBy getArgumentByForDisplayValue(String displayValue) {
+		ArgumentBy argBy = ArgumentBy.TBD;
+		if(StringUtils.equalsIgnoreCase(displayValue, ArgumentBy.JUDGE.getDisplayValue())) {
+			argBy=ArgumentBy.JUDGE;
+		}else if (StringUtils.equalsIgnoreCase(displayValue, ArgumentBy.APPLICANT.getDisplayValue())) {
+			argBy=ArgumentBy.APPLICANT;
+		}else if (StringUtils.equalsIgnoreCase(displayValue, ArgumentBy.RESPONDENT.getDisplayValue())) {
+			argBy=ArgumentBy.RESPONDENT;
+		}else if (StringUtils.equalsIgnoreCase(displayValue, ArgumentBy.TBD.getDisplayValue())) {
+			argBy=ArgumentBy.TBD;
+		}
+		return argBy;
+	}
+	
 }

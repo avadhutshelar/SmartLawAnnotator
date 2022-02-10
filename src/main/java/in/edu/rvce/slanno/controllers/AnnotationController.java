@@ -100,7 +100,7 @@ public class AnnotationController {
 			annotationService.updateLegalRefsByUser(jsonCourtOrder, jsonCourtOrderIn, authentication);
 			
 			//Update argumentBy
-			annotationService.updateArgumentsByUser(jsonCourtOrder, jsonCourtOrderIn);
+			annotationService.updateArgumentsByUser(jsonCourtOrder, jsonCourtOrderIn, authentication);
 			
 			//Update Order			
 			annotationService.updateOrderByUser(jsonCourtOrder, jsonCourtOrderIn);
