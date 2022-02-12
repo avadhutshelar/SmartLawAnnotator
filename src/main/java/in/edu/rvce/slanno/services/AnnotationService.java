@@ -31,6 +31,7 @@ import in.edu.rvce.courtorder.LegalReference;
 import in.edu.rvce.courtorder.annotations.ArgumentByAnnotations;
 import in.edu.rvce.courtorder.annotations.ArgumentSentenceTypeAnnotations;
 import in.edu.rvce.courtorder.annotations.LegalRefAcceptRejectDecisionAnnotations;
+import in.edu.rvce.courtorder.annotations.OrderTypeAnnotations;
 import in.edu.rvce.slanno.dto.LegalActFound;
 import in.edu.rvce.slanno.entities.LegalAct;
 import in.edu.rvce.slanno.entities.LegalDocument;
@@ -38,6 +39,7 @@ import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.entities.SystemSetting;
 import in.edu.rvce.slanno.enums.ArgumentBy;
 import in.edu.rvce.slanno.enums.ArgumentSentenceType;
+import in.edu.rvce.slanno.enums.AttendPoliceStationRecurrence;
 import in.edu.rvce.slanno.enums.LegalRefAcceptRejectDecision;
 import in.edu.rvce.slanno.enums.OrderType;
 import in.edu.rvce.slanno.repositories.LegalDocumentRepository;
@@ -79,6 +81,7 @@ public class AnnotationService {
 			}		
 			getUpdatedLegalRefsByUser(jsonCourtOrder, authentication);
 			getUpdatedArgumentsByUser(jsonCourtOrder, authentication);
+			getUpdatedOrderByUser(jsonCourtOrder,authentication);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -433,16 +436,48 @@ public class AnnotationService {
 		});
 	}
 	
-	public void updateOrderByUser(JsonCourtOrder jsonCourtOrder, JsonCourtOrder jsonCourtOrderIn) {
-		jsonCourtOrder.getOrder().setOrderType(jsonCourtOrderIn.getOrder().getOrderType());
+	private void getUpdatedOrderByUser(JsonCourtOrder jsonCourtOrder, Authentication authentication) {
+		List<OrderTypeAnnotations> orderTypeAnnotations = jsonCourtOrder.getOrder().getOrderTypeAnnotations();
+		orderTypeAnnotations.forEach(oType->{
+			if(StringUtils.equalsIgnoreCase(authentication.getName(), oType.getUsername())) {
+				jsonCourtOrder.getOrder().setOrderType(oType.getOrderType());
+			}
+		});
+	}
+	
+	public void updateOrderByUser(JsonCourtOrder jsonCourtOrder, JsonCourtOrder jsonCourtOrderIn, Authentication authentication) {
+		
+		List<OrderTypeAnnotations> jsonCourtOrderOrderTypeAnnotations = jsonCourtOrder.getOrder().getOrderTypeAnnotations();
+		jsonCourtOrderOrderTypeAnnotations.forEach(a->{
+			if(StringUtils.equalsIgnoreCase(authentication.getName(), a.getUsername())) {
+				a.setOrderType(jsonCourtOrderIn.getOrder().getOrderType());
+			}			
+		});
+		
+		//re-calculate order type
+		List<OrderTypeAnnotations> orderTypeAnnotations = jsonCourtOrder.getOrder().getOrderTypeAnnotations();
+		Map<String,Integer> orderTypeCountMap = new HashMap<>();
+		orderTypeAnnotations.forEach(oType->{
+			String orderType = oType.getOrderType().getDisplayValue();
+			if (!orderTypeCountMap.containsKey(orderType)) {  // first time we've seen this string
+				orderTypeCountMap.put(orderType, 1);
+		    }
+		    else {
+		      int count = orderTypeCountMap.get(orderType);
+		      orderTypeCountMap.put(orderType, count + 1);
+		    }
+		});	
+		String maxOrderType=Collections.max(orderTypeCountMap.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
+		jsonCourtOrder.getOrder().setOrderType(getOrderTypeForDisplayValue(maxOrderType));
+		
 		if(jsonCourtOrderIn.getOrder().getOrderType().equals(OrderType.ACCEPTED)) {
 			jsonCourtOrder.getOrder().setBondAmount(jsonCourtOrderIn.getOrder().getBondAmount());
 			jsonCourtOrder.getOrder().setAttendPoliceStationRecurrence(jsonCourtOrderIn.getOrder().getAttendPoliceStationRecurrence());
 			jsonCourtOrder.getOrder().setAttendPoliceStationFrequency(jsonCourtOrderIn.getOrder().getAttendPoliceStationFrequency());
 		}else {
-			jsonCourtOrder.getOrder().setBondAmount(null);
-			jsonCourtOrder.getOrder().setAttendPoliceStationRecurrence(null);
-			jsonCourtOrder.getOrder().setAttendPoliceStationFrequency(null);
+			jsonCourtOrder.getOrder().setBondAmount("0");
+			jsonCourtOrder.getOrder().setAttendPoliceStationRecurrence(AttendPoliceStationRecurrence.NA);
+			jsonCourtOrder.getOrder().setAttendPoliceStationFrequency("0");
 		}
 	}
 	
@@ -484,4 +519,15 @@ public class AnnotationService {
 		return argBy;
 	}
 	
+	private OrderType getOrderTypeForDisplayValue(String displayValue) {
+		OrderType orderType = OrderType.TBD;
+		if(StringUtils.equalsIgnoreCase(displayValue, OrderType.ACCEPTED.getDisplayValue())) {
+			orderType=OrderType.ACCEPTED;
+		}else if(StringUtils.equalsIgnoreCase(displayValue, OrderType.REJECTED.getDisplayValue())) {
+			orderType=OrderType.REJECTED;
+		}else if(StringUtils.equalsIgnoreCase(displayValue, OrderType.TBD.getDisplayValue())) {
+			orderType=OrderType.TBD;
+		}
+		return orderType;
+	}
 }

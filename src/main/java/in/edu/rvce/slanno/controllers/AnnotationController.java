@@ -103,7 +103,7 @@ public class AnnotationController {
 			annotationService.updateArgumentsByUser(jsonCourtOrder, jsonCourtOrderIn, authentication);
 			
 			//Update Order			
-			annotationService.updateOrderByUser(jsonCourtOrder, jsonCourtOrderIn);
+			annotationService.updateOrderByUser(jsonCourtOrder, jsonCourtOrderIn, authentication);
 			
 			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder);
 

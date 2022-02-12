@@ -240,6 +240,11 @@
 													</div>
 												</td>
 											</tr>
+										</tbody>
+									</table>
+									<div><!--  th:if="${jsonCourtOrder.order.orderType == T(in.edu.rvce.slanno.enums.OrderType).ACCEPTED}"> -->
+									<table class="table mb-0">
+										<tbody>
 											<tr>
 												<td class="col-md-11 h6 text-end align-middle"  th:text="'Bond Amount in case Accepted'" />
 												<td class="col-md-1">
@@ -268,6 +273,7 @@
 											</tr>				
 										</tbody>
 									</table>
+									</div>
 								</div>
 							</div>
 						</div>
