@@ -30,6 +30,9 @@ import in.edu.rvce.courtorder.JsonCourtOrder;
 import in.edu.rvce.courtorder.LegalReference;
 import in.edu.rvce.courtorder.annotations.ArgumentByAnnotations;
 import in.edu.rvce.courtorder.annotations.ArgumentSentenceTypeAnnotations;
+import in.edu.rvce.courtorder.annotations.AttendPoliceStationFrequencyAnnotations;
+import in.edu.rvce.courtorder.annotations.AttendPoliceStationRecurrenceAnnotations;
+import in.edu.rvce.courtorder.annotations.BondAmountAnnotations;
 import in.edu.rvce.courtorder.annotations.LegalRefAcceptRejectDecisionAnnotations;
 import in.edu.rvce.courtorder.annotations.OrderTypeAnnotations;
 import in.edu.rvce.slanno.dto.LegalActFound;
@@ -440,7 +443,27 @@ public class AnnotationService {
 		List<OrderTypeAnnotations> orderTypeAnnotations = jsonCourtOrder.getOrder().getOrderTypeAnnotations();
 		orderTypeAnnotations.forEach(oType->{
 			if(StringUtils.equalsIgnoreCase(authentication.getName(), oType.getUsername())) {
-				jsonCourtOrder.getOrder().setOrderType(oType.getOrderType());
+				jsonCourtOrder.getOrder().setOrderType(oType.getOrderType());				
+			}
+		});
+		List<BondAmountAnnotations> bondAmountAnnotations = jsonCourtOrder.getOrder().getBondAmountAnnotations();
+		bondAmountAnnotations.forEach(bAmount->{
+			if(StringUtils.equalsIgnoreCase(authentication.getName(), bAmount.getUsername())) {
+				jsonCourtOrder.getOrder().setBondAmount(bAmount.getBondAmount());
+			}
+		});
+		List<AttendPoliceStationRecurrenceAnnotations> attendPoliceStationRecurrenceAnnotations = 
+				jsonCourtOrder.getOrder().getAttendPoliceStationRecurrenceAnnotations();
+		attendPoliceStationRecurrenceAnnotations.forEach(attendRecurrence->{
+			if(StringUtils.equalsIgnoreCase(authentication.getName(), attendRecurrence.getUsername())) {
+				jsonCourtOrder.getOrder().setAttendPoliceStationRecurrence(attendRecurrence.getAttendPoliceStationRecurrence());
+			}
+		});
+		List<AttendPoliceStationFrequencyAnnotations> attendPoliceStationFrequencyAnnotations=
+				jsonCourtOrder.getOrder().getAttendPoliceStationFrequencyAnnotations();
+		attendPoliceStationFrequencyAnnotations.forEach(attendFrequency->{
+			if(StringUtils.equalsIgnoreCase(authentication.getName(), attendFrequency.getUsername())) {
+				jsonCourtOrder.getOrder().setAttendPoliceStationFrequency(attendFrequency.getAttendPoliceStationFrequency());
 			}
 		});
 	}
@@ -453,7 +476,43 @@ public class AnnotationService {
 				a.setOrderType(jsonCourtOrderIn.getOrder().getOrderType());
 			}			
 		});
-		
+		List<BondAmountAnnotations> jsonCourtOrderbondAmountAnnotations = jsonCourtOrder.getOrder().getBondAmountAnnotations();
+		jsonCourtOrderbondAmountAnnotations.forEach(a->{
+			if(StringUtils.equalsAnyIgnoreCase(authentication.getName(), a.getUsername())) {
+				if(jsonCourtOrderIn.getOrder().getOrderType().equals(OrderType.ACCEPTED)) {					
+					a.setBondAmount(jsonCourtOrderIn.getOrder().getBondAmount());
+				}
+				else {
+					a.setBondAmount("0");
+				}
+			}
+		});
+		List<AttendPoliceStationRecurrenceAnnotations> jsonCourtOrderAttendPoliceStationRecurrenceAnnotations = 
+				jsonCourtOrder.getOrder().getAttendPoliceStationRecurrenceAnnotations();
+		jsonCourtOrderAttendPoliceStationRecurrenceAnnotations.forEach(a->{
+			if(StringUtils.equalsAnyIgnoreCase(authentication.getName(), a.getUsername())) {
+				if(jsonCourtOrderIn.getOrder().getOrderType().equals(OrderType.ACCEPTED)) {					
+					a.setAttendPoliceStationRecurrence(jsonCourtOrderIn.getOrder().getAttendPoliceStationRecurrence());
+				}
+				else {
+					a.setAttendPoliceStationRecurrence(AttendPoliceStationRecurrence.NA);
+				}
+			}
+		});
+		List<AttendPoliceStationFrequencyAnnotations> jsonCourtOrderAttendPoliceStationFrequencyAnnotations=
+				jsonCourtOrder.getOrder().getAttendPoliceStationFrequencyAnnotations();
+		jsonCourtOrderAttendPoliceStationFrequencyAnnotations.forEach(a->{
+			if(StringUtils.equalsAnyIgnoreCase(authentication.getName(), a.getUsername())) {
+				if(jsonCourtOrderIn.getOrder().getOrderType().equals(OrderType.ACCEPTED)) {					
+					a.setAttendPoliceStationFrequency(jsonCourtOrderIn.getOrder().getAttendPoliceStationFrequency());
+				}
+				else {
+					a.setAttendPoliceStationFrequency("0");
+				}
+			}
+		});
+				
+				
 		//re-calculate order type
 		List<OrderTypeAnnotations> orderTypeAnnotations = jsonCourtOrder.getOrder().getOrderTypeAnnotations();
 		Map<String,Integer> orderTypeCountMap = new HashMap<>();
@@ -470,15 +529,57 @@ public class AnnotationService {
 		String maxOrderType=Collections.max(orderTypeCountMap.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
 		jsonCourtOrder.getOrder().setOrderType(getOrderTypeForDisplayValue(maxOrderType));
 		
-		if(jsonCourtOrderIn.getOrder().getOrderType().equals(OrderType.ACCEPTED)) {
-			jsonCourtOrder.getOrder().setBondAmount(jsonCourtOrderIn.getOrder().getBondAmount());
-			jsonCourtOrder.getOrder().setAttendPoliceStationRecurrence(jsonCourtOrderIn.getOrder().getAttendPoliceStationRecurrence());
-			jsonCourtOrder.getOrder().setAttendPoliceStationFrequency(jsonCourtOrderIn.getOrder().getAttendPoliceStationFrequency());
-		}else {
-			jsonCourtOrder.getOrder().setBondAmount("0");
-			jsonCourtOrder.getOrder().setAttendPoliceStationRecurrence(AttendPoliceStationRecurrence.NA);
-			jsonCourtOrder.getOrder().setAttendPoliceStationFrequency("0");
-		}
+		//re-calculate bond Amount
+		List<BondAmountAnnotations> bondAmountAnnotations = jsonCourtOrder.getOrder().getBondAmountAnnotations();
+		Map<String,Integer> bondAmountCountMap = new HashMap<>();
+		bondAmountAnnotations.forEach(bAmount->{
+			String bondAmount = bAmount.getBondAmount();
+			if (!bondAmountCountMap.containsKey(bondAmount)) {  // first time we've seen this string
+				bondAmountCountMap.put(bondAmount, 1);
+		    }
+		    else {
+		      int count = bondAmountCountMap.get(bondAmount);
+		      bondAmountCountMap.put(bondAmount, count + 1);
+		    }
+		});	
+		String maxBondAmount=Collections.max(bondAmountCountMap.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
+		jsonCourtOrder.getOrder().setBondAmount(maxBondAmount);
+		
+		//re-calculate attend police station recurrence
+		List<AttendPoliceStationRecurrenceAnnotations> attendPoliceStationRecurrenceAnnotations = 
+				jsonCourtOrder.getOrder().getAttendPoliceStationRecurrenceAnnotations();
+		Map<String,Integer> attendRecurrenceCountMap = new HashMap<>();
+		attendPoliceStationRecurrenceAnnotations.forEach(attReccurrence->{
+			String attendReccurrence = attReccurrence.getAttendPoliceStationRecurrence().getDisplayValue();
+			if (!attendRecurrenceCountMap.containsKey(attendReccurrence)) {  // first time we've seen this string
+				attendRecurrenceCountMap.put(attendReccurrence, 1);
+		    }
+		    else {
+		      int count = attendRecurrenceCountMap.get(attendReccurrence);
+		      attendRecurrenceCountMap.put(attendReccurrence, count + 1);
+		    }
+		});	
+		String maxAttendRecurrence=Collections.max(attendRecurrenceCountMap.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
+		jsonCourtOrder.getOrder().setAttendPoliceStationRecurrence(getAttendPoliceStationRecurrenceForDisplayValue(maxAttendRecurrence));
+		
+	
+		//re-calculate attend police station frequency
+		List<AttendPoliceStationFrequencyAnnotations> attendPoliceStationFrequencyAnnotations = 
+				jsonCourtOrder.getOrder().getAttendPoliceStationFrequencyAnnotations();
+		Map<String,Integer> attendFrequencyCountMap = new HashMap<>();
+		attendPoliceStationFrequencyAnnotations.forEach(attFrequency->{
+			String attendFrequency = attFrequency.getAttendPoliceStationFrequency();
+			if (!attendFrequencyCountMap.containsKey(attendFrequency)) {  // first time we've seen this string
+				attendFrequencyCountMap.put(attendFrequency, 1);
+		    }
+		    else {
+		      int count = attendFrequencyCountMap.get(attendFrequency);
+		      attendFrequencyCountMap.put(attendFrequency, count + 1);
+		    }
+		});	
+		String maxAttendFrequency=Collections.max(attendFrequencyCountMap.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
+		jsonCourtOrder.getOrder().setAttendPoliceStationFrequency(maxAttendFrequency);
+		
 	}
 	
 	private LegalRefAcceptRejectDecision getLegalRefAcceptRejectDecisionForDisplayValue(String displayValue) {
@@ -530,4 +631,19 @@ public class AnnotationService {
 		}
 		return orderType;
 	}
+	
+	private AttendPoliceStationRecurrence getAttendPoliceStationRecurrenceForDisplayValue(String displayValue) {
+		AttendPoliceStationRecurrence attendPoliceStationRecurrence = AttendPoliceStationRecurrence.NA;
+		if(StringUtils.equalsIgnoreCase(displayValue, AttendPoliceStationRecurrence.DAILY.getDisplayValue())) {
+			attendPoliceStationRecurrence=AttendPoliceStationRecurrence.DAILY;
+		}else if(StringUtils.equalsIgnoreCase(displayValue, AttendPoliceStationRecurrence.WEEKLY.getDisplayValue())) {
+			attendPoliceStationRecurrence=AttendPoliceStationRecurrence.WEEKLY;
+		}else if(StringUtils.equalsIgnoreCase(displayValue, AttendPoliceStationRecurrence.MONTHLY.getDisplayValue())) {
+			attendPoliceStationRecurrence=AttendPoliceStationRecurrence.MONTHLY;
+		}else if(StringUtils.equalsIgnoreCase(displayValue, AttendPoliceStationRecurrence.NA.getDisplayValue())) {
+			attendPoliceStationRecurrence=AttendPoliceStationRecurrence.NA;
+		}
+		return attendPoliceStationRecurrence;
+	}
+
 }
