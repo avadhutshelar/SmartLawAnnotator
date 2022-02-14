@@ -23,6 +23,7 @@ import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
 import in.edu.rvce.slanno.enums.OrderType;
 import in.edu.rvce.slanno.services.AnnotationService;
+import in.edu.rvce.slanno.services.LegalReferenceService;
 import in.edu.rvce.slanno.services.ProjectService;
 import in.edu.rvce.slanno.utils.SessionMessage;
 
@@ -34,6 +35,10 @@ public class AnnotationController {
 
 	@Autowired
 	private AnnotationService annotationService;
+	
+	@Autowired
+	private LegalReferenceService legalReferenceService;
+
 
 	@GetMapping("/project/{projectId}/annotate")
 	public RedirectView annotate(SessionMessage message, Model model, @PathVariable Integer projectId) {
@@ -97,7 +102,7 @@ public class AnnotationController {
 			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
 
 			//Update Legal Reference
-			annotationService.updateLegalRefsByUser(jsonCourtOrder, jsonCourtOrderIn, authentication);
+			legalReferenceService.updateLegalRefsByUser(jsonCourtOrder, jsonCourtOrderIn, authentication);
 			
 			//Update argumentBy
 			annotationService.updateArgumentsByUser(jsonCourtOrder, jsonCourtOrderIn, authentication);
@@ -262,7 +267,7 @@ public class AnnotationController {
 			legalActFound.setSectionsMatched(sectionsMatched);
 			legalActFound.setStringMatched(stringMatched);
 			
-			JsonCourtOrder jsonCourtOrder = annotationService.addLegalActFound(jsonCourtOrderTemp, legalActFound);
+			JsonCourtOrder jsonCourtOrder = legalReferenceService.addLegalActFound(jsonCourtOrderTemp, legalActFound);
 			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder);
 			
 		}catch (Exception e) {

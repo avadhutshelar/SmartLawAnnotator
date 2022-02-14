@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,9 @@ public class ProjectService {
 
 	@Autowired
 	private SettingsService settingsService;
+	
+	@Autowired
+	private LegalReferenceService legalReferenceService;
 
 	public Boolean createDirectories(Project project) throws Exception {
 
@@ -240,8 +244,12 @@ public class ProjectService {
 				e.printStackTrace();
 			}
 
-			JsonCourtOrder co = getJsonCourtOrder(processedText);
-
+			JsonCourtOrder jsonCourtOrder = getJsonCourtOrder(processedText);
+			
+			if(CollectionUtils.isEmpty(jsonCourtOrder.getBackground().getLegalReferences())) {
+				legalReferenceService.updateSectionReference(jsonCourtOrder, project);
+			}		
+			
 			legalDocument.setJsonFilePath(
 					env.getProperty("slanno.dataset.dir.json") + "\\" + legalDocument.getDocumentId() + ".json");
 
@@ -252,7 +260,7 @@ public class ProjectService {
 
 			// Java objects to File
 			try (FileWriter writer = new FileWriter(jsonFileNameWithPath)) {
-				gson.toJson(co, writer);
+				gson.toJson(jsonCourtOrder, writer);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -264,20 +272,20 @@ public class ProjectService {
 	}
 
 	private JsonCourtOrder getJsonCourtOrder(String processedText) {
-		JsonCourtOrder co = new JsonCourtOrder();
-		co.setProcessedText(processedText);
+		JsonCourtOrder jsonCourtOrder = new JsonCourtOrder();
+		jsonCourtOrder.setProcessedText(processedText);
 
 		String headerEnds = ApplicationConstants.HEADER_ENDS;
 		String header = StringUtils.substring(processedText, 0,
 				StringUtils.indexOfIgnoreCase(processedText, headerEnds));
-		co.setHeader(header.trim());
+		jsonCourtOrder.setHeader(header.trim());
 
 		String backgroundEnds = ApplicationConstants.BACKGROUND_ENDS;
 		String background = StringUtils.substring(processedText,
 				StringUtils.indexOfIgnoreCase(processedText, headerEnds) + headerEnds.length(),
 				StringUtils.indexOfIgnoreCase(processedText, backgroundEnds));
 		Background back = new Background(background.trim());
-		co.setBackground(back);
+		jsonCourtOrder.setBackground(back);
 
 		String argumentEnds = ApplicationConstants.ARGUMENT_ENDS;
 		String argument = StringUtils.substring(processedText,
@@ -296,21 +304,21 @@ public class ProjectService {
 			arg.setArgumentBy(ArgumentBy.TBD);
 			argumentList.add(arg);
 		}
-		co.setArguments(argumentList);
+		jsonCourtOrder.setArguments(argumentList);
 
 		String orderEnds = ApplicationConstants.ORDER_ENDS;
 		String orderText = StringUtils.substring(processedText,
 				StringUtils.lastIndexOfIgnoreCase(processedText, argumentEnds) + argumentEnds.length(),
 				StringUtils.indexOfIgnoreCase(processedText, orderEnds));
 		Order order= new Order(orderText.trim(),OrderType.TBD);
-		co.setOrder(order);
+		jsonCourtOrder.setOrder(order);
 
 		String footer = StringUtils.substring(processedText,
 				StringUtils.lastIndexOfIgnoreCase(processedText, orderEnds) + orderEnds.length(),
 				processedText.length());
-		co.setFooter(footer.trim());
+		jsonCourtOrder.setFooter(footer.trim());
 
-		return co;
+		return jsonCourtOrder;
 	}
 
 	public List<ArgumentSentence> splitArgumentSentences(String text) {
