@@ -38,8 +38,10 @@
 					<tbody>
 						<tr>
 							<th>Document ID</th>
-							<th>PDF File Path (Relative to Project Directory)</th>
-							<th>Original Text File Path (Relative to Project Directory)</th>
+							<th>PDF File Path <br>(Relative to Project Directory)</th>
+							<th>Original Text File Path <br>(Relative to Project Directory)</th>
+							<th>Processed Text File Path <br>(Relative to Project Directory)</th>
+							<th>JSON File Path <br>(Relative to Project Directory)</th>
 						</tr>
 						<tr th:each="legalDocument: ${project.legalDocuments}">
 							<td th:text="${legalDocument.documentId}" />
@@ -48,6 +50,12 @@
 							</td>
 							<td>
 								<label th:text="${legalDocument.origTextFilePath}"></label>								
+							</td>
+							<td>
+								<label th:text="${legalDocument.processedTextFilePath}"></label>								
+							</td>
+							<td>
+								<label th:text="${legalDocument.jsonFilePath}"></label>								
 							</td>
 						</tr>
 					</tbody>

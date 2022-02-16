@@ -7,8 +7,7 @@
 <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
 <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
 <script type="text/javascript">
-
-	function setAnnotation(annotation) {		
+	function setAnnotation(annotation) {
 		var textSelected = document.getSelection();
 		var y = document.getElementById('selectedText');
 		y.value = textSelected;
@@ -19,82 +18,343 @@
 		var txtArea = document.getElementById("textOrderTextArea");
 		var y = document.getElementById('textOrderHidden1');
 		y.value = txtArea.value;
-	}
-	
+	}	
 </script>
+
 </head>
 <body>
 	<div th:replace="fragments/header :: header"></div>
+
+	<div class="row">
+		<div class="col-md-6">
+			<ul class="nav nav-tabs">
+				<li class="nav-item"><a class="nav-link" 
+					th:href="@{/project/{projectId}/preprocess/{docId}(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">Preprocess</a></li>
+				<li class="nav-item"><a class="nav-link" 
+					th:href="@{/project/{projectId}/veiwJson/{docId}(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">Json</a></li>
+				<li class="nav-item"><a class="nav-link active" aria-current="page" href="#">Annotate</a></li>				
+			</ul>
+		</div>
+		<div class="col-md-4">
+			<nav aria-label="Page navigation example">
+				<ul class="pagination justify-content-start pagination-sm">
+					<li class="page-item"><a class="page-link"
+						th:href="@{/project/{projectId}/annotate/{docId}/prev(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
+							Previous </a></li>
+					<li class="page-item active" aria-current="page"><a
+						class="page-link"
+						th:href="@{/project/{projectId}/annotate/{docId}(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
+							<label
+							th:text="' Current Document : '+${legalDocument.documentId}"></label>
+					</a></li>
+					<li class="page-item"><a class="page-link"
+						th:href="@{/project/{projectId}/annotate/{docId}/next(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
+							Next </a></li>
+				</ul>
+			</nav>
+		</div>
+		<div class="col-md-2">
+			<a th:href="@{/project/view/{id}(id=${legalDocument.project.projectId})}">
+				<h6><label th:text="'Back to : '+${legalDocument.project.projectName}"></label></h6>
+			</a>
+		</div>	
+	</div>
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-md-4">
-				<h3 class="lh-lg">
-					Annotate Documents					
-				</h3>
+			<div class="col-md-12">
+				<h3 class="lh-lg">Annotate Documents</h3>
 			</div>
-			<div class="col-md-6">
-				<nav aria-label="Page navigation example">
-				  <ul class="pagination justify-content-start pagination-lg">
-				    <li class="page-item">
-				    	<a class="page-link" 
-				    		th:href="@{/project/{projectId}/annotate/{docId}/prev(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}">
-				    		Previous
-				    	</a>
-				    </li>
-				    <li class="page-item active" aria-current="page">
-				    	<a class="page-link" 
-				    		th:href="@{/project/{projectId}/annotate/{docId}(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}">
-				    		<label th:text="' Current Document : '+${legalDocument.documentId}"></label>
-				    	</a>
-				    </li>    
-				    <li class="page-item">
-				    	<a class="page-link" 
-				    		th:href="@{/project/{projectId}/annotate/{docId}/next(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}">
-				    		Next
-				    	</a>
-				   	</li>
-				  </ul>
-				</nav>
-			</div>						
 		</div>
 		<div class="row">
-			<div class="col-md-10">
-				<div th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE0}">	
-					<textarea rows="20" cols="170" id="textOrderTextArea"
-						th:text="${message.textOrder}" th:field="${message.textOrder}"></textarea>
-				</div>
-				<div th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE1}">	
-					<p id="styledtextOrderPara" th:utext="${message.styledtextOrder}"></p>
+			<div class="col-md-12">
+				<div
+					th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE1}">
+
+					<table class="table table-striped table-responsive-md">
+						<tbody>
+							<tr>
+								<td class="h5 text-center" th:text="${jsonCourtOrder.header}" />
+							</tr>
+							
+						</tbody>
+					</table>
+
+					<form method="post" th:object="${jsonCourtOrder}"
+						th:action="@{/project/{projectId}/annotate/{docId}(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
+					
+					<div class="accordion" id="legalRefAccordion">
+						<div class="accordion-item">	
+							<h2 class="accordion-header"
+								th:id="'legalRefAccordionHeader'">
+								<button class="accordion-button collapsed" type="button"
+									data-bs-toggle="collapse"	
+									th:data-bs-target="@{#collapseLegalRefAccordion}"								
+									aria-expanded="false"		
+									th:aria-controls="'collapseLegalRefAccordion'"							
+									th:text="'Background with Legal Reference'"></button>
+							</h2>
+							<div th:id="'collapseLegalRefAccordion'"
+								class="accordion-collapse collapse" aria-labelledby="headingTwo"
+								data-bs-parent="#legalRefAccordion">
+								<div class="accordion-body">
+									<table class="table table-striped table-responsive-md">
+										<tbody>									
+											<tr>
+												<td colspan="4" th:text="${jsonCourtOrder.background.text}" />
+											</tr>
+											
+											<tr th:each="legalRef,stat1 : *{background.legalReferences}">												
+												<td class="col-md-8" th:text="'Section/s '+ ${legalRef.legalActFound.sectionsMatched} +' of the ' + ${legalRef.legalActFound.legalAct.actName}" />
+												<td
+													th:each="refDecision : ${T(in.edu.rvce.slanno.enums.LegalRefAcceptRejectDecision).values()}">									
+													<input type="radio" th:field="*{background.legalReferences[__${stat1.index}__].legalRefAcceptRejectDecision}" 
+														th:value="${refDecision}" class="custom-control-input">
+				                    				<label class="custom-control-label" th:text="${refDecision.displayValue}">sentType</label>
+				                    				
+				                    				<input type="hidden" th:field="*{background.legalReferences[__${stat1.index}__].refNumber}">		                    				
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									<table class="table mb-0">
+										<thead>
+											<tr>
+												<td class="col-md-3 h6 text-center" th:text="'Act Name Matched'" />
+												<td class="col-md-2 h6 text-center" th:text="'Sections Matched'" />
+												<td class="col-md-6 h6 text-center" th:text="'String Matched'" />
+												<td class="col-md-1 h6" th:text="'Action'" />
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td class="col-md-3"><input type="text" class="form-control" id="actNameMatchedTemp"></td>
+												<td class="col-md-2"><input type="text" class="form-control" id="sectionsMatchedTemp"></td>
+										        <td class="col-md-6"><input type="text" class="form-control" id="stringMatchedTemp"></td>
+												<td class="col-md-1">
+													<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLegalReference">Add</button>
+												</td>
+											</tr>	
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="accordion" id="argumentAccordion"
+						th:each="argument,stat : *{arguments}">
+						<div class="accordion-item">
+							<h2 class="accordion-header"
+								th:id="'heading'+${argument.argumentNumber}">
+								<button class="accordion-button collapsed" type="button"
+									data-bs-toggle="collapse"
+									th:data-bs-target="@{#collapse{id}(id=${argument.argumentNumber})}"
+									aria-expanded="false"
+									th:aria-controls="'collapse'+${argument.argumentNumber}"
+									th:text="'Argument No '+${argument.argumentNumber}"></button>
+							</h2>
+							<div th:id="'collapse'+${argument.argumentNumber}"
+								class="accordion-collapse collapse" aria-labelledby="headingTwo"
+								data-bs-parent="#argumentAccordion">
+								<div class="accordion-body">
+									<table class="table mb-0">
+										<thead>
+											<tr>
+												<td class="col-md-10 h6 text-center" th:text="'Argument'" />
+												<td class="h6 text-center" th:text="'Argument By'"></td>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td class="col-md-10" th:text="${argument.text}" />
+												<td><div class="form-group">
+														<div
+															th:each="argBy : ${T(in.edu.rvce.slanno.enums.ArgumentBy).values()}">
+															<div class="custom-control custom-radio custom-control-inline">
+																 
+																<input type="radio" th:field="*{arguments[__${stat.index}__].argumentBy}" th:value="${argBy}" class="custom-control-input">
+                  													<label class="custom-control-label" th:text="${argBy.displayValue}">argBy</label>
+                  													<input type="hidden" th:field="*{arguments[__${stat.index}__].argumentNumber}">
+															</div>
+														</div>
+													</div>													
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									<table class="table table-striped table-responsive-md">
+										<thead>
+											<tr>
+												<td class="col-md-8 h6 text-center" th:text="'Sentences'" />
+												<td class="h6 text-center" colspan="2" th:text="'Sentence Type'"></td>
+											</tr>
+										</thead>
+										<tbody>
+											<tr th:each="argumentSentence,stat1 : *{arguments[__${stat.index}__].argumentSentences}">
+												<td class="col-md-8" th:text="${argumentSentence.text}" />
+												<td class="align-middle"
+													th:each="sentType : ${T(in.edu.rvce.slanno.enums.ArgumentSentenceType).values()}">									
+													<input type="radio" th:field="*{arguments[__${stat.index}__].argumentSentences[__${stat1.index}__].argumentSentenceType}" 
+														th:value="${sentType}" class="custom-control-input">
+				                    				<label class="custom-control-label" th:text="${sentType.displayValue}">sentType</label>
+				                    				<input type="hidden" th:field="*{arguments[__${stat.index}__].argumentSentences[__${stat1.index}__].sentenceNumber}">
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="accordion" id="orderAccordion">
+						<div class="accordion-item">	
+							<h2 class="accordion-header"
+								th:id="'orderAccordionHeader'">
+								<button class="accordion-button collapsed" type="button"
+									data-bs-toggle="collapse"	
+									th:data-bs-target="@{#collapseOrderAccordion}"								
+									aria-expanded="false"		
+									th:aria-controls="'collapseOrderAccordion'"							
+									th:text="'Order'"></button>
+							</h2>
+							<div th:id="'collapseOrderAccordion'"
+								class="accordion-collapse collapse" aria-labelledby="headingTwo"
+								data-bs-parent="#OrderAccordion">
+								<div class="accordion-body">
+									<table class="table mb-0">
+										<thead>
+											<tr>
+												<td class="col-md-11 h6 text-center" th:text="'Order'" />
+												<td class="col-md-1 h6 text-center" colspan="2" th:text="'Order Type'"></td>
+											</tr>
+										</thead>
+										<tbody>									
+											<tr>
+												<td class="col-md-11"  th:text="${jsonCourtOrder.order.text}" />
+												<td class="col-md-1">
+													<div th:each="orderType : ${T(in.edu.rvce.slanno.enums.OrderType).values()}">	
+														<div class="custom-control custom-radio custom-control-inline">								
+															<input type="radio" th:field="${jsonCourtOrder.order.orderType}" th:value="${orderType}" class="custom-control-input">
+						                    				<label class="custom-control-label" th:text="${orderType.displayValue}">orderType</label>		
+					                    				</div>		                    				
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+									<div><!--  th:if="${jsonCourtOrder.order.orderType == T(in.edu.rvce.slanno.enums.OrderType).ACCEPTED}"> -->
+									<table class="table mb-0">
+										<tbody>
+											<tr>
+												<td class="col-md-11 h6 text-end align-middle"  th:text="'Bond Amount in case Accepted'" />
+												<td class="col-md-1">
+													<input type="text" class="form-control" th:name="${jsonCourtOrder.order.bondAmount}"
+														th:field="${jsonCourtOrder.order.bondAmount}" >
+												</td>												
+											</tr>	
+											<tr>
+												<td class="col-md-11 h6 text-end align-middle"  th:text="'Attend Police Station Recurrence in case Accepted'" />
+												<td class="col-md-1">
+													<div th:each="attendPoliceStationRecurrence : ${T(in.edu.rvce.slanno.enums.AttendPoliceStationRecurrence).values()}">
+														<div class="custom-control custom-radio custom-control-inline">
+															<input type="radio" th:field="${jsonCourtOrder.order.attendPoliceStationRecurrence}" 
+																th:value="${attendPoliceStationRecurrence}" class="custom-control-input">
+						                    				<label class="custom-control-label" th:text="${attendPoliceStationRecurrence.displayValue}">attendPoliceStationRecurrence</label>
+														</div>
+													 </div>
+												</td>												
+											</tr>
+											<tr>
+												<td class="col-md-11 h6 text-end align-middle"  th:text="'Attend Police Station Frequency in case Accepted'" />
+												<td class="col-md-1">
+													<input type="text" class="form-control" th:name="${jsonCourtOrder.order.attendPoliceStationFrequency}"
+														th:field="${jsonCourtOrder.order.attendPoliceStationFrequency}" >
+												</td>												
+											</tr>				
+										</tbody>
+									</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<input type="submit" value="Update Annotations"/>
+					</form>
+					
+					<table class="table table-striped table-responsive-md">
+						<tbody>
+							<tr>
+								<td th:text="${jsonCourtOrder.footer}" />
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
-			
-			
-			<div class="col-md-2">		
-			<h6>Tools</h6>
-			<br>
-			<form action="#"
-				th:action="@{/project/{projectId}/addAnnotation/{docId}(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}"
-				th:object="${legalDocument}" method="post">
-				<input type="hidden" th:name="selectedText" class="form-control" id="selectedText" placeholder="selectedText">
-				<input type="hidden" th:name="selectedAnnotation" class="form-control" id="selectedAnnotation" placeholder="selectedAnnotation">		
-				<input type="submit" value="Set Header" onclick="setAnnotation('header')"/>
-			</form>
-			<br>
-			<form action="#"
-				th:action="@{/project/{projectId}/annotate/{docId}/complete(projectId=${legalDocument.project_doc.projectId},docId=${legalDocument.documentId})}"
-				th:object="${legalDocument}" method="post">
-				<input type="hidden" th:name="textOrderHidden1" class="form-control"
-					id="textOrderHidden1" placeholder="textOrderHidden1"/>			
-				<div th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE0}">	
-					<input type="submit" value="Mark Complete" onclick="completeAnnotationProcess()"/>
+		</div>
+		<div class="row">
+			<div class="col-md-12">	
+				<form action="#"
+					th:action="@{/project/{projectId}/annotate/{docId}/complete(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}"
+					th:object="${legalDocument}" method="post">
+					<input type="hidden" th:name="textOrderHidden1"
+						class="form-control" id="textOrderHidden1"
+						placeholder="textOrderHidden1" />
+					<div
+						th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE1}">
+						<input type="submit" value="Mark Complete"
+							onclick="completeAnnotationProcess()" />
+					</div>
+				</form>
+				<div th:if="${message != null}">
+					<label for="name" class="text-success"
+						th:text="${message.successMessage}"></label> <label for="name"
+						class="text-danger" th:text="${message.errorMessage}"></label>
 				</div>
-			</form>
-			<div th:if="${message != null}">
-				<label for="name" class="text-success"	th:text="${message.successMessage}"></label>	
-				<label for="name" class="text-danger" th:text="${message.errorMessage}"></label>
-			</div>	
 			</div>
 		</div>
 	</div>
+	
+	<div class="modal fade" id="addLegalReference" tabindex="-1" aria-labelledby="addLegalReference" aria-hidden="true">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel">Add Legal Reference</h5>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	      </div>
+			<form method="post" 
+				th:action="@{/project/{projectId}/annotate/{docId}/legalReference/add(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
+		      <div class="modal-body">
+		          <div class="mb-3">
+		            <label for="actNameMatched" class="col-form-label">Act Name Matched:</label>
+		            <input type="text" class="form-control" id="actNameMatched" placeholder="actNameMatched" th:name="actNameMatched">
+		          </div>
+		          <div class="mb-3">
+		            <label for="sectionsMatched" class="col-form-label">Sections Matched:</label>
+		            <input type="text" class="form-control" id="sectionsMatched" placeholder="sectionsMatched" th:name="sectionsMatched">
+		          </div>
+		          <div class="mb-3">
+		            <label for="stringMatched" class="col-form-label">String Matched:</label>
+		            <input type="text" class="form-control" id="stringMatched" placeholder="stringMatched" th:name="stringMatched">
+		          </div>
+		        
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>		        
+		        <input type="submit" value="Add"/>
+		      </div>
+	      </form>
+	    </div>
+	  </div>
+	</div>
+	
+	<script>
+		var exampleModal = document.getElementById('addLegalReference')
+		exampleModal.addEventListener('show.bs.modal', function(event) {		
+			document.getElementById('actNameMatched').value = document.getElementById('actNameMatchedTemp').value;
+			document.getElementById('sectionsMatched').value = document.getElementById('sectionsMatchedTemp').value;
+			document.getElementById('stringMatched').value = document.getElementById('stringMatchedTemp').value;
+		})
+	</script>
 </body>
 </html>

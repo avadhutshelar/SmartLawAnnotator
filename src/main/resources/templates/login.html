@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+    <head>
+        <title>Spring Security Example </title>
+		<link rel="stylesheet"	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+		<script	th:src="@{/webjars/jquery/jquery.min.js}"></script>
+		<script	th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>		
+    </head>
+    <body>
+    	<div th:replace="fragments/header :: header"></div>
+   		<div class="container-fluid">
+			<div class="col-md-5">
+    			<h2 class="lh-lg">Smart Law Application - Login</h2>
+    			<form th:action="@{/login}" method="post">
+    			<table class="table table-striped table-responsive-md">
+					<tbody>							
+						<tr>
+							<td><label for="userName" class="col-form-label">User Name: </label></td>
+							<td>
+								<input type="text" class="form-control" name="username" placeholder="Type user name here"/>								
+							</td>
+						</tr>
+						<tr>
+							<td><label for="password" class="col-form-label">Password: </label></td>
+							<td>
+								<input type="password" class="form-control" name="password" placeholder="Type password here"/>								
+							</td>
+						</tr>
+						<tr>
+							<td></td>
+							<td>
+								<input type="submit" value="Sign In"/>								
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<div th:if="${param.error}">
+									<label for="name" class="text-danger" th:text="'Invalid username and password.'"></label>
+						       </div>								
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<div th:if="${param.logout}">						            
+						            <label for="name" class="text-success" th:text="'You have been logged out.'"></label>
+						        </div>							
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				</form>
+	        </div>
+        </div>
+    </body>
+</html>

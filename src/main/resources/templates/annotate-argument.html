@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Annotate Documents</title>
+<link rel="stylesheet"
+	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+<script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+</head>
+<body>
+	<div th:replace="fragments/header :: header"></div>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-6">
+				<h3 class="lh-lg">Annotate Documents</h3>
+			</div>
+			<div class="col-md-6">
+				<br />
+				<nav aria-label="Page navigation example">
+					<ul class="pagination justify-content-start pagination-sm">
+						<li class="page-item"><a class="page-link"
+							th:href="@{/project/{projectId}/annotate/{docId}/prev(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
+								Previous </a></li>
+						<li class="page-item active" aria-current="page"><a
+							class="page-link"
+							th:href="@{/project/{projectId}/annotate/{docId}(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
+								<label
+								th:text="' Current Document : '+${legalDocument.documentId}"></label>
+						</a></li>
+						<li class="page-item"><a class="page-link"
+							th:href="@{/project/{projectId}/annotate/{docId}/next(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}">
+								Next </a></li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<div
+					th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE1}">
+					<table class="table table-striped table-responsive-md">
+						<tbody>
+							<tr>
+								<td class="h5 text-center" th:text="${jsonCourtOrder.header}" />
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<form method="post" th:object="${argument}"
+				th:action="@{/project/{projectId}/annotate/{docId}/argument/{argNum}(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId},argNum=${argument.argumentNumber})}">
+				<div class="table-responsive">
+					<table class="table">
+						<thead>
+							<tr>
+								<td class="col-md-10 h5 text-center" th:text="'Argument'" />
+								<td class="h5 text-center" th:text="'Argument By'"></td>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td class="col-md-10" th:text="${argument.text}" />
+								<td>
+									<div
+										th:each="argBy : ${T(in.edu.rvce.slanno.enums.ArgumentBy).values()}">											
+										<input type="radio" th:field="*{argumentBy}" th:value="${argBy}" class="custom-control-input">
+                    					<label class="custom-control-label" th:for="${#ids.prev('argumentBy')}" th:text="${argBy.displayValue}">argBy</label>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="table-responsive">
+					<table class="table">
+						<thead>
+							<tr>
+								<td class="col-md-9 h5 text-center" th:text="'Sentences'" />
+								<td class="h5 text-center" colspan="2" th:text="'Sentence Type'"></td>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="argumentSentence,stat : *{argumentSentences}">
+								<td class="col-md-9" th:text="${argumentSentence.text}" />
+								<td
+									th:each="sentType : ${T(in.edu.rvce.slanno.enums.ArgumentSentenceType).values()}">									
+									<input type="radio" th:field="*{argumentSentences[__${stat.index}__].argumentSentenceType}" th:value="${sentType}" class="custom-control-input">
+                    				<label class="custom-control-label" th:text="${sentType.displayValue}">sentType</label>
+                    				
+                    				<input type="hidden" th:field="*{argumentSentences[__${stat.index}__].sentenceNumber}">
+                    				<input type="hidden" th:field="*{argumentSentences[__${stat.index}__].text}">
+								</td>
+							</tr>
+							<tr>
+								<td class="col-md-9"/>
+								<td/>
+								<td>
+									<input type="submit" value="Update" />
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div>
+					
+				</div>
+			</form>
+		</div>
+</body>
+</html>

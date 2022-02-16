@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+e<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 	<div th:fragment="viewProjectLeftSidebar">
@@ -12,6 +12,25 @@
 		  <li class="nav-item">
 		    <a class="nav-link" aria-controls="preprocess" aria-selected="true" th:href="@{/project/{projectId}/preprocess(projectId=${project.projectId})}">Preprocess Documents</a>
 		  </li>
+		  <li class="nav-item">
+		    <a class="nav-link" aria-controls="preprocess" aria-selected="true" th:href="@{/project/{projectId}/annotators(projectId=${project.projectId})}">Assign Annotators</a>
+		  </li>
+		  <li class="nav-item">
+		    <a class="nav-link" aria-controls="annotate" aria-selected="true" th:href="@{/project/{projectId}/annotate(projectId=${project.projectId})}">Annotate Documents</a>
+		  </li>	
+		</ul>
+	</div>
+	<div th:fragment="viewSettingsLeftSidebar">
+		<ul class="nav flex-column">
+		  <li class="nav-item">
+		    <a class="nav-link" aria-controls="prop" aria-selected="true" th:href="@{/systemSettings}">System Settings</a>
+		  </li>	
+		  <li class="nav-item">
+		    <a class="nav-link" aria-controls="prop" aria-selected="true" th:href="@{/legalActs}">Legal Acts</a>
+		  </li>	
+		  <li class="nav-item">
+		    <a class="nav-link" aria-controls="prop" aria-selected="true" th:href="@{/users}">User Management</a>
+		  </li>	
 		</ul>
 	</div>
 </body>

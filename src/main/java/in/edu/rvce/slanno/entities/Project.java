@@ -33,11 +33,13 @@ public class Project {
 	String projectDirectoryName;
 	
 	@OneToMany(
-			mappedBy = "project_doc",
+			mappedBy = "project",
 			cascade = CascadeType.ALL,
 			orphanRemoval = true
 	)
 	List<LegalDocument> legalDocuments=new ArrayList<>();
+	
+	String annotatorUserListString;
 	
 	public Project() {
 		

@@ -1,0 +1,14 @@
+# make all patterns case-sensitive
+ENV.defaultStringMatchFlags = 0
+ENV.defaultStringPatternFlags = 0
+
+# these Java classes will be used by the rules
+ner = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$NamedEntityTagAnnotation" }
+tokens = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$TokensAnnotation" }
+
+# define some regexes over tokens
+$LDAPP_BEGINNING = "/(ld|Ld)\.?/"
+$LDAPP_ENDING = "/(app|App|APP)\.?/"
+
+# rule for recognizing company names
+{ ruleType: "tokens", pattern: ([{word:$LDAPP_BEGINNING} & {tag:"NNP"}]+ [{word:$LDAPP_ENDING}]), action: Annotate($0, ner, "LDAPP"), result: "LDAPP_RESULT" }
