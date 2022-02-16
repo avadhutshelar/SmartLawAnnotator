@@ -17,7 +17,7 @@
 		var txtArea = document.getElementById("textOrderTextArea");
 		var y = document.getElementById('textOrderHidden1');
 		y.value = txtArea.value;
-	}
+	}	
 	function insertHeaderEnd() {
 		var txtArea = document.getElementById("textOrderTextArea");
 		var startPosition, txtAreaBeforeStartPosition,txtAreaAfterStartPosition,txtAreaUpdated;		
@@ -66,7 +66,11 @@
 		var y = document.getElementById('textOrderHidden5');
 		y.value = txtAreaUpdated;
 	}
-	
+	function backToPreProcess(){
+		var txtArea = document.getElementById("textOrderTextArea");
+		var y = document.getElementById('textOrderHidden6');
+		y.value = txtArea.value;
+	}
 </script>
 </head>
 <body>
@@ -177,6 +181,14 @@
 				</div>
 				<div th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE1}">	
 					<label class="text-success" th:text="'Preprocessing Already marked complete'"></label>
+					
+					<form action="#"
+						th:action="@{/project/{projectId}/preprocess/{docId}/backToPreprocess(projectId=${legalDocument.project.projectId},docId=${legalDocument.documentId})}"
+						th:object="${legalDocument}" method="post">
+						<input type="hidden" th:name="textOrderHidden6" class="form-control" id="textOrderHidden6" placeholder="textOrderHidden6"/>									
+							<input type="submit" value="Back to Pre-Process" onclick="backToPreProcess()"/>					
+					</form>
+					
 				</div>
 				<div th:if="${message != null}">
 					<label for="name" class="text-success"	th:text="${message.successMessage}"></label>	

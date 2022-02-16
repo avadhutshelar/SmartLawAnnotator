@@ -126,6 +126,31 @@ public class ProjectPreProcessDocumentsController {
 		return "project-preprocess-document";
 	}
 	
+	@PostMapping("/project/{projectId}/preprocess/{docId}/backToPreprocess")
+	public String backToPreprocess(SessionMessage message, Model model, @PathVariable Integer projectId, @PathVariable Long docId,
+			@RequestParam(value = "textOrderHidden6", required = true) String textOrderHidden6) {
+		String successMessage = "";
+		String errorMessage = "";
+		try {
+			Project project = projectService.getProjectById(projectId);
+			LegalDocument legalDocument= projectService.getLegalDocumentByDocumentId(docId);
+			legalDocument.setAnnotationProcessingStage(AnnotationProcessingStage.STAGE0);
+			projectService.saveUpdatedTextOrder(project, legalDocument, textOrderHidden6);
+			projectService.saveJsonOrder(project, legalDocument);
+			message.setTextOrder(textOrderHidden6);
+			model.addAttribute("project", project);
+			model.addAttribute("legalDocument", legalDocument);
+			successMessage="Back to Pre-Process now";
+		} catch (Exception e) {
+			errorMessage = "Error in going back to pre-processing: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);			
+		}
+		return "project-preprocess-document";
+	}
+	
 	@GetMapping("/project/{projectId}/preprocess/{docId}/prev")
 	public RedirectView preProcessPreviousDocuments(SessionMessage message, Model model, @PathVariable Integer projectId, @PathVariable Long docId) {
 		String successMessage = "";

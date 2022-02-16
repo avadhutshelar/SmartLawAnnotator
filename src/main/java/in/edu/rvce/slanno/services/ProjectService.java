@@ -37,6 +37,7 @@ import in.edu.rvce.slanno.entities.SystemSetting;
 import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
 import in.edu.rvce.slanno.enums.ArgumentBy;
 import in.edu.rvce.slanno.enums.ArgumentSentenceType;
+import in.edu.rvce.slanno.enums.AttendPoliceStationRecurrence;
 import in.edu.rvce.slanno.enums.OrderType;
 import in.edu.rvce.slanno.repositories.LegalDocumentRepository;
 import in.edu.rvce.slanno.repositories.ProjectRepository;
@@ -64,7 +65,13 @@ public class ProjectService {
 	private SettingsService settingsService;
 	
 	@Autowired
-	private LegalReferenceService legalReferenceService;
+	private LegalReferenceAnnotationService legalReferenceService;
+	
+	@Autowired
+	private ArgumentAnnotationService argumentAnnotationService;
+	
+	@Autowired 
+	private OrderAnnotationService orderAnnotationService;
 
 	public Boolean createDirectories(Project project) throws Exception {
 
@@ -247,8 +254,12 @@ public class ProjectService {
 			JsonCourtOrder jsonCourtOrder = getJsonCourtOrder(processedText);
 			
 			if(CollectionUtils.isEmpty(jsonCourtOrder.getBackground().getLegalReferences())) {
-				legalReferenceService.updateSectionReference(jsonCourtOrder, project);
+				legalReferenceService.initializeSectionReference(jsonCourtOrder, project);
 			}		
+			
+			argumentAnnotationService.initializeArgumentBySentenceType(jsonCourtOrder, project);
+			
+			orderAnnotationService.initializeArgumentBySentenceType(jsonCourtOrder, project);
 			
 			legalDocument.setJsonFilePath(
 					env.getProperty("slanno.dataset.dir.json") + "\\" + legalDocument.getDocumentId() + ".json");
@@ -310,7 +321,7 @@ public class ProjectService {
 		String orderText = StringUtils.substring(processedText,
 				StringUtils.lastIndexOfIgnoreCase(processedText, argumentEnds) + argumentEnds.length(),
 				StringUtils.indexOfIgnoreCase(processedText, orderEnds));
-		Order order= new Order(orderText.trim(),OrderType.TBD);
+		Order order= new Order(orderText.trim(),OrderType.TBD,"0",AttendPoliceStationRecurrence.NA,"0");
 		jsonCourtOrder.setOrder(order);
 
 		String footer = StringUtils.substring(processedText,

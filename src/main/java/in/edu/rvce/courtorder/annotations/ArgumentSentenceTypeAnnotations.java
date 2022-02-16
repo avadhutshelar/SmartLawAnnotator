@@ -12,4 +12,9 @@ public class ArgumentSentenceTypeAnnotations {
 	public ArgumentSentenceTypeAnnotations() {
 		
 	}
+
+	public ArgumentSentenceTypeAnnotations(String username, ArgumentSentenceType argumentSentenceType) {
+		this.username = username;
+		this.argumentSentenceType = argumentSentenceType;
+	}
 }

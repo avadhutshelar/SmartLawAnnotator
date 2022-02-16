@@ -28,13 +28,13 @@ import in.edu.rvce.slanno.enums.LegalRefAcceptRejectDecision;
 import in.edu.rvce.slanno.utils.ApplicationConstants;
 
 @Service
-public class LegalReferenceService {
+public class LegalReferenceAnnotationService {
 	
 	@Autowired
 	private SettingsService settingsService;
 
 
-	public JsonCourtOrder updateSectionReference(JsonCourtOrder jsonCourtOrder, Project project) {
+	public JsonCourtOrder initializeSectionReference(JsonCourtOrder jsonCourtOrder, Project project) {
 		try {
 			if (jsonCourtOrder.getBackground() != null) {
 				Background background = jsonCourtOrder.getBackground();

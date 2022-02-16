@@ -3,7 +3,6 @@ package in.edu.rvce.slanno.controllers;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -16,14 +15,14 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import in.edu.rvce.courtorder.Argument;
 import in.edu.rvce.courtorder.JsonCourtOrder;
-import in.edu.rvce.courtorder.annotations.LegalRefAcceptRejectDecisionAnnotations;
 import in.edu.rvce.slanno.dto.LegalActFound;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
-import in.edu.rvce.slanno.enums.OrderType;
 import in.edu.rvce.slanno.services.AnnotationService;
-import in.edu.rvce.slanno.services.LegalReferenceService;
+import in.edu.rvce.slanno.services.ArgumentAnnotationService;
+import in.edu.rvce.slanno.services.LegalReferenceAnnotationService;
+import in.edu.rvce.slanno.services.OrderAnnotationService;
 import in.edu.rvce.slanno.services.ProjectService;
 import in.edu.rvce.slanno.utils.SessionMessage;
 
@@ -37,8 +36,13 @@ public class AnnotationController {
 	private AnnotationService annotationService;
 	
 	@Autowired
-	private LegalReferenceService legalReferenceService;
+	private LegalReferenceAnnotationService legalReferenceService;
 
+	@Autowired
+	private ArgumentAnnotationService argumentAnnotationService;
+	
+	@Autowired
+	private OrderAnnotationService orderAnnotationService;
 
 	@GetMapping("/project/{projectId}/annotate")
 	public RedirectView annotate(SessionMessage message, Model model, @PathVariable Integer projectId) {
@@ -105,10 +109,10 @@ public class AnnotationController {
 			legalReferenceService.updateLegalRefsByUser(jsonCourtOrder, jsonCourtOrderIn, authentication);
 			
 			//Update argumentBy
-			annotationService.updateArgumentsByUser(jsonCourtOrder, jsonCourtOrderIn, authentication);
+			argumentAnnotationService.updateArgumentsByUser(jsonCourtOrder, jsonCourtOrderIn, authentication);
 			
 			//Update Order			
-			annotationService.updateOrderByUser(jsonCourtOrder, jsonCourtOrderIn, authentication);
+			orderAnnotationService.updateOrderByUser(jsonCourtOrder, jsonCourtOrderIn, authentication);
 			
 			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder);
 

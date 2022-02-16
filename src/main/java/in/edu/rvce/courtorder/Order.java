@@ -23,9 +23,13 @@ public class Order {
 	String attendPoliceStationFrequency;
 	List<AttendPoliceStationFrequencyAnnotations> attendPoliceStationFrequencyAnnotations;
 		
-	public Order(String text, OrderType orderType) {
+	public Order(String text, OrderType orderType, String bondAmount, 
+			AttendPoliceStationRecurrence attendPoliceStationRecurrence, String attendPoliceStationFrequency) {
 		this.text = text;
 		this.orderType=orderType;
+		this.bondAmount=bondAmount;
+		this.attendPoliceStationRecurrence=attendPoliceStationRecurrence;
+		this.attendPoliceStationFrequency=attendPoliceStationFrequency;
 	}
 
 	public Order() {
