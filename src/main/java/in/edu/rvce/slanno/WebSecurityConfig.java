@@ -28,7 +28,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		http.authorizeRequests()
 			.antMatchers("/systemSettings").hasRole("ADMIN")
-			.antMatchers("/project/**/annotate/**").hasAnyRole("ANNOTATOR", "ADMIN")
+			.antMatchers("/legalActs").hasRole("ADMIN")
+			.antMatchers("/users").hasRole("ADMIN")
+			.antMatchers("/project/create").hasAnyRole("ADMIN")
+			.antMatchers("/project/view/all").hasAnyRole("ADMIN")
+			.antMatchers("/project/**/import/**").hasAnyRole("ADMIN")
+			.antMatchers("/project/**/annotators/**").hasAnyRole("ADMIN")
+			.antMatchers("/project/**/preprocess/**").hasAnyRole("ADMIN", "ANNOTATOR")
+			.antMatchers("/project/**/veiwJson/**").hasAnyRole("ADMIN", "ANNOTATOR")
+			.antMatchers("/project/**/annotate/**").hasAnyRole("ADMIN", "ANNOTATOR")
 			.antMatchers("/").permitAll().and().formLogin()
 			.loginPage("/login").permitAll().and().logout().permitAll();
 	}
