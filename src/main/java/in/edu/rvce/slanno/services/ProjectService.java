@@ -384,6 +384,12 @@ public class ProjectService {
 		return argumentSentences;
 	}
 	
+	public int getNumberofAnnotatorsForProject(Project project) {
+		String annotatorUserListString = project.getAnnotatorUserListString();
+		List<String> annotatorUserWithAnnotatorRole = Arrays.asList(annotatorUserListString.split(","));
+		return annotatorUserWithAnnotatorRole.size();
+	}
+	
 	/*
 	 * public List<ProjectAnnotator> getAllProjectAnnotators() throws Exception {
 	 * List<ProjectAnnotator> projectAnnotatorList =
@@ -393,4 +399,5 @@ public class ProjectService {
 	 * public void addOrUpdateProjectAnnotator(ProjectAnnotator projectAnnotator) {
 	 * projectAnnotatorRepository.save(projectAnnotator); }
 	 */
+	
 }

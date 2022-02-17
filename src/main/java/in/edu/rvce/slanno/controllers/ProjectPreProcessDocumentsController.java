@@ -108,14 +108,18 @@ public class ProjectPreProcessDocumentsController {
 		String errorMessage = "";
 		try {
 			Project project = projectService.getProjectById(projectId);
-			LegalDocument legalDocument= projectService.getLegalDocumentByDocumentId(docId);
-			legalDocument.setAnnotationProcessingStage(AnnotationProcessingStage.STAGE1);
-			projectService.saveUpdatedTextOrder(project, legalDocument, textOrderHidden1);
-			projectService.saveJsonOrder(project, legalDocument);
-			message.setTextOrder(textOrderHidden1);
-			model.addAttribute("project", project);
-			model.addAttribute("legalDocument", legalDocument);
-			successMessage="Marked Completed.";
+			if(projectService.getNumberofAnnotatorsForProject(project)>=3) {
+				LegalDocument legalDocument= projectService.getLegalDocumentByDocumentId(docId);
+				legalDocument.setAnnotationProcessingStage(AnnotationProcessingStage.STAGE1);
+				projectService.saveUpdatedTextOrder(project, legalDocument, textOrderHidden1);
+				projectService.saveJsonOrder(project, legalDocument);
+				message.setTextOrder(textOrderHidden1);
+				model.addAttribute("project", project);
+				model.addAttribute("legalDocument", legalDocument);
+				successMessage="Marked Completed.";
+			}else {
+				errorMessage = "Error in completing pre-processing: Please assign minimum 3 annotators for the project";
+			}
 		} catch (Exception e) {
 			errorMessage = "Error in completing pre-processing: \n" + e.getMessage();
 		} finally {
