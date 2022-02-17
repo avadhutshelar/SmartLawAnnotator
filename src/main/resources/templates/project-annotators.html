@@ -60,7 +60,10 @@
 									<input type="hidden" th:field="*{userDtoList[__${itemStat.index}__].username}" />
 								</td>
 								<td th:text="${userDto.enabled}"/>
-								<td th:text="${userDto.authority}"/>
+								<td>
+									<label class="custom-control-label" th:text="${userDto.authority}">authority</label>
+									<input type="hidden" th:field="*{userDtoList[__${itemStat.index}__].authority}" />	
+								</td>								
 								<td><input type="checkbox" th:field="*{userDtoList[__${itemStat.index}__].isAnnotatorForProject}" /></td>
 							</tr>
 							<tr>
@@ -72,6 +75,10 @@
 						</tbody>
 					</table>
 				</form>
+				<div th:if="${message != null}">
+					<label for="name" class="text-success"	th:text="${message.successMessage}"></label>	
+					<label for="name" class="text-danger" th:text="${message.errorMessage}"></label>
+				</div>	
 			</div>
 		</div>
 	</div>

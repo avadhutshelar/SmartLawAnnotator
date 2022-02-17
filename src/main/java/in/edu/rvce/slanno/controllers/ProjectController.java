@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import in.edu.rvce.slanno.dto.UserProjectDto;
+import in.edu.rvce.slanno.entities.Authorities;
 import in.edu.rvce.slanno.entities.Project;
+import in.edu.rvce.slanno.enums.UserAuthorities;
 import in.edu.rvce.slanno.enums.UserDto;
 import in.edu.rvce.slanno.services.ProjectService;
 import in.edu.rvce.slanno.services.UsersService;
@@ -153,6 +155,7 @@ public class ProjectController {
 	public String projectAnnotators(SessionMessage message, Model model, @PathVariable Integer projectId) {
 		String successMessage = "";
 		String errorMessage = "";
+		if(StringUtils.isNotBlank(message.getErrorMessage())) {errorMessage=message.getErrorMessage();}
 		try {
 			Project project = projectService.getProjectById(projectId);
 			
@@ -187,33 +190,41 @@ public class ProjectController {
 			throws Exception {
 		String successMessage = "";
 		String errorMessage = "";
-		try {
-			if (result.hasErrors()) {
-				errorMessage = "One or more mandatory parameters missing. Please check";
-			} else {		
+		try {		
 				
-				Project project = projectService.getProjectById(projectId);
-					
-				List<String> annotatorUserList = new ArrayList<>();
-				userProjectDto.getUserDtoList().forEach(user->{
-					if(user.getIsAnnotatorForProject().equals(Boolean.TRUE)) {
-						annotatorUserList.add(user.getUsername());
-					}					
-				});
+			Project project = projectService.getProjectById(projectId);
+				
+			List<String> annotatorUserWithAnnotatorRole = new ArrayList<>();
+			List<String> annotatorUserList = new ArrayList<>();
+			userProjectDto.getUserDtoList().forEach(user->{
+				if(user.getIsAnnotatorForProject().equals(Boolean.TRUE)) {
+					annotatorUserList.add(user.getUsername());
+					if(user.getAuthority().equals(UserAuthorities.ANNOTATOR)) {
+						annotatorUserWithAnnotatorRole.add(user.getUsername());
+					}
+				}					
+			});
+			if(annotatorUserWithAnnotatorRole.size()>=3) {
 				String annotatorUserListString=annotatorUserList.stream().map(a -> String.valueOf(a))
 						.collect(Collectors.joining(","));			
 				
 				project.setAnnotatorUserListString(annotatorUserListString);
 				projectService.createOrUpdateProject(project);
-				
+				successMessage= "Update Success";
+			}else {
+				errorMessage = "Updating Annotators Failed - Minimum 3 annotators with ANNOTATOR role should be selected";
 			}
+			model.addAttribute("userProjectDto", userProjectDto);
+			model.addAttribute("project", project);
+			
 		} catch (Exception e) {
-			errorMessage = "Updating Annotators Failed with follwing error:\n" + e.getMessage();
+			errorMessage = "Updating Annotators Failed with follwing error:\n" + e.getMessage();			
 		} finally {
 			message.setSuccessMessage(successMessage);
 			message.setErrorMessage(errorMessage);
 			model.addAttribute("message", message);
 		}
-		return "redirect:/project/"+projectId+"/annotators";
-	}	
+		return "project-annotators";
+	}
+	
 }
