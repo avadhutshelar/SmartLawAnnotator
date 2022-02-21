@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
@@ -16,6 +17,7 @@ import com.google.gson.GsonBuilder;
 import in.edu.rvce.courtorder.JsonCourtOrder;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
+import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
 import in.edu.rvce.slanno.repositories.LegalDocumentRepository;
 
 @Service
@@ -35,6 +37,10 @@ public class AnnotationService {
 	
 	@Autowired
 	private OrderAnnotationService orderAnnotationService;
+	
+	@Autowired
+	AnnotationProcessingStageService annotationProcessingStageService;
+
 
 	public JsonCourtOrder getJsonCourtOrder(Project project, LegalDocument legalDocument, Authentication authentication) {
 		JsonCourtOrder jsonCourtOrder = new JsonCourtOrder();
@@ -58,6 +64,9 @@ public class AnnotationService {
 			legalReferenceService.getUpdatedLegalRefsByUser(jsonCourtOrder, authentication);
 			argumentAnnotationService.getUpdatedArgumentsByUser(jsonCourtOrder, authentication);
 			orderAnnotationService.getUpdatedOrderByUser(jsonCourtOrder,authentication);
+			if(CollectionUtils.isNotEmpty(jsonCourtOrder.getAnnotationProcessingStageAnnotations())) {
+				annotationProcessingStageService.getUpdatedAnnotationProcessingStageByUser(jsonCourtOrder, authentication);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -65,9 +74,13 @@ public class AnnotationService {
 		return jsonCourtOrder;
 	}
 
-	public void saveJsonOrder(Project project, LegalDocument legalDocument, JsonCourtOrder jsonCourtOrder) {
+	public void saveJsonOrder(Project project, LegalDocument legalDocument, JsonCourtOrder jsonCourtOrder, Authentication authentication) {
 		try {
 
+			annotationProcessingStageService.setAnnotationProcessingStage(jsonCourtOrder, project, authentication, legalDocument.getAnnotationProcessingStage());
+			//update recalculated annotation processing stage
+			legalDocument.setAnnotationProcessingStage(jsonCourtOrder.getAnnotationProcessingStage());
+			
 			legalDocument.setJsonFilePath(
 					env.getProperty("slanno.dataset.dir.json") + "\\" + legalDocument.getDocumentId() + ".json");
 
@@ -87,8 +100,6 @@ public class AnnotationService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}	
-	
-		
+	}		
 
 }

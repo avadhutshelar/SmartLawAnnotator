@@ -1,12 +1,16 @@
 package in.edu.rvce.slanno.controllers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,6 +48,38 @@ public class AnnotationController {
 	@Autowired
 	private OrderAnnotationService orderAnnotationService;
 
+	@GetMapping("/annotationTask")
+	public String annotationTask(SessionMessage message, Model model, Authentication authentication) {
+		String successMessage = "";
+		String errorMessage = "";
+		try {
+			List<Project> projectList = projectService.getAllProjects();
+			List<Project> userProjectList = new ArrayList<>();
+			projectList.forEach(project->{
+				String annotatorUserListString = project.getAnnotatorUserListString();
+				List<String> annotatorUserList= Arrays.asList(annotatorUserListString.split(","));
+				annotatorUserList.forEach(username->{
+					if(StringUtils.equalsIgnoreCase(username, authentication.getName())) {
+						userProjectList.add(project);
+					}
+				});
+			});
+
+			if(CollectionUtils.isEmpty(userProjectList)) {
+				errorMessage = "No active annotation task for user - "+authentication.getName()+". Contact admin.";
+			}else {
+				model.addAttribute("userProjectList",userProjectList);
+			}
+		} catch (Exception e) {
+			errorMessage = "Error in retriving the annotation task: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);
+		}
+		return "annotationTask";
+	}
+	
 	@GetMapping("/project/{projectId}/annotate")
 	public RedirectView annotate(SessionMessage message, Model model, @PathVariable Integer projectId) {
 		String successMessage = "";
@@ -114,7 +150,7 @@ public class AnnotationController {
 			//Update Order			
 			orderAnnotationService.updateOrderByUser(jsonCourtOrder, jsonCourtOrderIn, authentication);
 			
-			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder);
+			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder, authentication);
 
 		} catch (Exception e) {
 			errorMessage = "Error in retriving the legal document: \n" + e.getMessage();
@@ -124,6 +160,62 @@ public class AnnotationController {
 			model.addAttribute("message", message);
 		}
 		return new RedirectView("/project/" + projectId + "/annotate/" + docId);
+	}
+	
+	@PostMapping("/project/{projectId}/annotate/{docId}/complete")
+	public RedirectView markAnnotationComplete(SessionMessage message, Model model, @PathVariable Integer projectId,
+			@PathVariable Long docId, JsonCourtOrder jsonCourtOrderIn, Authentication authentication) {
+		String successMessage = "";
+		String errorMessage = "";
+		try {
+			Project project = projectService.getProjectById(projectId);
+			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
+			
+			legalDocument.setAnnotationProcessingStage(AnnotationProcessingStage.STAGE2);
+			
+			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder, authentication);
+			
+			model.addAttribute("project", project);
+			model.addAttribute("legalDocument", legalDocument);
+			model.addAttribute("jsonCourtOrder", jsonCourtOrder);
+			
+		} catch (Exception e) {
+			errorMessage = "Error in retriving the legal document: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);
+		}
+		return new RedirectView("/project/" + projectId + "/annotate/" + docId);
+	}
+	
+	@PostMapping("/project/{projectId}/annotate/{docId}/backToAnnotation")
+	public String backToAnnotation(SessionMessage message, Model model, @PathVariable Integer projectId,
+			@PathVariable Long docId, JsonCourtOrder jsonCourtOrderIn, Authentication authentication) {
+		String successMessage = "";
+		String errorMessage = "";
+		try {
+			Project project = projectService.getProjectById(projectId);
+			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
+			
+			legalDocument.setAnnotationProcessingStage(AnnotationProcessingStage.STAGE1);
+			
+			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder, authentication);
+			
+			model.addAttribute("project", project);
+			model.addAttribute("legalDocument", legalDocument);
+			model.addAttribute("jsonCourtOrder", jsonCourtOrder);
+			
+		} catch (Exception e) {
+			errorMessage = "Error in retriving the legal document: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);
+		}
+		return "annotate-document";
 	}
 	
 	@GetMapping("/project/{projectId}/annotate/{docId}/prev")
@@ -225,7 +317,7 @@ public class AnnotationController {
 
 	@PostMapping("/project/{projectId}/annotate/{docId}/argument/{argNum}")
 	public RedirectView updateArgBy(SessionMessage message, Model model, @PathVariable Integer projectId,
-			@PathVariable Long docId, @PathVariable Integer argNum, Argument argument, Authentication authentication) {
+			@PathVariable Long docId, @PathVariable Integer argNum, Argument argument, JsonCourtOrder jsonCourtOrderIn, Authentication authentication) {
 		String successMessage = "";
 		String errorMessage = "";
 		try {
@@ -240,7 +332,7 @@ public class AnnotationController {
 				}
 			});
 			
-			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder);
+			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder, authentication);
 
 		} catch (Exception e) {
 			errorMessage = "Error in retriving the legal document: \n" + e.getMessage();
@@ -254,7 +346,7 @@ public class AnnotationController {
 	
 	@PostMapping("/project/{projectId}/annotate/{docId}/legalReference/add")
 	public RedirectView addLegalReference(SessionMessage message, Model model, @PathVariable Integer projectId,
-			@PathVariable Long docId, Authentication authentication,
+			@PathVariable Long docId, JsonCourtOrder jsonCourtOrderIn, Authentication authentication,
 			@RequestParam(value = "actNameMatched", required = true) String actNameMatched,
 			@RequestParam(value = "sectionsMatched", required = true) String sectionsMatched,
 			@RequestParam(value = "stringMatched", required = true) String stringMatched) {
@@ -272,7 +364,7 @@ public class AnnotationController {
 			legalActFound.setStringMatched(stringMatched);
 			
 			JsonCourtOrder jsonCourtOrder = legalReferenceService.addLegalActFound(jsonCourtOrderTemp, legalActFound);
-			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder);
+			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder, authentication);
 			
 		}catch (Exception e) {
 			errorMessage = "Error in retriving the legal document: \n" + e.getMessage();

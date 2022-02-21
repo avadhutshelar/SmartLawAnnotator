@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -72,6 +73,9 @@ public class ProjectService {
 	
 	@Autowired 
 	private OrderAnnotationService orderAnnotationService;
+	
+	@Autowired
+	AnnotationProcessingStageService annotationProcessingStageService;
 
 	public Boolean createDirectories(Project project) throws Exception {
 
@@ -238,7 +242,7 @@ public class ProjectService {
 		}
 	}
 
-	public void saveJsonOrder(Project project, LegalDocument legalDocument) {
+	public void saveJsonOrder(Project project, LegalDocument legalDocument, Authentication authentication) {
 		try {
 
 			String processedText = "";
@@ -260,6 +264,12 @@ public class ProjectService {
 			argumentAnnotationService.initializeArgumentBySentenceType(jsonCourtOrder, project);
 			
 			orderAnnotationService.initializeArgumentBySentenceType(jsonCourtOrder, project);
+			
+			if(legalDocument.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE0)) {
+				//annotationProcessingStageService.setAnnotationProcessingStage0(jsonCourtOrder, project, authentication);
+			}else if(legalDocument.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE1)) {
+				annotationProcessingStageService.initializeAnnotationProcessingStage(jsonCourtOrder, project, AnnotationProcessingStage.STAGE1);
+			}
 			
 			legalDocument.setJsonFilePath(
 					env.getProperty("slanno.dataset.dir.json") + "\\" + legalDocument.getDocumentId() + ".json");

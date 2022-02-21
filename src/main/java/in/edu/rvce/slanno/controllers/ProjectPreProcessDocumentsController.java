@@ -103,7 +103,7 @@ public class ProjectPreProcessDocumentsController {
 	
 	@PostMapping("/project/{projectId}/preprocess/{docId}/complete")
 	public String markPreProcessComplete(SessionMessage message, Model model, @PathVariable Integer projectId, @PathVariable Long docId,
-			@RequestParam(value = "textOrderHidden1", required = true) String textOrderHidden1) {
+			@RequestParam(value = "textOrderHidden1", required = true) String textOrderHidden1, Authentication authentication) {
 		String successMessage = "";
 		String errorMessage = "";
 		try {
@@ -112,7 +112,7 @@ public class ProjectPreProcessDocumentsController {
 				LegalDocument legalDocument= projectService.getLegalDocumentByDocumentId(docId);
 				legalDocument.setAnnotationProcessingStage(AnnotationProcessingStage.STAGE1);
 				projectService.saveUpdatedTextOrder(project, legalDocument, textOrderHidden1);
-				projectService.saveJsonOrder(project, legalDocument);
+				projectService.saveJsonOrder(project, legalDocument, authentication);
 				message.setTextOrder(textOrderHidden1);
 				model.addAttribute("project", project);
 				model.addAttribute("legalDocument", legalDocument);
@@ -132,7 +132,7 @@ public class ProjectPreProcessDocumentsController {
 	
 	@PostMapping("/project/{projectId}/preprocess/{docId}/backToPreprocess")
 	public String backToPreprocess(SessionMessage message, Model model, @PathVariable Integer projectId, @PathVariable Long docId,
-			@RequestParam(value = "textOrderHidden6", required = true) String textOrderHidden6) {
+			@RequestParam(value = "textOrderHidden6", required = true) String textOrderHidden6, Authentication authentication) {
 		String successMessage = "";
 		String errorMessage = "";
 		try {
@@ -140,7 +140,7 @@ public class ProjectPreProcessDocumentsController {
 			LegalDocument legalDocument= projectService.getLegalDocumentByDocumentId(docId);
 			legalDocument.setAnnotationProcessingStage(AnnotationProcessingStage.STAGE0);
 			projectService.saveUpdatedTextOrder(project, legalDocument, textOrderHidden6);
-			projectService.saveJsonOrder(project, legalDocument);
+			projectService.saveJsonOrder(project, legalDocument, authentication);
 			message.setTextOrder(textOrderHidden6);
 			model.addAttribute("project", project);
 			model.addAttribute("legalDocument", legalDocument);

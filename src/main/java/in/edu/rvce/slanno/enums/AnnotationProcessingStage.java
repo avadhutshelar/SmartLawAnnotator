@@ -4,7 +4,8 @@ public enum AnnotationProcessingStage {
 
 	STAGE0("Original Text Extraction Completed"),
 	STAGE1("Preprocessing Completed"),
-	STAGE2("Annotation Completed");
+	STAGE2("Annotation Completed"),
+	TBD("TBD"),;
 		
 	private final String displayValue;
 	

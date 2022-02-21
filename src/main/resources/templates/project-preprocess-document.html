@@ -179,7 +179,8 @@
 							<input type="submit" value="Mark Complete" onclick="completePreProcess()"/>					
 					</form>
 				</div>
-				<div th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE1}">	
+				<div th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE1} or
+							${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE2}">	
 					<label class="text-success" th:text="'Preprocessing Already marked complete'"></label>
 					
 					<form action="#"
