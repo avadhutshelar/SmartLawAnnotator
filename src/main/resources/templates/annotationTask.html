@@ -20,20 +20,20 @@
 						<tr>
 							<th>Project ID</th>
 							<th>Project Name</th>
+							<th>Document Assigned</th>
 							<th>Document Complete</th>
-							<th>Document Pending</th>
-							<th>Document Total</th>
+							<th>Document Pending</th>							
 						</tr>
-						<tr th:each="project: ${userProjectList}">
-							<td th:text="${project.projectId}" />
-							<td	th:text="${project.projectName}"/>
-							<td th:text="'complete'" />
+						<tr th:each="annotationTaskDto: ${annotationTaskDtoList}">
+							<td th:text="${annotationTaskDto.project.projectId}" />
+							<td	th:text="${annotationTaskDto.project.projectName}"/>
+							<td th:text="${annotationTaskDto.totalDocsAssigned}" />
+							<td th:text="${annotationTaskDto.totalDocsComplete}" />
 							<td>
-								<a th:href="@{/project/{projectId}/annotate(projectId=${project.projectId})}">
-								<label th:text="Pending"></label>
+								<a th:href="@{/project/{projectId}/annotate(projectId=${annotationTaskDto.project.projectId})}">
+								<label th:text="${annotationTaskDto.totalDocsPending}"></label>
 								</a>
 							</td>
-							<td th:text="'total'" />
 						</tr>
 					</tbody>
 				</table>

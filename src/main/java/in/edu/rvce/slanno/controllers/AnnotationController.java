@@ -19,6 +19,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import in.edu.rvce.courtorder.Argument;
 import in.edu.rvce.courtorder.JsonCourtOrder;
+import in.edu.rvce.slanno.dto.AnnotationTaskDto;
 import in.edu.rvce.slanno.dto.LegalActFound;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
@@ -54,21 +55,26 @@ public class AnnotationController {
 		String errorMessage = "";
 		try {
 			List<Project> projectList = projectService.getAllProjects();
-			List<Project> userProjectList = new ArrayList<>();
+			List<AnnotationTaskDto> annotationTaskDtoList = new ArrayList<>();
 			projectList.forEach(project->{
 				String annotatorUserListString = project.getAnnotatorUserListString();
 				List<String> annotatorUserList= Arrays.asList(annotatorUserListString.split(","));
 				annotatorUserList.forEach(username->{
 					if(StringUtils.equalsIgnoreCase(username, authentication.getName())) {
-						userProjectList.add(project);
+						AnnotationTaskDto annotationTaskDto = new AnnotationTaskDto();
+						annotationTaskDto.setProject(project);
+						annotationTaskDto.setTotalDocsAssigned(""+annotationService.calculateDocsAssigned(project, authentication));
+						annotationTaskDto.setTotalDocsPending(""+annotationService.calculateDocsPending(project, authentication));
+						annotationTaskDto.setTotalDocsComplete(""+annotationService.calculateDocsComplete(project, authentication));
+						annotationTaskDtoList.add(annotationTaskDto);
 					}
 				});
 			});
 
-			if(CollectionUtils.isEmpty(userProjectList)) {
+			if(CollectionUtils.isEmpty(annotationTaskDtoList)) {
 				errorMessage = "No active annotation task for user - "+authentication.getName()+". Contact admin.";
 			}else {
-				model.addAttribute("userProjectList",userProjectList);
+				model.addAttribute("annotationTaskDtoList",annotationTaskDtoList);
 			}
 		} catch (Exception e) {
 			errorMessage = "Error in retriving the annotation task: \n" + e.getMessage();
