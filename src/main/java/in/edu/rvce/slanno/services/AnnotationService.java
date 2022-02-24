@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,11 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.util.StringUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import in.edu.rvce.courtorder.JsonCourtOrder;
+import in.edu.rvce.courtorder.annotations.AnnotationProcessingStageAnnotations;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
@@ -112,7 +115,19 @@ public class AnnotationService {
 		List<LegalDocument> legalDocumentList = tempLegalDocumentList.stream()
 				.filter(legDoc -> legDoc.getProject().getProjectId() == project.getProjectId()).collect(Collectors.toList());
 		
-		Integer totalDocsAssigned = legalDocumentList.size();
+		List<LegalDocument> legalDocumentListAssigned = new ArrayList<>();
+		legalDocumentList.stream().forEach(legalDocument->{
+			JsonCourtOrder jsonCourtOrder = getJsonCourtOrder(project, legalDocument, authentication);
+			List<AnnotationProcessingStageAnnotations> annotationProcessingStageAnnotations = jsonCourtOrder.getAnnotationProcessingStageAnnotations();
+			annotationProcessingStageAnnotations.stream().forEach(annotationuser->{
+				if(StringUtils.equalsIgnoreCase(annotationuser.getUsername(), authentication.getName())) {
+					legalDocumentListAssigned.add(legalDocument);
+				}
+			});
+		});
+		
+		
+		Integer totalDocsAssigned = legalDocumentListAssigned.size();
 		return totalDocsAssigned;
 	}
 	
@@ -122,13 +137,22 @@ public class AnnotationService {
 		List<LegalDocument> tempLegalDocumentList = Lists.newArrayList(legalDocumentRepository.findAll());
 		List<LegalDocument> legalDocumentList = tempLegalDocumentList.stream()
 				.filter(legDoc -> 
-					legDoc.getProject().getProjectId() == project.getProjectId()
-					&& (legDoc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE0)
-							|| legDoc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE1))
-						).collect(Collectors.toList());
+					legDoc.getProject().getProjectId() == project.getProjectId()).collect(Collectors.toList());
 		
-	
-		Integer totalDocsPending = legalDocumentList.size();
+		List<LegalDocument> legalDocumentListPending = new ArrayList<>();
+		legalDocumentList.stream().forEach(legalDocument->{
+			JsonCourtOrder jsonCourtOrder = getJsonCourtOrder(project, legalDocument, authentication);
+			List<AnnotationProcessingStageAnnotations> annotationProcessingStageAnnotations = jsonCourtOrder.getAnnotationProcessingStageAnnotations();
+			annotationProcessingStageAnnotations.stream().forEach(annotationuser->{
+				if(StringUtils.equalsIgnoreCase(annotationuser.getUsername(), authentication.getName())
+						&& (annotationuser.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE0)
+								||annotationuser.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE1))) {
+					legalDocumentListPending.add(legalDocument);
+				}
+			});
+		});
+		
+		Integer totalDocsPending = legalDocumentListPending.size();
 		
 		return totalDocsPending;
 	}
@@ -139,12 +163,21 @@ public class AnnotationService {
 		List<LegalDocument> tempLegalDocumentList = Lists.newArrayList(legalDocumentRepository.findAll());
 		List<LegalDocument> legalDocumentList = tempLegalDocumentList.stream()
 				.filter(legDoc -> 
-					legDoc.getProject().getProjectId() == project.getProjectId()
-					&& legDoc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE2))
+					legDoc.getProject().getProjectId() == project.getProjectId())
 				.collect(Collectors.toList());
-		
+		List<LegalDocument> legalDocumentListComplete = new ArrayList<>();
+		legalDocumentList.stream().forEach(legalDocument->{
+			JsonCourtOrder jsonCourtOrder = getJsonCourtOrder(project, legalDocument, authentication);
+			List<AnnotationProcessingStageAnnotations> annotationProcessingStageAnnotations = jsonCourtOrder.getAnnotationProcessingStageAnnotations();
+			annotationProcessingStageAnnotations.stream().forEach(annotationuser->{
+				if(StringUtils.equalsIgnoreCase(annotationuser.getUsername(), authentication.getName())
+						&& (annotationuser.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE2))) {
+					legalDocumentListComplete.add(legalDocument);
+				}
+			});
+		});
 	
-		Integer totalDocsComplete = legalDocumentList.size();
+		Integer totalDocsComplete = legalDocumentListComplete.size();
 		
 		return totalDocsComplete;
 	}
