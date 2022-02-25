@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Projects</title>
+<link rel="stylesheet"
+	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+<script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+</head>
+<body>
+	<div th:replace="fragments/header :: header"></div>
+	<div class="container-fluid">
+		<div class="row">
+			<h2 class="lh-lg">
+				<label th:text="${project.projectName}"></label>
+			</h2>
+		</div>
+		<div class="row">
+			<div class="col-md-2">
+				<div th:replace="fragments/leftSidebar :: viewProjectLeftSidebar"></div>
+			</div>
+			<div class="col-md-8">
+				<h4 class="lh-sm">
+					<label>Inter Annotator Agreement</label>
+				</h4>
+				<table class="table table-striped table-responsive-md">
+					<tbody>
+						<tr>
+							<td><label th:text="'Project ID'"></label></td>
+							<td th:text="${project.projectId}" />
+						</tr>
+						<tr>
+							<td><label th:text="'Project Name'"></label></td>
+							<td th:text="${project.projectName}" />
+						</tr>
+					</tbody>
+				</table>
+
+				<div th:if="${message != null}">
+					<label for="name" class="text-success"
+						th:text="${message.successMessage}"></label> <label for="name"
+						class="text-danger" th:text="${message.errorMessage}"></label>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -227,4 +227,24 @@ public class ProjectController {
 		return "project-annotators";
 	}
 	
+	
+	@GetMapping("/project/{projectId}/interAnnotatorAgreement")
+	public String getInterAnnotatorAgreement(SessionMessage message, Model model, @PathVariable Integer projectId) {
+		String successMessage = "";
+		String errorMessage = "";
+		if(StringUtils.isNotBlank(message.getErrorMessage())) {errorMessage=message.getErrorMessage();}
+		try {
+			Project project = projectService.getProjectById(projectId);
+			
+			
+			model.addAttribute("project", project);
+		} catch (Exception e) {
+			errorMessage = "Error in retriving the inter annotator agreement: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);			
+		}
+		return "interAnnotatorAgreement";
+	}
 }
