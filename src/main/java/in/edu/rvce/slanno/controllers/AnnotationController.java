@@ -87,16 +87,14 @@ public class AnnotationController {
 	}
 	
 	@GetMapping("/project/{projectId}/annotate")
-	public RedirectView annotate(SessionMessage message, Model model, @PathVariable Integer projectId) {
+	public RedirectView annotate(SessionMessage message, Model model, @PathVariable Integer projectId,
+			Authentication authentication) {
 		String successMessage = "";
 		String errorMessage = "";
 		Long docId = null;
 		try {
-			List<LegalDocument> legalDocumentList = projectService.getAllLegalDocumentByProjectId(projectId);
-			List<LegalDocument> annotationDocumentList = legalDocumentList.stream()
-					.filter(doc -> doc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE1))
-					.collect(Collectors.toList());
-
+			Project project = projectService.getProjectById(projectId);
+			List<LegalDocument> annotationDocumentList = annotationService.getAnnotationDocumentListByUser(project, authentication);
 			// TODO get 1st incomplete document
 			LegalDocument legalDocument = annotationDocumentList.get(0);
 
@@ -226,15 +224,13 @@ public class AnnotationController {
 	
 	@GetMapping("/project/{projectId}/annotate/{docId}/prev")
 	public RedirectView annotatePreviousDocuments(SessionMessage message, Model model, @PathVariable Integer projectId,
-			@PathVariable Long docId) {
+			@PathVariable Long docId, Authentication authentication) {
 		String successMessage = "";
 		String errorMessage = "";
 		try {
-			List<LegalDocument> legalDocumentList = projectService.getAllLegalDocumentByProjectId(projectId);
-
-			List<LegalDocument> annotationDocumentList = legalDocumentList.stream()
-					.filter(doc -> doc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE1))
-					.collect(Collectors.toList());
+			Project project = projectService.getProjectById(projectId);
+			List<LegalDocument> annotationDocumentList = annotationService.getAnnotationDocumentListByUser(project, authentication);
+			
 
 			LegalDocument currentlegalDocument = projectService.getLegalDocumentByDocumentId(docId);
 			Integer index = 0;
@@ -262,16 +258,13 @@ public class AnnotationController {
 
 	@GetMapping("/project/{projectId}/annotate/{docId}/next")
 	public RedirectView preProcessNextDocuments(SessionMessage message, Model model, @PathVariable Integer projectId,
-			@PathVariable Long docId) {
+			@PathVariable Long docId, Authentication authentication) {
 		String successMessage = "";
 		String errorMessage = "";
 		try {
-			List<LegalDocument> legalDocumentList = projectService.getAllLegalDocumentByProjectId(projectId);
-
-			List<LegalDocument> annotationDocumentList = legalDocumentList.stream()
-					.filter(doc -> doc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE1))
-					.collect(Collectors.toList());
-
+			Project project = projectService.getProjectById(projectId);
+			List<LegalDocument> annotationDocumentList = annotationService.getAnnotationDocumentListByUser(project, authentication);
+			
 			LegalDocument currentlegalDocument = projectService.getLegalDocumentByDocumentId(docId);
 			Integer index = 0;
 			for (LegalDocument ld : annotationDocumentList) {

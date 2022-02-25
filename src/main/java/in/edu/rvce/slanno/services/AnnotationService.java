@@ -108,6 +108,27 @@ public class AnnotationService {
 		}
 	}		
 	
+	public List<LegalDocument> getAnnotationDocumentListByUser (Project project, Authentication authentication){
+		List<LegalDocument> tempLegalDocumentList = Lists.newArrayList(legalDocumentRepository.findAll());
+		List<LegalDocument> legalDocumentList = tempLegalDocumentList.stream()
+				.filter(legDoc -> 
+					legDoc.getProject().getProjectId() == project.getProjectId()).collect(Collectors.toList());
+		
+		List<LegalDocument> legalDocumentListPending = new ArrayList<>();
+		legalDocumentList.stream().forEach(legalDocument->{
+			JsonCourtOrder jsonCourtOrder = getJsonCourtOrder(project, legalDocument, authentication);
+			List<AnnotationProcessingStageAnnotations> annotationProcessingStageAnnotations = jsonCourtOrder.getAnnotationProcessingStageAnnotations();
+			annotationProcessingStageAnnotations.stream().forEach(annotationuser->{
+				if(StringUtils.equalsIgnoreCase(annotationuser.getUsername(), authentication.getName())
+						&& (annotationuser.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE0)
+								||annotationuser.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE1))) {
+					legalDocumentListPending.add(legalDocument);
+				}
+			});
+		});
+		return legalDocumentListPending;
+	}
+	
 	public Integer calculateDocsAssigned(Project project, Authentication authentication) {
 		
 		
