@@ -119,7 +119,7 @@ public class AnnotationController {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
 
-			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication.getName());
 			String textOrder = jsonCourtOrder.getProcessedText();
 			message.setTextOrder(textOrder);
 			model.addAttribute("project", project);
@@ -143,7 +143,7 @@ public class AnnotationController {
 		try {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
-			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication.getName());
 
 			//Update Legal Reference
 			legalReferenceService.updateLegalRefsByUser(jsonCourtOrder, jsonCourtOrderIn, authentication);
@@ -174,7 +174,7 @@ public class AnnotationController {
 		try {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
-			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication.getName());
 			
 			legalDocument.setAnnotationProcessingStage(AnnotationProcessingStage.STAGE2);
 			
@@ -202,7 +202,7 @@ public class AnnotationController {
 		try {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
-			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication.getName());
 			
 			legalDocument.setAnnotationProcessingStage(AnnotationProcessingStage.STAGE1);
 			
@@ -297,7 +297,7 @@ public class AnnotationController {
 		try {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
-			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);			
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication.getName());			
 			List<Argument> argumentList = jsonCourtOrder.getArguments().stream().filter(arg->arg.getArgumentNumber().equals(argNum)).collect(Collectors.toList());
 			
 			model.addAttribute("project", project);
@@ -322,7 +322,7 @@ public class AnnotationController {
 		try {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
-			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication.getName());
 			//Update argumentBy
 			jsonCourtOrder.getArguments().forEach(a -> {
 				if (a.getArgumentNumber().equals(argNum)) {
@@ -355,7 +355,7 @@ public class AnnotationController {
 		try {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
-			JsonCourtOrder jsonCourtOrderTemp = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
+			JsonCourtOrder jsonCourtOrderTemp = annotationService.getJsonCourtOrder(project, legalDocument, authentication.getName());
 			
 			LegalActFound legalActFound = new LegalActFound();
 			legalActFound.setActNameMatched(actNameMatched);

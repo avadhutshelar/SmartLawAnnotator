@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import in.edu.rvce.slanno.dto.UserProjectDto;
-import in.edu.rvce.slanno.entities.Authorities;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.UserAuthorities;
 import in.edu.rvce.slanno.enums.UserDto;
+import in.edu.rvce.slanno.services.InterAnnotatorAgreementService;
 import in.edu.rvce.slanno.services.ProjectService;
 import in.edu.rvce.slanno.services.UsersService;
 import in.edu.rvce.slanno.utils.SessionMessage;
@@ -36,6 +36,9 @@ public class ProjectController {
 	
 	@Autowired
 	UsersService usersService;
+
+	@Autowired
+	InterAnnotatorAgreementService interAnnotatorAgreementService;
 
 	@GetMapping("/project/create")
 	public String createProject(SessionMessage message, Model model) {
@@ -236,6 +239,7 @@ public class ProjectController {
 		try {
 			Project project = projectService.getProjectById(projectId);
 			
+			interAnnotatorAgreementService.calculate();
 			
 			model.addAttribute("project", project);
 		} catch (Exception e) {

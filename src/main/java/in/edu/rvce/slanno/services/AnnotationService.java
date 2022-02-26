@@ -48,7 +48,7 @@ public class AnnotationService {
 	AnnotationProcessingStageService annotationProcessingStageService;
 
 
-	public JsonCourtOrder getJsonCourtOrder(Project project, LegalDocument legalDocument, Authentication authentication) {
+	public JsonCourtOrder getJsonCourtOrder(Project project, LegalDocument legalDocument, String loggedUserName) {
 		JsonCourtOrder jsonCourtOrder = new JsonCourtOrder();
 
 		String jsonText = "";
@@ -67,11 +67,11 @@ public class AnnotationService {
 		// File to Java objects
 		try {
 			jsonCourtOrder = gson.fromJson(jsonText, JsonCourtOrder.class);
-			legalReferenceService.getUpdatedLegalRefsByUser(jsonCourtOrder, authentication);
-			argumentAnnotationService.getUpdatedArgumentsByUser(jsonCourtOrder, authentication);
-			orderAnnotationService.getUpdatedOrderByUser(jsonCourtOrder,authentication);
+			legalReferenceService.getUpdatedLegalRefsByUser(jsonCourtOrder, loggedUserName);
+			argumentAnnotationService.getUpdatedArgumentsByUser(jsonCourtOrder, loggedUserName);
+			orderAnnotationService.getUpdatedOrderByUser(jsonCourtOrder,loggedUserName);
 			if(CollectionUtils.isNotEmpty(jsonCourtOrder.getAnnotationProcessingStageAnnotations())) {
-				annotationProcessingStageService.getUpdatedAnnotationProcessingStageByUser(jsonCourtOrder, authentication);
+				annotationProcessingStageService.getUpdatedAnnotationProcessingStageByUser(jsonCourtOrder, loggedUserName);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -116,7 +116,7 @@ public class AnnotationService {
 		
 		List<LegalDocument> legalDocumentListPending = new ArrayList<>();
 		legalDocumentList.stream().forEach(legalDocument->{
-			JsonCourtOrder jsonCourtOrder = getJsonCourtOrder(project, legalDocument, authentication);
+			JsonCourtOrder jsonCourtOrder = getJsonCourtOrder(project, legalDocument, authentication.getName());
 			List<AnnotationProcessingStageAnnotations> annotationProcessingStageAnnotations = jsonCourtOrder.getAnnotationProcessingStageAnnotations();
 			annotationProcessingStageAnnotations.stream().forEach(annotationuser->{
 				if(StringUtils.equalsIgnoreCase(annotationuser.getUsername(), authentication.getName())
@@ -138,7 +138,7 @@ public class AnnotationService {
 		
 		List<LegalDocument> legalDocumentListAssigned = new ArrayList<>();
 		legalDocumentList.stream().forEach(legalDocument->{
-			JsonCourtOrder jsonCourtOrder = getJsonCourtOrder(project, legalDocument, authentication);
+			JsonCourtOrder jsonCourtOrder = getJsonCourtOrder(project, legalDocument, authentication.getName());
 			List<AnnotationProcessingStageAnnotations> annotationProcessingStageAnnotations = jsonCourtOrder.getAnnotationProcessingStageAnnotations();
 			annotationProcessingStageAnnotations.stream().forEach(annotationuser->{
 				if(StringUtils.equalsIgnoreCase(annotationuser.getUsername(), authentication.getName())) {
@@ -162,7 +162,7 @@ public class AnnotationService {
 		
 		List<LegalDocument> legalDocumentListPending = new ArrayList<>();
 		legalDocumentList.stream().forEach(legalDocument->{
-			JsonCourtOrder jsonCourtOrder = getJsonCourtOrder(project, legalDocument, authentication);
+			JsonCourtOrder jsonCourtOrder = getJsonCourtOrder(project, legalDocument, authentication.getName());
 			List<AnnotationProcessingStageAnnotations> annotationProcessingStageAnnotations = jsonCourtOrder.getAnnotationProcessingStageAnnotations();
 			annotationProcessingStageAnnotations.stream().forEach(annotationuser->{
 				if(StringUtils.equalsIgnoreCase(annotationuser.getUsername(), authentication.getName())
@@ -188,7 +188,7 @@ public class AnnotationService {
 				.collect(Collectors.toList());
 		List<LegalDocument> legalDocumentListComplete = new ArrayList<>();
 		legalDocumentList.stream().forEach(legalDocument->{
-			JsonCourtOrder jsonCourtOrder = getJsonCourtOrder(project, legalDocument, authentication);
+			JsonCourtOrder jsonCourtOrder = getJsonCourtOrder(project, legalDocument, authentication.getName());
 			List<AnnotationProcessingStageAnnotations> annotationProcessingStageAnnotations = jsonCourtOrder.getAnnotationProcessingStageAnnotations();
 			annotationProcessingStageAnnotations.stream().forEach(annotationuser->{
 				if(StringUtils.equalsIgnoreCase(annotationuser.getUsername(), authentication.getName())

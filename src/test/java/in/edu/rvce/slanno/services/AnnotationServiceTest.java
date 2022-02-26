@@ -64,7 +64,7 @@ public class AnnotationServiceTest {
 		 * ));
 		 */
 		
-		annotationService.updateSectionReference(jsonCourtOrder);
+		//TODO- annotationService.updateSectionReference(jsonCourtOrder);
 		
 		Background updatedBackground= jsonCourtOrder.getBackground();
 		List<LegalReference> legalReferenceList = updatedBackground.getLegalReferences();

@@ -214,11 +214,11 @@ public class LegalReferenceAnnotationService {
 		return jsonCourtOrder;
 	}
 
-	public void getUpdatedLegalRefsByUser(JsonCourtOrder jsonCourtOrder, Authentication authentication) {
+	public void getUpdatedLegalRefsByUser(JsonCourtOrder jsonCourtOrder, String loggedUserName) {
 		jsonCourtOrder.getBackground().getLegalReferences().forEach(legalRef->{			
 			List<LegalRefAcceptRejectDecisionAnnotations> legalRefAcceptRejectDecisionAnnotations = legalRef.getLegalRefAcceptRejectDecisionAnnotations();
 			legalRefAcceptRejectDecisionAnnotations.forEach(decision->{
-				if(StringUtils.equalsIgnoreCase(authentication.getName(), decision.getUsername())) {
+				if(StringUtils.equalsIgnoreCase(loggedUserName, decision.getUsername())) {
 					legalRef.setLegalRefAcceptRejectDecision(decision.getLegalRefAcceptRejectDecision());
 				}				
 			});			
