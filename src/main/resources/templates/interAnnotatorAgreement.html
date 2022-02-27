@@ -38,7 +38,7 @@
 									<label 
 										th:if="${interAnnotatorAgreementDto.user1} == ${username1} and ${interAnnotatorAgreementDto.user2} == ${username2}"
 										class="custom-control-label"	
-										th:text="${interAnnotatorAgreementDto.agreementPercentage}">agreementPercentage
+										th:text="${#numbers.formatDecimal(interAnnotatorAgreementDto.agreementScore * 100 , 1, 2)} + '%'">agreementScore
 									</label>
 								</div>															
 							</td>							

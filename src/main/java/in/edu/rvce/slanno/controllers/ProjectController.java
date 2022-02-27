@@ -243,7 +243,7 @@ public class ProjectController {
 			String[] usernamesArray = project.getAnnotatorUserListString().split(",");
 			List<String> usernamesList = Arrays.asList(usernamesArray);
 			
-			List<InterAnnotatorAgreementDto> interAnnotatorAgreementDtoList = interAnnotatorAgreementService.calculate(usernamesList);
+			List<InterAnnotatorAgreementDto> interAnnotatorAgreementDtoList = interAnnotatorAgreementService.calculate(usernamesList, project);
 			
 			model.addAttribute("project", project);
 			model.addAttribute("interAnnotatorAgreementDtoList", interAnnotatorAgreementDtoList);

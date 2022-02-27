@@ -25,28 +25,62 @@ public class InterAnnotatorAgreementService {
 	@Autowired
 	private AnnotationService annotationService;
 
-	public List<InterAnnotatorAgreementDto> calculate(List<String> usernamesList) throws Exception {
+	public List<InterAnnotatorAgreementDto> calculate(List<String> usernamesList, Project project) throws Exception {
 		
-		Project project = projectService.getProjectById(3);
-		LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(14l);
+		//LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(14l);
+		
+		List<LegalDocument> legalDocumentList = projectService.getAllLegalDocumentByProjectId(project.getProjectId());
 
-		Map<String, Map<String, Integer>> userAnnoLabelCountMap = new HashMap<>();
-		usernamesList.forEach(username -> {
-			Map<String, Integer> annoLabelCountMap = initializeAnnoLabelCountMap();
-			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, username);
-			Map<String, Integer> updatedAnnoLabelCountMap = updateAnnoLabelCountMap(annoLabelCountMap, jsonCourtOrder);
-			userAnnoLabelCountMap.put(username, updatedAnnoLabelCountMap);
+		Map<LegalDocument, List<InterAnnotatorAgreementDto>> legalDocumentWiseInterAnnotatorAgreementMap = new HashMap<>(); 
+		
+		legalDocumentList.forEach(legalDocument->{
+			
+		
+			Map<String, Map<String, Integer>> userAnnoLabelCountMap = new HashMap<>();
+			usernamesList.forEach(username -> {
+				Map<String, Integer> annoLabelCountMap = initializeAnnoLabelCountMap();
+				JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, username);
+				Map<String, Integer> updatedAnnoLabelCountMap = updateAnnoLabelCountMap(annoLabelCountMap, jsonCourtOrder);
+				userAnnoLabelCountMap.put(username, updatedAnnoLabelCountMap);
+			});
+	
+			List<InterAnnotatorAgreementDto> interAnnotatorAgreementDtoListTemp = new ArrayList<>();
+			usernamesList.forEach(u1->{
+				usernamesList.forEach(u2->{
+					Double agreement = getCohensKappa (userAnnoLabelCountMap.get(u1),userAnnoLabelCountMap.get(u2)) ;
+					//String agreementPercentage = String.format("%.0f%%",agreement*100);
+					InterAnnotatorAgreementDto interAnnotatorAgreementDto = new InterAnnotatorAgreementDto(u1,u2,agreement);
+					interAnnotatorAgreementDtoListTemp.add(interAnnotatorAgreementDto);				
+				});
+			});	
+			
+			legalDocumentWiseInterAnnotatorAgreementMap.put(legalDocument, interAnnotatorAgreementDtoListTemp);
 		});
-
+		
 		List<InterAnnotatorAgreementDto> interAnnotatorAgreementDtoList = new ArrayList<>();
 		usernamesList.forEach(u1->{
 			usernamesList.forEach(u2->{
-				Double agreement = getCohensKappa (userAnnoLabelCountMap.get(u1),userAnnoLabelCountMap.get(u2)) ;
-				String agreementPercentage = String.format("%.0f%%",agreement*100);
-				InterAnnotatorAgreementDto interAnnotatorAgreementDto = new InterAnnotatorAgreementDto(u1,u2,agreementPercentage);
+				Double totalAgreementScore = 0.0;
+				Double avgAgreementScore = 0.0;
+				List<Double> agreementScoreList = new ArrayList<>();
+				legalDocumentWiseInterAnnotatorAgreementMap.entrySet().forEach(entry->{
+					List<InterAnnotatorAgreementDto> interAnnotatorAgreementDtoListTemp = entry.getValue();
+					interAnnotatorAgreementDtoListTemp.forEach(interAnnotatorAgreementDto->{
+						if(interAnnotatorAgreementDto.getUser1().equals(u1) && interAnnotatorAgreementDto.getUser2().equals(u2)){
+							agreementScoreList.add(interAnnotatorAgreementDto.getAgreementScore());
+						}
+					});
+				});
+				for(Double score:agreementScoreList) {
+					totalAgreementScore = totalAgreementScore + score;
+				}
+				avgAgreementScore = totalAgreementScore / agreementScoreList.size();
+				//String agreementPercentage = String.format("%.0f%%",avgAgreementScore*100);
+				InterAnnotatorAgreementDto interAnnotatorAgreementDto = new InterAnnotatorAgreementDto(u1,u2,avgAgreementScore);
 				interAnnotatorAgreementDtoList.add(interAnnotatorAgreementDto);				
 			});
-		});		
+		});	
+		
 		return interAnnotatorAgreementDtoList;
 	}
 	
@@ -83,7 +117,6 @@ public class InterAnnotatorAgreementService {
 			pExpected = pExpected + entry.getValue();	
 		}
 		
-		//kappa = (pObserved-pExpected)/(1-pExpected)
 		kappa = (pObserved-pExpected)/(1-pExpected);
 		
 		return kappa;
@@ -121,14 +154,6 @@ public class InterAnnotatorAgreementService {
 	private Map<String, Integer> updateAnnoLabelCountMap(Map<String, Integer> annoLabelCountMap,
 			JsonCourtOrder jsonCourtOrder) {
 		Map<String, Integer> updatedAnnoLabelCountMap = annoLabelCountMap;
-		String orderTypeLabel = "OrderType."+jsonCourtOrder.getOrder().getOrderType().getDisplayValue();
-
-		if (!updatedAnnoLabelCountMap.containsKey(orderTypeLabel)) {
-			//TODO - Logger - System.out.println("Annotation label " + annotationLabel + " not found");
-		} else {
-			int count = updatedAnnoLabelCountMap.get(orderTypeLabel);
-			updatedAnnoLabelCountMap.put(orderTypeLabel, count + 1);
-		}
 		
 		jsonCourtOrder.getArguments().forEach(arg->{
 			
@@ -143,7 +168,15 @@ public class InterAnnotatorAgreementService {
 
 		});
 		
-		
+		String orderTypeLabel = "OrderType."+jsonCourtOrder.getOrder().getOrderType().getDisplayValue();
+
+		if (!updatedAnnoLabelCountMap.containsKey(orderTypeLabel)) {
+			//TODO - Logger - System.out.println("Annotation label " + annotationLabel + " not found");
+		} else {
+			int count = updatedAnnoLabelCountMap.get(orderTypeLabel);
+			updatedAnnoLabelCountMap.put(orderTypeLabel, count + 1);
+		}
+
 		return updatedAnnoLabelCountMap;
 	}
 }

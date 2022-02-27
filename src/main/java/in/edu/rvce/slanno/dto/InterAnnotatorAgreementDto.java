@@ -6,12 +6,12 @@ import lombok.Data;
 public class InterAnnotatorAgreementDto {
 	String user1;
 	String user2;
-	String agreementPercentage;
+	Double agreementScore;
 	
-	public InterAnnotatorAgreementDto(String user1, String user2, String agreementPercentage) {
+	public InterAnnotatorAgreementDto(String user1, String user2, Double agreementScore) {
 		this.user1 = user1;
 		this.user2 = user2;
-		this.agreementPercentage = agreementPercentage;
+		this.agreementScore = agreementScore;
 	}	
 	
 }
