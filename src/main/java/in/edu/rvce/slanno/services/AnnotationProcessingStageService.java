@@ -52,10 +52,10 @@ public class AnnotationProcessingStageService {
 		return jsonCourtOrder;
 	}
 	
-	public void getUpdatedAnnotationProcessingStageByUser(JsonCourtOrder jsonCourtOrder, Authentication authentication) {
+	public void getUpdatedAnnotationProcessingStageByUser(JsonCourtOrder jsonCourtOrder, String loggedUserName) {
 		List<AnnotationProcessingStageAnnotations> annotationProcessingStageAnnotations = jsonCourtOrder.getAnnotationProcessingStageAnnotations();
 		annotationProcessingStageAnnotations.forEach(stage->{
-			if(StringUtils.equalsIgnoreCase(authentication.getName(), stage.getUsername())) {
+			if(StringUtils.equalsIgnoreCase(loggedUserName, stage.getUsername())) {
 				jsonCourtOrder.setAnnotationProcessingStage(stage.getAnnotationProcessingStage());				
 			}
 		});

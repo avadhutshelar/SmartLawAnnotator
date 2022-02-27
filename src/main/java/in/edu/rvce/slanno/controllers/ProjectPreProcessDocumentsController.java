@@ -317,7 +317,7 @@ public class ProjectPreProcessDocumentsController {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument= projectService.getLegalDocumentByDocumentId(docId);
 			
-			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication);
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication.getName());
 			
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 

@@ -19,11 +19,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import in.edu.rvce.slanno.dto.InterAnnotatorAgreementDto;
 import in.edu.rvce.slanno.dto.UserProjectDto;
-import in.edu.rvce.slanno.entities.Authorities;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.UserAuthorities;
 import in.edu.rvce.slanno.enums.UserDto;
+import in.edu.rvce.slanno.services.InterAnnotatorAgreementService;
 import in.edu.rvce.slanno.services.ProjectService;
 import in.edu.rvce.slanno.services.UsersService;
 import in.edu.rvce.slanno.utils.SessionMessage;
@@ -36,6 +37,9 @@ public class ProjectController {
 	
 	@Autowired
 	UsersService usersService;
+
+	@Autowired
+	InterAnnotatorAgreementService interAnnotatorAgreementService;
 
 	@GetMapping("/project/create")
 	public String createProject(SessionMessage message, Model model) {
@@ -227,4 +231,30 @@ public class ProjectController {
 		return "project-annotators";
 	}
 	
+	
+	@GetMapping("/project/{projectId}/interAnnotatorAgreement")
+	public String getInterAnnotatorAgreement(SessionMessage message, Model model, @PathVariable Integer projectId) {
+		String successMessage = "";
+		String errorMessage = "";
+		if(StringUtils.isNotBlank(message.getErrorMessage())) {errorMessage=message.getErrorMessage();}
+		try {
+			Project project = projectService.getProjectById(projectId);
+			
+			String[] usernamesArray = project.getAnnotatorUserListString().split(",");
+			List<String> usernamesList = Arrays.asList(usernamesArray);
+			
+			List<InterAnnotatorAgreementDto> interAnnotatorAgreementDtoList = interAnnotatorAgreementService.calculate(usernamesList, project);
+			
+			model.addAttribute("project", project);
+			model.addAttribute("interAnnotatorAgreementDtoList", interAnnotatorAgreementDtoList);
+			model.addAttribute("usernamesList", usernamesList);
+		} catch (Exception e) {
+			errorMessage = "Error in retriving the inter annotator agreement: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);			
+		}
+		return "interAnnotatorAgreement";
+	}
 }

@@ -52,30 +52,30 @@ public class OrderAnnotationService {
 		return jsonCourtOrder;
 	}
 	
-	public void getUpdatedOrderByUser(JsonCourtOrder jsonCourtOrder, Authentication authentication) {
+	public void getUpdatedOrderByUser(JsonCourtOrder jsonCourtOrder, String loggedUserName) {
 		List<OrderTypeAnnotations> orderTypeAnnotations = jsonCourtOrder.getOrder().getOrderTypeAnnotations();
 		orderTypeAnnotations.forEach(oType->{
-			if(StringUtils.equalsIgnoreCase(authentication.getName(), oType.getUsername())) {
+			if(StringUtils.equalsIgnoreCase(loggedUserName, oType.getUsername())) {
 				jsonCourtOrder.getOrder().setOrderType(oType.getOrderType());				
 			}
 		});
 		List<BondAmountAnnotations> bondAmountAnnotations = jsonCourtOrder.getOrder().getBondAmountAnnotations();
 		bondAmountAnnotations.forEach(bAmount->{
-			if(StringUtils.equalsIgnoreCase(authentication.getName(), bAmount.getUsername())) {
+			if(StringUtils.equalsIgnoreCase(loggedUserName, bAmount.getUsername())) {
 				jsonCourtOrder.getOrder().setBondAmount(bAmount.getBondAmount());
 			}
 		});
 		List<AttendPoliceStationRecurrenceAnnotations> attendPoliceStationRecurrenceAnnotations = 
 				jsonCourtOrder.getOrder().getAttendPoliceStationRecurrenceAnnotations();
 		attendPoliceStationRecurrenceAnnotations.forEach(attendRecurrence->{
-			if(StringUtils.equalsIgnoreCase(authentication.getName(), attendRecurrence.getUsername())) {
+			if(StringUtils.equalsIgnoreCase(loggedUserName, attendRecurrence.getUsername())) {
 				jsonCourtOrder.getOrder().setAttendPoliceStationRecurrence(attendRecurrence.getAttendPoliceStationRecurrence());
 			}
 		});
 		List<AttendPoliceStationFrequencyAnnotations> attendPoliceStationFrequencyAnnotations=
 				jsonCourtOrder.getOrder().getAttendPoliceStationFrequencyAnnotations();
 		attendPoliceStationFrequencyAnnotations.forEach(attendFrequency->{
-			if(StringUtils.equalsIgnoreCase(authentication.getName(), attendFrequency.getUsername())) {
+			if(StringUtils.equalsIgnoreCase(loggedUserName, attendFrequency.getUsername())) {
 				jsonCourtOrder.getOrder().setAttendPoliceStationFrequency(attendFrequency.getAttendPoliceStationFrequency());
 			}
 		});

@@ -49,18 +49,18 @@ public class ArgumentAnnotationService {
 		return jsonCourtOrder;
 	}
 	
-	public void getUpdatedArgumentsByUser(JsonCourtOrder jsonCourtOrder, Authentication authentication) {
+	public void getUpdatedArgumentsByUser(JsonCourtOrder jsonCourtOrder, String loggedUserName) {
 		jsonCourtOrder.getArguments().forEach(a -> {
 			List<ArgumentByAnnotations> argumentByAnnotations = a.getArgumentByAnnotations();
 			argumentByAnnotations.forEach(argumentByAnno->{
-				if(StringUtils.equalsIgnoreCase(authentication.getName(), argumentByAnno.getUsername())) {
+				if(StringUtils.equalsIgnoreCase(loggedUserName, argumentByAnno.getUsername())) {
 					a.setArgumentBy(argumentByAnno.getArgumentBy());					
 				}
 			});			
 			a.getArgumentSentences().forEach(sent->{
 				List<ArgumentSentenceTypeAnnotations> argumentSentenceTypeAnnotations = sent.getArgumentSentenceTypeAnnotations();
 				argumentSentenceTypeAnnotations.forEach(sentType->{
-					if(StringUtils.equalsIgnoreCase(authentication.getName(), sentType.getUsername())) {
+					if(StringUtils.equalsIgnoreCase(loggedUserName, sentType.getUsername())) {
 						sent.setArgumentSentenceType(sentType.getArgumentSentenceType());
 					}
 				});
