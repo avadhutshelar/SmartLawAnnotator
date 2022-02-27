@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import in.edu.rvce.slanno.dto.InterAnnotatorAgreementDto;
 import in.edu.rvce.slanno.dto.UserProjectDto;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.UserAuthorities;
@@ -239,9 +240,14 @@ public class ProjectController {
 		try {
 			Project project = projectService.getProjectById(projectId);
 			
-			interAnnotatorAgreementService.calculate();
+			String[] usernamesArray = project.getAnnotatorUserListString().split(",");
+			List<String> usernamesList = Arrays.asList(usernamesArray);
+			
+			List<InterAnnotatorAgreementDto> interAnnotatorAgreementDtoList = interAnnotatorAgreementService.calculate(usernamesList);
 			
 			model.addAttribute("project", project);
+			model.addAttribute("interAnnotatorAgreementDtoList", interAnnotatorAgreementDtoList);
+			model.addAttribute("usernamesList", usernamesList);
 		} catch (Exception e) {
 			errorMessage = "Error in retriving the inter annotator agreement: \n" + e.getMessage();
 		} finally {

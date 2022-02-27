@@ -1,5 +1,6 @@
 package in.edu.rvce.slanno.services;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import in.edu.rvce.courtorder.JsonCourtOrder;
+import in.edu.rvce.slanno.dto.InterAnnotatorAgreementDto;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.ArgumentBy;
@@ -23,26 +25,29 @@ public class InterAnnotatorAgreementService {
 	@Autowired
 	private AnnotationService annotationService;
 
-	public Double calculate() throws Exception {
+	public List<InterAnnotatorAgreementDto> calculate(List<String> usernamesList) throws Exception {
 		
 		Project project = projectService.getProjectById(3);
 		LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(14l);
 
-		String[] usernamesArray = project.getAnnotatorUserListString().split(",");
-		List<String> usernames = Arrays.asList(usernamesArray);
-		
 		Map<String, Map<String, Integer>> userAnnoLabelCountMap = new HashMap<>();
-		usernames.forEach(username -> {
+		usernamesList.forEach(username -> {
 			Map<String, Integer> annoLabelCountMap = initializeAnnoLabelCountMap();
 			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, username);
 			Map<String, Integer> updatedAnnoLabelCountMap = updateAnnoLabelCountMap(annoLabelCountMap, jsonCourtOrder);
 			userAnnoLabelCountMap.put(username, updatedAnnoLabelCountMap);
 		});
 
-		getCohensKappa (userAnnoLabelCountMap.get("a2"),userAnnoLabelCountMap.get("a3")) ;
-		
-		Double agreement = 0.0;
-		return agreement;
+		List<InterAnnotatorAgreementDto> interAnnotatorAgreementDtoList = new ArrayList<>();
+		usernamesList.forEach(u1->{
+			usernamesList.forEach(u2->{
+				Double agreement = getCohensKappa (userAnnoLabelCountMap.get(u1),userAnnoLabelCountMap.get(u2)) ;
+				String agreementPercentage = String.format("%.0f%%",agreement*100);
+				InterAnnotatorAgreementDto interAnnotatorAgreementDto = new InterAnnotatorAgreementDto(u1,u2,agreementPercentage);
+				interAnnotatorAgreementDtoList.add(interAnnotatorAgreementDto);				
+			});
+		});		
+		return interAnnotatorAgreementDtoList;
 	}
 	
 	private Double getCohensKappa(Map<String, Integer> user1AnnoLabelCountMap, Map<String, Integer> user2AnnoLabelCountMap) {
