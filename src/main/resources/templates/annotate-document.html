@@ -68,12 +68,12 @@
 		<div class="row">
 			<div class="col-md-12">
 			
-				<div th:if="${jsonCourtOrder.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE0} or
-							${jsonCourtOrder.annotationProcessingStage == null}">	
+				<div th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE0} or
+							${legalDocument.annotationProcessingStage == null}">	
 					<label class="text-success" th:text="'Preprocessing isnt complete yet.'"></label>
 				</div>
 				
-				<div th:if="${jsonCourtOrder.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE1}">
+				<div th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE1}">
 					
 					<table class="table table-striped table-responsive-md">
 						<tbody>
@@ -304,7 +304,7 @@
 				
 				</div>
 				
-				<div th:if="${jsonCourtOrder.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE2}">	
+				<div th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE2}">	
 					<label class="text-success" th:text="'Annotaion Process Already marked complete'"></label>
 					
 					<form action="#"

@@ -22,7 +22,7 @@ import lombok.Setter;
 public class Project {
 
 	@Id	
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Integer projectId;
 	
 	@NotBlank(message = "Project Name is mandatory")

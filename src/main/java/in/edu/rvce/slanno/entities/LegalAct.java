@@ -17,7 +17,7 @@ import lombok.Setter;
 public class LegalAct {
 
 	@Id	
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long actId;
 	
 	@NotBlank(message = "Act Name is mandatory")	

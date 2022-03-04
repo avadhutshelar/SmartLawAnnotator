@@ -169,7 +169,7 @@ public class LegalReferenceAnnotationService {
 		return jsonCourtOrder;
 	}
 
-	public JsonCourtOrder addLegalActFound(JsonCourtOrder jsonCourtOrder,LegalActFound legalActFound) {
+	public JsonCourtOrder addLegalActFound(JsonCourtOrder jsonCourtOrder,LegalActFound legalActFound, Project project, Authentication authentication) {
 		
 		try {
 			List<LegalAct> legalActList = settingsService.getLegalActs();
@@ -181,7 +181,7 @@ public class LegalReferenceAnnotationService {
 					flag=Boolean.TRUE;
 					legalActTemp = legalAct;
 					break;
-				}else if(StringUtils.equalsAnyIgnoreCase(matched, legalAct.getActShortNameList())) {
+				}else if(legalAct.getActShortNameList().contains(matched)) {
 					flag=Boolean.TRUE;
 					legalActTemp = legalAct;
 					break;
@@ -190,9 +190,23 @@ public class LegalReferenceAnnotationService {
 			if (flag) {
 				LegalReference legalReference = new LegalReference();
 				legalReference.setLegalActFound(legalActFound);
-				legalReference.setLegalRefAcceptRejectDecision(LegalRefAcceptRejectDecision.ACCEPT_SUGGESTION);
+				legalReference.setLegalRefAcceptRejectDecision(LegalRefAcceptRejectDecision.TBD);
 				legalActFound.setLegalAct(legalActTemp);
 				legalReference.setLegalActFound(legalActFound);
+				
+				String annotatorUserListString=project.getAnnotatorUserListString();
+				List<String> annotatorUserList= Arrays.asList(annotatorUserListString.split(",")); 
+				List<LegalRefAcceptRejectDecisionAnnotations> legalRefAcceptRejectDecisionAnnotations = new ArrayList<>();
+				annotatorUserList.forEach(username->{
+					if(StringUtils.equals(username, authentication.getName())) {
+						legalRefAcceptRejectDecisionAnnotations.add(
+								new LegalRefAcceptRejectDecisionAnnotations(username,LegalRefAcceptRejectDecision.ACCEPT_SUGGESTION));
+					}else {
+						legalRefAcceptRejectDecisionAnnotations.add(
+								new LegalRefAcceptRejectDecisionAnnotations(username,LegalRefAcceptRejectDecision.TBD));
+					}
+				});
+				legalReference.setLegalRefAcceptRejectDecisionAnnotations(legalRefAcceptRejectDecisionAnnotations);
 				
 				List<LegalReference> legalReferences=jsonCourtOrder.getBackground().getLegalReferences();
 				Integer refNumber=1;

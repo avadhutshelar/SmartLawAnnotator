@@ -17,7 +17,7 @@ import lombok.Setter;
 public class SystemSetting {
 
 	@Id	
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long settingsId;
 	
 	@NotBlank(message = "Key is mandatory")	

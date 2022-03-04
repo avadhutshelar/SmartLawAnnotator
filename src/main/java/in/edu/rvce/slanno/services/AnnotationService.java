@@ -112,7 +112,8 @@ public class AnnotationService {
 		List<LegalDocument> tempLegalDocumentList = Lists.newArrayList(legalDocumentRepository.findAll());
 		List<LegalDocument> legalDocumentList = tempLegalDocumentList.stream()
 				.filter(legDoc -> 
-					legDoc.getProject().getProjectId() == project.getProjectId()).collect(Collectors.toList());
+					legDoc.getProject().getProjectId() == project.getProjectId()
+					&& !legDoc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE0)).collect(Collectors.toList());
 		
 		List<LegalDocument> legalDocumentListPending = new ArrayList<>();
 		legalDocumentList.stream().forEach(legalDocument->{
@@ -134,7 +135,8 @@ public class AnnotationService {
 		
 		List<LegalDocument> tempLegalDocumentList = Lists.newArrayList(legalDocumentRepository.findAll());
 		List<LegalDocument> legalDocumentList = tempLegalDocumentList.stream()
-				.filter(legDoc -> legDoc.getProject().getProjectId() == project.getProjectId()).collect(Collectors.toList());
+				.filter(legDoc -> legDoc.getProject().getProjectId() == project.getProjectId()
+				&& !legDoc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE0)).collect(Collectors.toList());
 		
 		List<LegalDocument> legalDocumentListAssigned = new ArrayList<>();
 		legalDocumentList.stream().forEach(legalDocument->{
@@ -158,7 +160,8 @@ public class AnnotationService {
 		List<LegalDocument> tempLegalDocumentList = Lists.newArrayList(legalDocumentRepository.findAll());
 		List<LegalDocument> legalDocumentList = tempLegalDocumentList.stream()
 				.filter(legDoc -> 
-					legDoc.getProject().getProjectId() == project.getProjectId()).collect(Collectors.toList());
+					legDoc.getProject().getProjectId() == project.getProjectId()
+					&& !legDoc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE0)).collect(Collectors.toList());
 		
 		List<LegalDocument> legalDocumentListPending = new ArrayList<>();
 		legalDocumentList.stream().forEach(legalDocument->{
@@ -184,7 +187,8 @@ public class AnnotationService {
 		List<LegalDocument> tempLegalDocumentList = Lists.newArrayList(legalDocumentRepository.findAll());
 		List<LegalDocument> legalDocumentList = tempLegalDocumentList.stream()
 				.filter(legDoc -> 
-					legDoc.getProject().getProjectId() == project.getProjectId())
+					legDoc.getProject().getProjectId() == project.getProjectId()
+					&& !legDoc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE0))
 				.collect(Collectors.toList());
 		List<LegalDocument> legalDocumentListComplete = new ArrayList<>();
 		legalDocumentList.stream().forEach(legalDocument->{

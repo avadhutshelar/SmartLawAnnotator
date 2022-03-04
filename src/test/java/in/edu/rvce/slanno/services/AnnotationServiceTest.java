@@ -28,7 +28,7 @@ public class AnnotationServiceTest {
 	@MockBean
 	private SettingsService settingsService;
 
-	@Test
+	//@Test
 	public void updateSectionReferenceTest() throws Exception {
 		SystemSetting systemSetting = new SystemSetting(ApplicationConstants.SECTION_ABBR_LIST,
 				"under section,under sections,u.s.,u/s,read with,r/w,r.w.,read with section,read with sections,r/w. s.,r.w.s.,under sec/s.");

@@ -118,13 +118,15 @@ public class AnnotationController {
 		try {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
-
-			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication.getName());
-			String textOrder = jsonCourtOrder.getProcessedText();
-			message.setTextOrder(textOrder);
+			if (!legalDocument.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE0)) {
+				JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication.getName());
+				String textOrder = jsonCourtOrder.getProcessedText();
+				message.setTextOrder(textOrder);
+				model.addAttribute("jsonCourtOrder", jsonCourtOrder);
+			}
+			
 			model.addAttribute("project", project);
-			model.addAttribute("legalDocument", legalDocument);
-			model.addAttribute("jsonCourtOrder", jsonCourtOrder);
+			model.addAttribute("legalDocument", legalDocument);			
 		} catch (Exception e) {
 			errorMessage = "Error in retriving the legal document: \n" + e.getMessage();
 		} finally {
@@ -362,7 +364,7 @@ public class AnnotationController {
 			legalActFound.setSectionsMatched(sectionsMatched);
 			legalActFound.setStringMatched(stringMatched);
 			
-			JsonCourtOrder jsonCourtOrder = legalReferenceService.addLegalActFound(jsonCourtOrderTemp, legalActFound);
+			JsonCourtOrder jsonCourtOrder = legalReferenceService.addLegalActFound(jsonCourtOrderTemp, legalActFound, project, authentication);
 			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder, authentication);
 			
 		}catch (Exception e) {

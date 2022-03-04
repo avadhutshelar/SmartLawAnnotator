@@ -89,7 +89,13 @@ public class ArgumentAnnotationService {
 						ain.getArgumentSentences().forEach(sin->{
 						
 							if(s.getSentenceNumber().equals(sin.getSentenceNumber())) {
-								s.setArgumentSentenceType(sin.getArgumentSentenceType());
+								
+								List<ArgumentSentenceTypeAnnotations> argumentSentenceTypeAnnotations = s.getArgumentSentenceTypeAnnotations();
+								argumentSentenceTypeAnnotations.forEach(sentTypeAnno->{
+									if(StringUtils.equalsIgnoreCase(authentication.getName(), sentTypeAnno.getUsername())) {
+										sentTypeAnno.setArgumentSentenceType(sin.getArgumentSentenceType());
+									}
+								});
 							}
 							
 						});

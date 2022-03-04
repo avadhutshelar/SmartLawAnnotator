@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import in.edu.rvce.courtorder.JsonCourtOrder;
 import in.edu.rvce.slanno.dto.InterAnnotatorAgreementDto;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
+import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
 import in.edu.rvce.slanno.enums.ArgumentBy;
 import in.edu.rvce.slanno.enums.OrderType;
 
@@ -30,6 +32,8 @@ public class InterAnnotatorAgreementService {
 		//LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(14l);
 		
 		List<LegalDocument> legalDocumentList = projectService.getAllLegalDocumentByProjectId(project.getProjectId());
+		legalDocumentList = legalDocumentList.stream().filter(legDoc->
+			!legDoc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE0)).collect(Collectors.toList());
 
 		Map<LegalDocument, List<InterAnnotatorAgreementDto>> legalDocumentWiseInterAnnotatorAgreementMap = new HashMap<>(); 
 		

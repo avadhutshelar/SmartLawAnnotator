@@ -167,10 +167,12 @@ public class ProjectController {
 			UserProjectDto userProjectDto = new UserProjectDto();
 			List<UserDto> userDtoListTemp = new ArrayList<>();
 			userDtoList.forEach(userDto->{
-				String[] usernamesArray =  project.getAnnotatorUserListString().split(",");
-				List<String> usernames = Arrays.asList(usernamesArray);
-				if(usernames.contains(userDto.getUsername())) {
-					userDto.setIsAnnotatorForProject(Boolean.TRUE);
+				if(StringUtils.isNotBlank(project.getAnnotatorUserListString())) {
+					String[] usernamesArray =  project.getAnnotatorUserListString().split(",");
+					List<String> usernames = Arrays.asList(usernamesArray);
+					if(usernames.contains(userDto.getUsername())) {
+						userDto.setIsAnnotatorForProject(Boolean.TRUE);
+					}					
 				}
 				userDtoListTemp.add(userDto);
 			});

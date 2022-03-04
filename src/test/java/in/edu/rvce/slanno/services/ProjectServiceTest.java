@@ -24,7 +24,7 @@ public class ProjectServiceTest{
 	@MockBean
 	private SettingsService settingsService;
 
-	@Test
+	//@Test
 	public void splitArgumentSentencesTest()  throws Exception{
 
 		SystemSetting systemSetting = new SystemSetting(ApplicationConstants.ABBRS_IN_SENTENCE_LIST, "Ld.");

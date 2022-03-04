@@ -18,7 +18,7 @@ import lombok.Setter;
 public class LegalDocument {
 
 	@Id	
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long documentId;
 
 	@ManyToOne
