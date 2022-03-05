@@ -60,7 +60,11 @@
 		</div>
 		<div class="row">
 			<div class="col-md-12">
-				<div>	
+				<div th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE0} or
+							${legalDocument.annotationProcessingStage == null}">	
+					<label class="text-success" th:text="'Preprocessing isnt complete yet.'"></label>
+				</div>
+				<div th:if="${legalDocument.annotationProcessingStage == T(in.edu.rvce.slanno.enums.AnnotationProcessingStage).STAGE1}">	
 					<textarea rows="20" cols="170" id="jsonTextArea"
 						th:text="${message.textOrder}"  th:field="${message.textOrder}"></textarea>
 					

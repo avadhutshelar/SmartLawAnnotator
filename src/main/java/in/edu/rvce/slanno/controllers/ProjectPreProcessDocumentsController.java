@@ -316,21 +316,20 @@ public class ProjectPreProcessDocumentsController {
 		try {
 			Project project = projectService.getProjectById(projectId);
 			LegalDocument legalDocument= projectService.getLegalDocumentByDocumentId(docId);
-			
-			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication.getName());
-			
-			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			if (!legalDocument.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE0)) {				
+				JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication.getName());
 
-			String json = "";
-			// Java objects to File
-			try{
-				json=gson.toJson(jsonCourtOrder);
-			} catch (Exception e) {
-				e.printStackTrace();
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+	
+				String json = "";
+				try{
+					json=gson.toJson(jsonCourtOrder);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				message.setTextOrder(json);
 			}
-			message.setTextOrder(json);
 			model.addAttribute("project", project);
-			//model.addAttribute("json", json);
 			model.addAttribute("legalDocument", legalDocument);
 		} catch (Exception e) {
 			errorMessage = "Error in retriving the legal document: \n" + e.getMessage();
