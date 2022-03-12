@@ -169,7 +169,7 @@ public class AnnotationController {
 	}
 	
 	@PostMapping("/project/{projectId}/annotate/{docId}/complete")
-	public RedirectView markAnnotationComplete(SessionMessage message, Model model, @PathVariable Integer projectId,
+	public String markAnnotationComplete(SessionMessage message, Model model, @PathVariable Integer projectId,
 			@PathVariable Long docId, JsonCourtOrder jsonCourtOrderIn, Authentication authentication) {
 		String successMessage = "";
 		String errorMessage = "";
@@ -178,10 +178,17 @@ public class AnnotationController {
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
 			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication.getName());
 			
-			legalDocument.setAnnotationProcessingStage(AnnotationProcessingStage.STAGE2);
-			
-			annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder, authentication);
-			
+			List<String> incompleteAnnotationList = argumentAnnotationService.getIncompleteAnnotationList(jsonCourtOrder,authentication.getName());
+			if(incompleteAnnotationList.size() == 0) {
+				legalDocument.setAnnotationProcessingStage(AnnotationProcessingStage.STAGE2);
+				
+				annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder, authentication);
+			}else {
+				errorMessage = "Following annotations are incomplete";
+				for(String str:incompleteAnnotationList) {
+					errorMessage = errorMessage + "<br /> -" + str;
+				}
+			}
 			model.addAttribute("project", project);
 			model.addAttribute("legalDocument", legalDocument);
 			model.addAttribute("jsonCourtOrder", jsonCourtOrder);
@@ -193,7 +200,7 @@ public class AnnotationController {
 			message.setErrorMessage(errorMessage);
 			model.addAttribute("message", message);
 		}
-		return new RedirectView("/project/" + projectId + "/annotate/" + docId);
+		return "annotate-document";
 	}
 	
 	@PostMapping("/project/{projectId}/annotate/{docId}/backToAnnotation")

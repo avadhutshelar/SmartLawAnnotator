@@ -15,9 +15,12 @@ import org.springframework.stereotype.Service;
 import in.edu.rvce.courtorder.JsonCourtOrder;
 import in.edu.rvce.courtorder.annotations.ArgumentByAnnotations;
 import in.edu.rvce.courtorder.annotations.ArgumentSentenceTypeAnnotations;
+import in.edu.rvce.courtorder.annotations.LegalRefAcceptRejectDecisionAnnotations;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.ArgumentBy;
 import in.edu.rvce.slanno.enums.ArgumentSentenceType;
+import in.edu.rvce.slanno.enums.LegalRefAcceptRejectDecision;
+import in.edu.rvce.slanno.enums.OrderType;
 
 @Service
 public class ArgumentAnnotationService {
@@ -151,6 +154,44 @@ public class ArgumentAnnotationService {
 			});
 			
 		});
+	}
+	
+	public List<String> getIncompleteAnnotationList(JsonCourtOrder jsonCourtOrder, String loggedUserName) {
+		List<String> incompleteAnnotationList = new ArrayList<>();
+		//background complete?
+		jsonCourtOrder.getBackground().getLegalReferences().forEach(legRef->{
+			legRef.getLegalRefAcceptRejectDecisionAnnotations().forEach(decision->{
+				if(StringUtils.equals(decision.getUsername(), loggedUserName)
+						&& StringUtils.equalsIgnoreCase(decision.getLegalRefAcceptRejectDecision().getDisplayValue(), LegalRefAcceptRejectDecision.TBD.getDisplayValue())) {
+					incompleteAnnotationList.add("Background - LegalRef - "+legRef.getRefNumber());
+				}
+			});
+		});
+		//Argument annotations complete?
+		jsonCourtOrder.getArguments().forEach(arg->{
+			arg.getArgumentByAnnotations().forEach(argby->{
+				if(StringUtils.equals(argby.getUsername(), loggedUserName)
+						&& StringUtils.equalsIgnoreCase(argby.getArgumentBy().getDisplayValue(), ArgumentBy.TBD.getDisplayValue())) {
+					incompleteAnnotationList.add("Aggument "+arg.getArgumentNumber()+" - ArgumentBy");
+				}
+			});
+			arg.getArgumentSentences().forEach(sent->{
+				sent.getArgumentSentenceTypeAnnotations().forEach(sentType->{
+					if(StringUtils.equals(sentType.getUsername(), loggedUserName)
+							&& StringUtils.equalsIgnoreCase(sentType.getArgumentSentenceType().getDisplayValue(), ArgumentSentenceType.TBD.getDisplayValue())) {
+						incompleteAnnotationList.add("Argument" + arg.getArgumentNumber() + " - Sentence "+ sent.getSentenceNumber() + " - Sentence Type");
+					}
+				});
+			});
+		});
+		//Order annotatations complete?
+		jsonCourtOrder.getOrder().getOrderTypeAnnotations().forEach(orderType->{
+			if(StringUtils.equals(orderType.getUsername(), loggedUserName)
+					&& StringUtils.equalsIgnoreCase(orderType.getOrderType().getDisplayValue(), OrderType.TBD.getDisplayValue())) {
+				incompleteAnnotationList.add("Order - OrderType");
+			}
+		});
+		return incompleteAnnotationList;
 	}
 
 	private ArgumentSentenceType getArgumentSentenceTypeForDisplayValue(String displayValue) {
