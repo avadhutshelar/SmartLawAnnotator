@@ -159,6 +159,8 @@ public class ArgumentAnnotationService {
 			sentType = ArgumentSentenceType.PREMISE;
 		}else if(StringUtils.equalsIgnoreCase(displayValue, ArgumentSentenceType.CONCLUSION.getDisplayValue())) {
 			sentType = ArgumentSentenceType.CONCLUSION;
+		}else if(StringUtils.equalsIgnoreCase(displayValue, ArgumentSentenceType.NA.getDisplayValue())) {
+			sentType = ArgumentSentenceType.NA;
 		}else if(StringUtils.equalsIgnoreCase(displayValue, ArgumentSentenceType.TBD.getDisplayValue())) {
 			sentType = ArgumentSentenceType.TBD;
 		}

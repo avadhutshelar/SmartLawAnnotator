@@ -4,6 +4,7 @@ public enum ArgumentSentenceType {
 	
 	PREMISE("Premise or Evidence"),
 	CONCLUSION("Conclusion or Claim"),
+	NA("NA"),
 	TBD("TBD");
 		
 	private final String displayValue;
