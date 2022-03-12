@@ -187,41 +187,51 @@ public class LegalReferenceAnnotationService {
 					break;
 				}
 			}
-			if (flag) {
-				LegalReference legalReference = new LegalReference();
-				legalReference.setLegalActFound(legalActFound);
-				legalReference.setLegalRefAcceptRejectDecision(LegalRefAcceptRejectDecision.TBD);
-				legalActFound.setLegalAct(legalActTemp);
-				legalReference.setLegalActFound(legalActFound);
+			
+			if (!flag) {
+				LegalAct legalAct = new LegalAct();
+				legalAct.setActName(legalActFound.getActNameMatched());
+				legalAct.setActShortNameList("");
+				legalAct.setActYear("0000");
+				legalAct.setMinSectionNumber("1");
+				legalAct.setMaxSectionNumber("1");
 				
-				String annotatorUserListString=project.getAnnotatorUserListString();
-				List<String> annotatorUserList= Arrays.asList(annotatorUserListString.split(",")); 
-				List<LegalRefAcceptRejectDecisionAnnotations> legalRefAcceptRejectDecisionAnnotations = new ArrayList<>();
-				annotatorUserList.forEach(username->{
-					if(StringUtils.equals(username, authentication.getName())) {
-						legalRefAcceptRejectDecisionAnnotations.add(
-								new LegalRefAcceptRejectDecisionAnnotations(username,LegalRefAcceptRejectDecision.ACCEPT_SUGGESTION));
-					}else {
-						legalRefAcceptRejectDecisionAnnotations.add(
-								new LegalRefAcceptRejectDecisionAnnotations(username,LegalRefAcceptRejectDecision.TBD));
-					}
-				});
-				legalReference.setLegalRefAcceptRejectDecisionAnnotations(legalRefAcceptRejectDecisionAnnotations);
-				
-				List<LegalReference> legalReferences=jsonCourtOrder.getBackground().getLegalReferences();
-				Integer refNumber=1;
-				if(CollectionUtils.isNotEmpty(legalReferences)) {					
-					LegalReference maxLegalRef=legalReferences.stream().max(Comparator.comparing(LegalReference::getRefNumber)).orElseThrow(NoSuchElementException::new);
-					refNumber = maxLegalRef.getRefNumber()+1;
-					legalReference.setRefNumber(refNumber);
-					legalReferences.add(legalReference);
+				legalActTemp = settingsService.createActs(legalAct);
+			}
+			LegalReference legalReference = new LegalReference();
+			legalReference.setLegalActFound(legalActFound);
+			legalReference.setLegalRefAcceptRejectDecision(LegalRefAcceptRejectDecision.TBD);
+			legalActFound.setLegalAct(legalActTemp);
+			legalReference.setLegalActFound(legalActFound);
+			
+			String annotatorUserListString=project.getAnnotatorUserListString();
+			List<String> annotatorUserList= Arrays.asList(annotatorUserListString.split(",")); 
+			List<LegalRefAcceptRejectDecisionAnnotations> legalRefAcceptRejectDecisionAnnotations = new ArrayList<>();
+			annotatorUserList.forEach(username->{
+				if(StringUtils.equals(username, authentication.getName())) {
+					legalRefAcceptRejectDecisionAnnotations.add(
+							new LegalRefAcceptRejectDecisionAnnotations(username,LegalRefAcceptRejectDecision.ACCEPT_SUGGESTION));
 				}else {
-					legalReferences = new ArrayList<>();
-					legalReference.setRefNumber(refNumber);
-					legalReferences.add(legalReference);
-					jsonCourtOrder.getBackground().setLegalReferences(legalReferences);
+					legalRefAcceptRejectDecisionAnnotations.add(
+							new LegalRefAcceptRejectDecisionAnnotations(username,LegalRefAcceptRejectDecision.TBD));
 				}
-			}	
+			});
+			legalReference.setLegalRefAcceptRejectDecisionAnnotations(legalRefAcceptRejectDecisionAnnotations);
+			
+			List<LegalReference> legalReferences=jsonCourtOrder.getBackground().getLegalReferences();
+			Integer refNumber=1;
+			if(CollectionUtils.isNotEmpty(legalReferences)) {					
+				LegalReference maxLegalRef=legalReferences.stream().max(Comparator.comparing(LegalReference::getRefNumber)).orElseThrow(NoSuchElementException::new);
+				refNumber = maxLegalRef.getRefNumber()+1;
+				legalReference.setRefNumber(refNumber);
+				legalReferences.add(legalReference);
+			}else {
+				legalReferences = new ArrayList<>();
+				legalReference.setRefNumber(refNumber);
+				legalReferences.add(legalReference);
+				jsonCourtOrder.getBackground().setLegalReferences(legalReferences);
+			}
+		
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

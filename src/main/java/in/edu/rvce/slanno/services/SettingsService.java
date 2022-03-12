@@ -20,8 +20,8 @@ public class SettingsService {
 	@Autowired
 	private SystemSettingRepository systemSettingRepository;
 	
-	public void createActs(LegalAct legalAct) {
-		legalActRepository.save(legalAct);
+	public LegalAct createActs(LegalAct legalAct) {
+		return legalActRepository.save(legalAct);
 	}
 
 	public List<LegalAct> getLegalActs() throws Exception {

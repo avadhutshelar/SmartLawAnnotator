@@ -179,7 +179,7 @@ public class ArgumentAnnotationService {
 				sent.getArgumentSentenceTypeAnnotations().forEach(sentType->{
 					if(StringUtils.equals(sentType.getUsername(), loggedUserName)
 							&& StringUtils.equalsIgnoreCase(sentType.getArgumentSentenceType().getDisplayValue(), ArgumentSentenceType.TBD.getDisplayValue())) {
-						incompleteAnnotationList.add("Argument" + arg.getArgumentNumber() + " - Sentence "+ sent.getSentenceNumber() + " - Sentence Type");
+						incompleteAnnotationList.add("Argument " + arg.getArgumentNumber() + " - Sentence "+ sent.getSentenceNumber() + " - Sentence Type");
 					}
 				});
 			});
