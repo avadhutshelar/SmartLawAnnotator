@@ -195,8 +195,8 @@ public class LegalReferenceAnnotationService {
 				legalAct.setActYear("0000");
 				legalAct.setMinSectionNumber("1");
 				legalAct.setMaxSectionNumber("1");
-				
-				legalActTemp = settingsService.createActs(legalAct);
+				settingsService.createActs(legalAct);
+				legalActTemp = legalAct;
 			}
 			LegalReference legalReference = new LegalReference();
 			legalReference.setLegalActFound(legalActFound);
