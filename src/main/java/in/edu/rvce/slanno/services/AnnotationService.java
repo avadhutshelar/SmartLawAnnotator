@@ -80,6 +80,33 @@ public class AnnotationService {
 		return jsonCourtOrder;
 	}
 
+	public JsonCourtOrder getJsonCourtOrderForExport(Project project, LegalDocument legalDocument) {
+		JsonCourtOrder jsonCourtOrder = new JsonCourtOrder();
+
+		String jsonText = "";
+
+		String processedTextFileNameWithPath = env.getProperty("slanno.dataset.basedir") + "\\"
+				+ project.getProjectDirectoryName() + "\\" + legalDocument.getJsonFilePath();
+
+		try {
+			jsonText = new String(Files.readAllBytes(Paths.get(processedTextFileNameWithPath)));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+		// File to Java objects
+		try {
+			jsonCourtOrder = gson.fromJson(jsonText, JsonCourtOrder.class);			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return jsonCourtOrder;
+	}
+
+	
 	public void saveJsonOrder(Project project, LegalDocument legalDocument, JsonCourtOrder jsonCourtOrder, Authentication authentication) {
 		try {
 

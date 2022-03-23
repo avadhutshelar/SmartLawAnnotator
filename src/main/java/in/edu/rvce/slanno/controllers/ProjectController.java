@@ -259,4 +259,23 @@ public class ProjectController {
 		}
 		return "interAnnotatorAgreement";
 	}
+	
+	@GetMapping("/project/{projectId}/export")
+	public String exportDocuments(SessionMessage message, Model model, @PathVariable Integer projectId) {
+		String successMessage = "";
+		String errorMessage = "";
+		try {
+			Project project = projectService.getProjectById(projectId);
+			successMessage = projectService.exportDocuments(project);	
+			model.addAttribute("project", project);
+		} catch (Exception e) {
+			errorMessage = "Error in exporting documents: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);
+			model.addAttribute("datasetBaseDir", projectService.getDatasetBaseDirectory() + "\\");
+		}
+		return "project-export-documents";
+	}
 }

@@ -183,6 +183,7 @@ public class AnnotationController {
 				legalDocument.setAnnotationProcessingStage(AnnotationProcessingStage.STAGE2);
 				
 				annotationService.saveJsonOrder(project, legalDocument, jsonCourtOrder, authentication);
+				successMessage="Annotation Completed";
 			}else {
 				errorMessage = "Following annotations are incomplete";
 				for(String str:incompleteAnnotationList) {

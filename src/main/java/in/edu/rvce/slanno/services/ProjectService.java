@@ -76,6 +76,9 @@ public class ProjectService {
 	
 	@Autowired
 	AnnotationProcessingStageService annotationProcessingStageService;
+	
+	@Autowired
+	private AnnotationService annotationService;
 
 	public Boolean createDirectories(Project project) throws Exception {
 
@@ -400,14 +403,30 @@ public class ProjectService {
 		return annotatorUserWithAnnotatorRole.size();
 	}
 	
-	/*
-	 * public List<ProjectAnnotator> getAllProjectAnnotators() throws Exception {
-	 * List<ProjectAnnotator> projectAnnotatorList =
-	 * Lists.newArrayList(projectAnnotatorRepository.findAll()); return
-	 * projectAnnotatorList; }
-	 * 
-	 * public void addOrUpdateProjectAnnotator(ProjectAnnotator projectAnnotator) {
-	 * projectAnnotatorRepository.save(projectAnnotator); }
-	 */
+	public String exportDocuments(Project project) throws Exception{
+		List<LegalDocument> legalDocumentList = getAllLegalDocumentByProjectId(project.getProjectId());
+		legalDocumentList = legalDocumentList.stream().filter(legDoc->
+			legDoc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE2)).collect(Collectors.toList());
+
+		String exportDirName = env.getProperty("slanno.dataset.export.dir");
+		
+		legalDocumentList.forEach(legalDocument->{
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrderForExport(project, legalDocument);
+			
+			String jsonFileNameWithPath = exportDirName + "\\" + legalDocument.getJsonFilePath();
+
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+			// Java objects to File
+			try (FileWriter writer = new FileWriter(jsonFileNameWithPath)) {
+				gson.toJson(jsonCourtOrder, writer);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		});
+			
+		return "Exported " + legalDocumentList.size() + " Documents at => " + exportDirName;
+	}
 	
 }
