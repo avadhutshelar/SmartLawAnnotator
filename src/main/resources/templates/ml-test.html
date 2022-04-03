@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>ML Test</title>
+<link rel="stylesheet"
+	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+<script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+</head>
+<body>
+	<div th:replace="fragments/header :: header"></div>
+	<div class="container-fluid">		
+		<div class="row">
+			<div class="col-md-2">
+				<div th:replace="fragments/leftSidebar :: viewProjectLeftSidebar"></div>
+			</div>
+			<div class="col-md-8">
+				<h4 class="lh-sm">
+					<label>Machine Learning Service Test</label>
+				</h4>
+				<form action="#" th:action="@{/mltest/test}" th:object="${mlInputDto}" method="post" >
+				
+					<table class="table table-striped table-responsive-md">
+						<tbody>
+							<tr>
+								<td>
+									<label for="input1" class="col-form-label">Input 1: </label>
+								</td>
+								<td>
+									<input type="text" th:field="*{input1}" class="form-control" id="input1" placeholder="Type input 1 here">									
+								</td>			
+							</tr>
+							<tr>
+								<td>
+									<label for="input2" class="col-form-label">Input 2: </label>
+								</td>
+								<td>
+									<input type="text" th:field="*{input2}" class="form-control" id="input2" placeholder="Type input 2 here">									
+								</td>			
+							</tr>
+							<tr>									
+								<td colspan="2"><input type="submit" class="btn btn-primary" value="Test ML"></td>									
+							</tr>
+							
+							<tr>									
+								<td colspan="2">
+									<div th:if="${message != null}">
+										<label for="name" class="text-success"	th:text="${message.successMessage}"></label>	
+										<label for="name" class="text-danger" th:text="${message.errorMessage}"></label>
+									</div>								
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					
+				</form>
+				
+				<table class="table table-striped table-responsive-md">
+					<tbody>
+						<tr>
+							<td>
+								<label for="Output1" class="col-form-label">Output 1: </label>
+							</td>
+							<td th:text="${mlOutputDto.output1}" />
+						</tr>
+						<tr>
+							<td>
+								<label for="Output2" class="col-form-label">Output 2: </label>
+							</td>
+							<td th:text="${mlOutputDto.output2}" />
+						</tr>
+					</tbody>
+				</table>					
+				
+			</div>
+		</div>
+	</div>
+</body>
+</html>

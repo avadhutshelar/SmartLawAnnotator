@@ -17,9 +17,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import in.edu.rvce.slanno.dto.InterAnnotatorAgreementDto;
+import in.edu.rvce.slanno.dto.MLInputDto;
+import in.edu.rvce.slanno.dto.MLOutputDto;
 import in.edu.rvce.slanno.dto.UserProjectDto;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.UserAuthorities;
@@ -41,6 +46,9 @@ public class ProjectController {
 	@Autowired
 	InterAnnotatorAgreementService interAnnotatorAgreementService;
 
+	@Autowired
+	private RestTemplate restTemplate;
+	
 	@GetMapping("/project/create")
 	public String createProject(SessionMessage message, Model model) {
 		message.setSuccessMessage("");
@@ -277,5 +285,32 @@ public class ProjectController {
 			model.addAttribute("datasetBaseDir", projectService.getDatasetBaseDirectory() + "\\");
 		}
 		return "project-export-documents";
+	}
+	
+	@GetMapping("/project/{projectId}/mltest/test")
+	public String mlTest(SessionMessage message, Model model, @PathVariable Integer projectId, MLInputDto mlInputDto) {
+		String successMessage = "";
+		String errorMessage = "";
+		try {
+			Project project = projectService.getProjectById(projectId);				
+			model.addAttribute("project", project);
+			model.addAttribute("mlInputDto", mlInputDto);
+					
+			mlInputDto.setInput1("i1");
+			mlInputDto.setInput2("i2");
+			String result = restTemplate.postForObject("http://localhost:8050/predictArgumentBy", mlInputDto, String.class);
+			ObjectMapper objectMapper = new ObjectMapper();
+			MLOutputDto mlOutputDto = objectMapper.readValue(result, MLOutputDto.class);
+			
+			
+			model.addAttribute("mlOutputDto", mlOutputDto);			
+		} catch (Exception e) {
+			errorMessage = "Error in retriving the project: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);
+		}
+		return "ml-test";
 	}
 }

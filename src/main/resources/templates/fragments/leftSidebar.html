@@ -24,6 +24,9 @@
 		  <li class="nav-item">
 		    <a class="nav-link" aria-controls="export" aria-selected="true" th:href="@{/project/{id}/export(id=${project.projectId})}">Export Documents</a>
 		  </li>	
+		  <li class="nav-item">
+		    <a class="nav-link" aria-controls="mltest" aria-selected="true" th:href="@{/project/{id}/mltest/test(id=${project.projectId})}">ML Test</a>
+		  </li>	
 		</ul>
 	</div>
 	<div th:fragment="viewSettingsLeftSidebar">

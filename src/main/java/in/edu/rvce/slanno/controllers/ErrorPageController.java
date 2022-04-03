@@ -31,7 +31,6 @@ public class ErrorPageController implements ErrorController {
 	
 	private static final String PATH = "/error";
 
-	@Override
 	public String getErrorPath() {
 		return PATH;
 	}
