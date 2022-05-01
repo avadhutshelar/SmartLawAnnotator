@@ -403,12 +403,12 @@ public class ProjectService {
 		return annotatorUserWithAnnotatorRole.size();
 	}
 	
-	public String exportDocuments(Project project) throws Exception{
+	public String exportDocumentsStage2(Project project) throws Exception{
 		List<LegalDocument> legalDocumentList = getAllLegalDocumentByProjectId(project.getProjectId());
 		legalDocumentList = legalDocumentList.stream().filter(legDoc->
 			legDoc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE2)).collect(Collectors.toList());
 
-		String exportDirName = env.getProperty("slanno.dataset.export.dir");
+		String exportDirName = env.getProperty("slanno.dataset.export.stage2.dir");
 		
 		legalDocumentList.forEach(legalDocument->{
 			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrderForExport(project, legalDocument);
@@ -426,7 +426,33 @@ public class ProjectService {
 			
 		});
 			
-		return "Exported " + legalDocumentList.size() + " Documents at => " + exportDirName;
+		return "Exported " + legalDocumentList.size() + " Stage 2 Documents at => " + exportDirName;
+	}
+	
+	public String exportDocumentsStage1(Project project) throws Exception{
+		List<LegalDocument> legalDocumentList = getAllLegalDocumentByProjectId(project.getProjectId());
+		legalDocumentList = legalDocumentList.stream().filter(legDoc->
+			legDoc.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE1)).collect(Collectors.toList());
+
+		String exportDirName = env.getProperty("slanno.dataset.export.stage1.dir");
+		
+		legalDocumentList.forEach(legalDocument->{
+			JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrderForExport(project, legalDocument);
+			
+			String jsonFileNameWithPath = exportDirName + "\\" + legalDocument.getJsonFilePath();
+
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+			// Java objects to File
+			try (FileWriter writer = new FileWriter(jsonFileNameWithPath)) {
+				gson.toJson(jsonCourtOrder, writer);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		});
+			
+		return "Exported " + legalDocumentList.size() + " Stage 1 Documents at => " + exportDirName;
 	}
 	
 }

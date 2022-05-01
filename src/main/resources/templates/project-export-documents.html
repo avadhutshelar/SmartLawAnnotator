@@ -23,7 +23,7 @@
 				</h4>
 			
 				<div th:if="${message != null}">
-					<label for="name" class="text-success" th:text="${message.successMessage}"></label> 
+					<label for="name" class="text-success" th:utext="${message.successMessage}"></label> 
 					<label for="name" class="text-danger" th:utext="${message.errorMessage}"></label>
 				</div>
 			</div>

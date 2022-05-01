@@ -274,7 +274,8 @@ public class ProjectController {
 		String errorMessage = "";
 		try {
 			Project project = projectService.getProjectById(projectId);
-			successMessage = projectService.exportDocuments(project);	
+			successMessage = projectService.exportDocumentsStage2(project);
+			successMessage += "<br />" + projectService.exportDocumentsStage1(project);	
 			model.addAttribute("project", project);
 		} catch (Exception e) {
 			errorMessage = "Error in exporting documents: \n" + e.getMessage();
