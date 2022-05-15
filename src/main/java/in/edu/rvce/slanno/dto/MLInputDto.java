@@ -10,4 +10,7 @@ import lombok.Setter;
 public class MLInputDto {
 
 	private List<String> argumentTexts;
+	private List<String> sentenceTypeTexts;
+	private List<String> orderTypeTexts;
+	
 }

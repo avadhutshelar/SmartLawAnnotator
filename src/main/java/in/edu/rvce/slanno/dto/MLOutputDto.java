@@ -10,4 +10,6 @@ import lombok.Setter;
 public class MLOutputDto {
 	
 	private List<String> argumentBy;
+	private List<String> sentenceType;
+	private List<String> orderType;
 }
