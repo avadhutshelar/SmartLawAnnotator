@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +25,7 @@ import in.edu.rvce.slanno.dto.LegalActFound;
 import in.edu.rvce.slanno.entities.LegalDocument;
 import in.edu.rvce.slanno.entities.Project;
 import in.edu.rvce.slanno.enums.AnnotationProcessingStage;
+import in.edu.rvce.slanno.services.AnnotationRecommendationService;
 import in.edu.rvce.slanno.services.AnnotationService;
 import in.edu.rvce.slanno.services.ArgumentAnnotationService;
 import in.edu.rvce.slanno.services.LegalReferenceAnnotationService;
@@ -49,6 +51,12 @@ public class AnnotationController {
 	@Autowired
 	private OrderAnnotationService orderAnnotationService;
 
+	@Autowired
+	private AnnotationRecommendationService annotationRecommendationService;
+	
+	@Autowired
+	private Environment env;
+	
 	@GetMapping("/annotationTask")
 	public String annotationTask(SessionMessage message, Model model, Authentication authentication) {
 		String successMessage = "";
@@ -120,6 +128,9 @@ public class AnnotationController {
 			LegalDocument legalDocument = projectService.getLegalDocumentByDocumentId(docId);
 			if (!legalDocument.getAnnotationProcessingStage().equals(AnnotationProcessingStage.STAGE0)) {
 				JsonCourtOrder jsonCourtOrder = annotationService.getJsonCourtOrder(project, legalDocument, authentication.getName());
+				if(StringUtils.equalsIgnoreCase("true",env.getProperty("slanno.settings.annotation.recommendation.enabled.flag"))){
+					annotationRecommendationService.updateAnnotationRecommendations(jsonCourtOrder,authentication.getName());
+				}
 				String textOrder = jsonCourtOrder.getProcessedText();
 				message.setTextOrder(textOrder);
 				model.addAttribute("jsonCourtOrder", jsonCourtOrder);

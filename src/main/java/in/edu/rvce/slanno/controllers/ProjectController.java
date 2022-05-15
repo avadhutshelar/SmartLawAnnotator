@@ -297,12 +297,14 @@ public class ProjectController {
 			model.addAttribute("project", project);
 			model.addAttribute("mlInputDto", mlInputDto);
 					
-			mlInputDto.setInput1("i1");
-			mlInputDto.setInput2("i2");
+			List<String> input=new ArrayList<>();
+			input.add("heard learned advocate mr waghmare for the applicant");
+			input.add("2. Prosecution case is that on 08/03/2009 at about 04 a.am., complainant­Yuvraj Gade along with his truck was proceeding from Mumbai to Pune, and when his truck within the vicinity of Wadgaon Maval, one Qualis jeep by overtaking the truck, came in frontof said truck, three persons alighted from the said jeep, and pulled out complainant from the truck, beat him and snatched his mobile phone, cash amount and other documents worth Rs.5,59,883/­ and also kidnapped him, thereafter, along with truck,fled away.");
+			mlInputDto.setArgumentTexts(input);
+			
 			String result = restTemplate.postForObject("http://localhost:8050/predictArgumentBy", mlInputDto, String.class);
 			ObjectMapper objectMapper = new ObjectMapper();
 			MLOutputDto mlOutputDto = objectMapper.readValue(result, MLOutputDto.class);
-			
 			
 			model.addAttribute("mlOutputDto", mlOutputDto);			
 		} catch (Exception e) {

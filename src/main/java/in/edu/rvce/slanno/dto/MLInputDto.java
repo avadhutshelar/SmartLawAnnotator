@@ -1,5 +1,7 @@
 package in.edu.rvce.slanno.dto;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,7 +9,5 @@ import lombok.Setter;
 @Setter
 public class MLInputDto {
 
-	private String input1;
-	private String input2;
-	
+	private List<String> argumentTexts;
 }
