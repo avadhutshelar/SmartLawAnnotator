@@ -20,8 +20,11 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import in.edu.rvce.slanno.dto.DatasetStatistics;
 import in.edu.rvce.slanno.dto.InterAnnotatorAgreementDto;
 import in.edu.rvce.slanno.dto.MLInputDto;
 import in.edu.rvce.slanno.dto.MLOutputDto;
@@ -266,6 +269,30 @@ public class ProjectController {
 			model.addAttribute("message", message);			
 		}
 		return "interAnnotatorAgreement";
+	}
+	
+	@GetMapping("/datasetStats")
+	public String getDatasetStats(SessionMessage message, Model model) {
+		String successMessage = "";
+		String errorMessage = "";
+		if(StringUtils.isNotBlank(message.getErrorMessage())) {errorMessage=message.getErrorMessage();}
+		try {
+			
+			String result = restTemplate.getForObject("http://localhost:8050/getDatasetStats",String.class);
+			ObjectMapper objectMapper = new ObjectMapper();
+			MLOutputDto mlOutputDto;
+			mlOutputDto = objectMapper.readValue(result, MLOutputDto.class);
+			List<DatasetStatistics> datasetStatisticsList = mlOutputDto.getDatasetStatisticsList();
+			model.addAttribute("datasetStatisticsList", datasetStatisticsList);
+			
+		} catch (Exception e) {
+			errorMessage = "Error in retriving the inter annotator agreement: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);			
+		}
+		return "dataset-stats";
 	}
 	
 	@GetMapping("/project/{projectId}/export")

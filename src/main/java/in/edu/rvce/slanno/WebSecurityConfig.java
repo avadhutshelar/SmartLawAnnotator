@@ -36,6 +36,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers("/project/**/export/**").hasAnyRole("ADMIN")
 			.antMatchers("/project/**/annotators/**").hasAnyRole("ADMIN")
 			.antMatchers("/project/**/interAnnotatorAgreement").hasAnyRole("ADMIN")
+			.antMatchers("/datasetStats").hasAnyRole("ADMIN")
 			.antMatchers("/project/**/preprocess/**").hasAnyRole("ADMIN", "ANNOTATOR")
 			.antMatchers("/project/**/veiwJson/**").hasAnyRole("ADMIN", "ANNOTATOR")
 			.antMatchers("/project/**/annotate/**").hasAnyRole("ADMIN", "ANNOTATOR")
