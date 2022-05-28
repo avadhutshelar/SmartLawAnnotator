@@ -21,15 +21,15 @@
 							<tr>
 								<td th:text="'Element Type'"/>
 								<td th:text="'Label'"/>
-								<td th:text="'Tokens'"/>
-								<td th:text="'Instances'"/>
+								<td class="text-end" th:text="'Tokens'"/>
+								<td class="text-end" th:text="'Instances'"/>
 							</tr>
 						</thead>
 						<tr th:each="datasetStatistics: *{datasetStatisticsList}">
 							<td th:text="${datasetStatistics.elementType}"/>
 							<td th:text="${datasetStatistics.label}"/>
-							<td th:text="${datasetStatistics.tokens}"/>
-							<td th:text="${datasetStatistics.instances}"/>						
+							<td class="text-end" th:text="${datasetStatistics.tokens}"/>
+							<td class="text-end" th:text="${datasetStatistics.instances}"/>						
 						</tr>
 
 					</tbody>
