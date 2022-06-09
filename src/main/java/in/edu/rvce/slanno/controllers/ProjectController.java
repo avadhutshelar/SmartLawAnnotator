@@ -20,13 +20,11 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import in.edu.rvce.slanno.dto.CVResult;
 import in.edu.rvce.slanno.dto.DatasetStatistics;
 import in.edu.rvce.slanno.dto.InterAnnotatorAgreementDto;
-import in.edu.rvce.slanno.dto.MLInputDto;
 import in.edu.rvce.slanno.dto.MLOutputDto;
 import in.edu.rvce.slanno.dto.UserProjectDto;
 import in.edu.rvce.slanno.entities.Project;
@@ -294,6 +292,31 @@ public class ProjectController {
 		}
 		return "dataset-stats";
 	}
+
+	
+	@GetMapping("/cvResults")
+	public String getCVResults(SessionMessage message, Model model) {
+		String successMessage = "";
+		String errorMessage = "";
+		if(StringUtils.isNotBlank(message.getErrorMessage())) {errorMessage=message.getErrorMessage();}
+		try {
+			
+			String result = restTemplate.getForObject("http://localhost:8050/getCVResults",String.class);
+			ObjectMapper objectMapper = new ObjectMapper();
+			MLOutputDto mlOutputDto;
+			mlOutputDto = objectMapper.readValue(result, MLOutputDto.class);
+			List<CVResult> cvResultList = mlOutputDto.getCvResultList();
+			model.addAttribute("cvResultList", cvResultList);
+			
+		} catch (Exception e) {
+			errorMessage = "Error in retriving the inter annotator agreement: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);			
+		}
+		return "cvResults";
+	}
 	
 	@GetMapping("/project/{projectId}/export")
 	public String exportDocuments(SessionMessage message, Model model, @PathVariable Integer projectId) {
@@ -302,7 +325,7 @@ public class ProjectController {
 		try {
 			Project project = projectService.getProjectById(projectId);
 			successMessage = projectService.exportDocumentsStage2(project);
-			successMessage += "<br />" + projectService.exportDocumentsStage1(project);	
+			//successMessage += "<br />" + projectService.exportDocumentsStage1(project);	
 			model.addAttribute("project", project);
 		} catch (Exception e) {
 			errorMessage = "Error in exporting documents: \n" + e.getMessage();

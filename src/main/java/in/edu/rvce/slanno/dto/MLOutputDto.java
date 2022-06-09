@@ -13,4 +13,5 @@ public class MLOutputDto {
 	private List<String> sentenceType;
 	private List<String> orderType;
 	private List<DatasetStatistics> datasetStatisticsList;
+	private List<CVResult> cvResultList;
 }
