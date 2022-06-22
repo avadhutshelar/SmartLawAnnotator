@@ -318,6 +318,32 @@ public class ProjectController {
 		return "cvResults";
 	}
 	
+	@GetMapping("/getModelMetrics")
+	public String getModelMetrics(SessionMessage message, Model model) {
+		String successMessage = "";
+		String errorMessage = "";
+		if(StringUtils.isNotBlank(message.getErrorMessage())) {errorMessage=message.getErrorMessage();}
+		try {
+			
+			String result = restTemplate.getForObject("http://localhost:8050/getModelMetrics",String.class);
+			ObjectMapper objectMapper = new ObjectMapper();
+			MLOutputDto mlOutputDto;
+			mlOutputDto = objectMapper.readValue(result, MLOutputDto.class);
+			List<CVResult> cvResultList = mlOutputDto.getCvResultList();
+			model.addAttribute("cvResultList", cvResultList);
+			
+		} catch (Exception e) {
+			errorMessage = "Error in retriving the inter annotator agreement: \n" + e.getMessage();
+		} finally {
+			message.setSuccessMessage(successMessage);
+			message.setErrorMessage(errorMessage);
+			model.addAttribute("message", message);			
+		}
+		return "modelMetrics";
+	}
+	
+	
+	
 	@GetMapping("/project/{projectId}/export")
 	public String exportDocuments(SessionMessage message, Model model, @PathVariable Integer projectId) {
 		String successMessage = "";
